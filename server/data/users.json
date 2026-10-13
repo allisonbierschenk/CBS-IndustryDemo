@@ -1,0 +1,80 @@
+{
+  "_readme": "Apex portal user store. 'email' is both the portal identity and the JWT 'sub' — it must EXACTLY match a Tableau Cloud username on the site (add each as Viewer). Every entry in 'attributes' is injected into the Connected App JWT as a user attribute claim and can be read in Tableau with USERATTRIBUTE / USERATTRIBUTEINCLUDES (names are case sensitive). 'client name' must EXACTLY match [Client Name] in the data; 'subscription tier' matches [Subscription Tier] (Premium / Standard).",
+  "users": [
+    {
+      "id": "u-northstar",
+      "tenantId": "northstar",
+      "name": "Dana Whitfield",
+      "title": "VP of Operations & Supply Chain",
+      "email": "dana.whitfield@northstar.com",
+      "attributes": {
+        "client name": [
+          "Northstar Enterprises"
+        ],
+        "subscription tier": [
+          "Standard"
+        ]
+      }
+    },
+    {
+      "id": "u-crestline",
+      "tenantId": "crestline",
+      "name": "Priya Raman",
+      "title": "Chief Technology Officer",
+      "email": "priya.raman@crestline.com",
+      "attributes": {
+        "client name": [
+          "Crestline Partners"
+        ],
+        "subscription tier": [
+          "Premium"
+        ]
+      }
+    },
+    {
+      "id": "u-meridian",
+      "tenantId": "meridian",
+      "name": "Marcus Bell",
+      "title": "Chief Operating Officer",
+      "email": "marcus.bell@meridian.com",
+      "attributes": {
+        "client name": [
+          "Meridian Solutions"
+        ],
+        "subscription tier": [
+          "Standard"
+        ]
+      }
+    },
+    {
+      "id": "u-vantage",
+      "tenantId": "vantage",
+      "name": "Elena Ortiz",
+      "title": "VP of Logistics & Transportation Operations",
+      "email": "elena.ortiz@vantage.com",
+      "attributes": {
+        "client name": [
+          "Vantage Group"
+        ],
+        "subscription tier": [
+          "Premium"
+        ]
+      }
+    },
+    {
+      "id": "u-helix",
+      "tenantId": "helix",
+      "name": "Jordan Hayes",
+      "title": "VP of Operations & Sustainability",
+      "email": "jordan.hayes@helix.com",
+      "attributes": {
+        "client name": [
+          "Helix Industries"
+        ],
+        "subscription tier": [
+          "Standard"
+        ]
+      }
+    }
+  ]
+}

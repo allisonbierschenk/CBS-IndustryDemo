@@ -1,0 +1,213 @@
+{
+  "_readme": "Customer (tenant) profiles. Qualitative context only — no metric values live here; all KPIs and charts come from the embedded Tableau dashboards. 'features' drive server-side entitlements ('transportation' = Vantage's Transportation Optimization & Savings page); tier 'premium' grants 'benchmarks'. 'dataValue' is the engagement name as it appears in the Tableau data when it differs from the display name.",
+  "tenants": [
+    {
+      "id": "northstar",
+      "clientName": "Northstar Enterprises",
+      "shortName": "Northstar",
+      "monogram": "NE",
+      "color": "#1F4E79",
+      "industry": "Logistics & Distribution",
+      "region": "Northeast",
+      "tier": "standard",
+      "demoFocus": "Underperforming engagements · value at risk",
+      "clientSince": "2025-01-01",
+      "features": [],
+      "engagements": [
+        {
+          "name": "Operational Transformation",
+          "icon": "truck",
+          "description": "Overhauling freight and distribution operations across the Northeast network."
+        },
+        {
+          "name": "Process Optimization",
+          "icon": "flow",
+          "description": "Streamlining warehouse and fulfillment processes to reduce cycle time and cost."
+        },
+        {
+          "name": "Technology Modernization",
+          "icon": "chip",
+          "description": "Modernizing logistics technology — TMS, WMS and carrier integrations."
+        }
+      ],
+      "presenterNotes": {
+        "story": "A consulting relationship under pressure. Operational Transformation value realization has collapsed to ~8% and Process Optimization is At Risk — while Technology Modernization holds at ~88%.",
+        "scenes": [
+          "Scene 1 — Value Realization by Engagement: point to the steep decline in Operational Transformation and the contrast with Technology Modernization.",
+          "Engagement Health by Initiative: Operational Transformation and Process Optimization are where action is needed.",
+          "Note the locked Premium benchmarks — Northstar is a Standard client (upgrade opportunity)."
+        ],
+        "message": "Give clients transparent, ongoing visibility into the business value you're delivering."
+      }
+    },
+    {
+      "id": "crestline",
+      "clientName": "Crestline Partners",
+      "shortName": "Crestline",
+      "monogram": "CP",
+      "color": "#5B3FD1",
+      "industry": "Technology",
+      "region": "West",
+      "tier": "premium",
+      "demoFocus": "Premium success story · industry benchmarks",
+      "clientSince": "2025-01-01",
+      "features": [],
+      "engagements": [
+        {
+          "name": "Digital Transformation",
+          "icon": "rocket",
+          "description": "Enterprise-wide technology and digital transformation program."
+        },
+        {
+          "name": "Agile Transformation",
+          "icon": "sprint",
+          "description": "Transitioning engineering teams to agile delivery practices."
+        },
+        {
+          "name": "Change Management",
+          "icon": "people",
+          "description": "Supporting organizational adoption of new technologies and processes."
+        },
+        {
+          "name": "Talent & Workforce Strategy",
+          "icon": "users",
+          "description": "Aligning workforce capabilities with the transformation roadmap."
+        }
+      ],
+      "presenterNotes": {
+        "story": "A successful, Premium client. Digital Transformation is the top performer; Talent & Workforce Strategy and Change Management show only minor friction.",
+        "scenes": [
+          "Scene 4 — Note that the whole portal re-authenticated: new engagements, new KPIs, new Tableau session.",
+          "Open Industry Benchmarks — Premium unlocks peer percentile rankings, improvement opportunities and advisory recommendations (anonymized peers only)."
+        ],
+        "message": "Securely personalize analytics for every customer and monetize advanced insights."
+      }
+    },
+    {
+      "id": "meridian",
+      "clientName": "Meridian Solutions",
+      "shortName": "Meridian",
+      "monogram": "MS",
+      "color": "#0E7C7B",
+      "industry": "Healthcare",
+      "region": "Midwest",
+      "tier": "standard",
+      "demoFocus": "Risk visibility · ERP implementation in trouble",
+      "clientSince": "2025-01-01",
+      "features": [],
+      "engagements": [
+        {
+          "name": "ERP Implementation",
+          "icon": "erp",
+          "description": "Enterprise resource planning implementation across clinical and administrative operations."
+        },
+        {
+          "name": "Compliance & Risk",
+          "icon": "shield",
+          "description": "Strengthening regulatory compliance, governance and operational risk management."
+        },
+        {
+          "name": "Process Optimization",
+          "icon": "flow",
+          "description": "Improving clinical and administrative efficiency."
+        }
+      ],
+      "presenterNotes": {
+        "story": "Proactive risk visibility. ERP Implementation is over budget and behind schedule — Engagement Health has fallen to ~26% and on-time milestones are slipping.",
+        "scenes": [
+          "Scene 5 — Engagement Health by Initiative: ERP Implementation is the clear outlier. Show On-Time Milestone Rate and Hours Delivered vs. Plan (over plan = over budget).",
+          "Explain how the client can raise this with Apex before it undermines expected outcomes."
+        ],
+        "message": "Help clients identify issues before they undermine expected business outcomes."
+      }
+    },
+    {
+      "id": "vantage",
+      "clientName": "Vantage Group",
+      "shortName": "Vantage",
+      "monogram": "VG",
+      "color": "#B4461F",
+      "industry": "Logistics & Distribution",
+      "region": "South",
+      "tier": "premium",
+      "demoFocus": "Transportation savings · freight invoices & shipment drill-down · Premium",
+      "clientSince": "2025-01-01",
+      "features": [
+        "transportation"
+      ],
+      "engagements": [
+        {
+          "name": "Supply Chain & Logistics Optimization",
+          "icon": "truck",
+          "description": "Improving supply chain efficiency and transportation operations — freight cost, routing, carriers and invoicing.",
+          "dataValue": "Supply Chain Optimization",
+          "analytics": "transportation",
+          "analyticsLabel": "Transportation Optimization & Savings"
+        },
+        {
+          "name": "Digital Manufacturing",
+          "icon": "factory",
+          "description": "Digitizing warehouse, fleet and distribution-center operations."
+        },
+        {
+          "name": "Operational Excellence",
+          "icon": "target",
+          "description": "Lean, continuous-improvement practices across terminals, warehouses and fleet."
+        },
+        {
+          "name": "Change Management",
+          "icon": "people",
+          "description": "Supporting driver, warehouse and operations teams through new processes."
+        }
+      ],
+      "presenterNotes": {
+        "story": "Apex's strongest-performing client — every engagement is improving. Supply Chain Optimization shows up in the transportation data as falling freight cost and rising realized savings.",
+        "scenes": [
+          "Value Intelligence: every engagement trending up; Value-to-Investment well above 1x across the portfolio.",
+          "Select Supply Chain Optimization in the dashboard → 'Explore Transportation Optimization & Savings' (or the yellow engagement card).",
+          "Transportation: realized savings rising, freight cost falling, savings by initiative; drill into invoice status for the underlying invoices and shipments.",
+          "Premium benchmarks in the dashboard: Vantage against an anonymized logistics peer group — no other client is identifiable."
+        ],
+        "message": "Connect strategic consulting outcomes to measurable operational results."
+      }
+    },
+    {
+      "id": "helix",
+      "clientName": "Helix Industries",
+      "shortName": "Helix",
+      "monogram": "HI",
+      "color": "#2E7D32",
+      "industry": "Energy",
+      "region": "West",
+      "tier": "standard",
+      "demoFocus": "New client · early-stage value (4 months)",
+      "clientSince": "2026-06-01",
+      "features": [],
+      "engagements": [
+        {
+          "name": "ESG & Sustainability",
+          "icon": "leaf",
+          "description": "Developing sustainability strategy and responding to new regulatory requirements."
+        },
+        {
+          "name": "Operational Excellence",
+          "icon": "target",
+          "description": "Improving efficiency across extraction, processing and operational workflows."
+        },
+        {
+          "name": "Technology Enablement",
+          "icon": "bolt",
+          "description": "Modernizing field operations and supporting technology adoption."
+        }
+      ],
+      "presenterNotes": {
+        "story": "Apex's newest client — about four months of history. Strong early momentum, but not enough history for long-term value realization or year-over-year comparisons.",
+        "scenes": [
+          "Point out the early-relationship banner: comparisons only appear where history exists — nothing is invented.",
+          "Focus on milestones, on-time delivery and the developing value trend."
+        ],
+        "message": "Meaningful analytics from the very first months of a relationship."
+      }
+    }
+  ]
+}

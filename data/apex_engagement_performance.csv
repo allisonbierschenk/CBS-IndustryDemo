@@ -1,0 +1,307 @@
+Client Name,Industry,Region,Subscription Tier,Engagement,Month,Planned Hours,Delivered Hours,Consulting Investment,Target Business Value,Business Value Delivered,Milestones Due,Milestones On Time,Engagement Health Score,Engagement Status
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-01-01,1393,1357,407100,1420860,869702,4,3,70,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-02-01,1437,1414,424200,1465740,933750,2,2,67,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-03-01,1442,1370,411000,1470840,899237,3,2,63,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-04-01,1423,1367,410100,1451460,841215,3,2,63,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-05-01,1417,1372,411600,1445340,831620,5,4,62,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-06-01,1373,1264,379200,1400460,812474,2,2,57,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-07-01,1402,1314,394200,1430040,753497,4,3,57,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-08-01,1444,1306,391800,1472880,775078,3,2,52,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-09-01,1396,1302,390600,1423920,739443,2,1,52,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-10-01,1423,1295,388500,1451460,670832,2,1,49,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-11-01,1440,1273,381900,1468800,646767,4,2,47,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2025-12-01,1430,1288,386400,1458600,593566,2,1,44,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-01-01,1400,1256,376800,1428000,515152,2,1,42,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-02-01,1456,1292,387600,1485120,494088,5,3,39,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-03-01,1398,1206,361800,1425960,445335,5,2,35,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-04-01,1345,1157,347100,1371900,369730,5,2,33,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-05-01,1430,1220,366000,1458600,352426,2,1,30,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-06-01,1414,1194,358200,1442280,308056,3,1,31,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-07-01,1443,1199,359700,1471860,218414,2,1,27,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-08-01,1453,1220,366000,1482060,191089,3,1,24,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Operational Transformation,2026-09-01,1377,1125,337500,1404540,111152,4,1,21,Critical
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-01-01,885,877,241175,730125,590298,3,3,78,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-02-01,872,859,236225,719400,585692,5,4,77,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-03-01,934,917,252175,770550,620671,2,2,75,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-04-01,892,879,241725,735900,585244,3,2,75,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-05-01,893,876,240900,736725,569466,2,2,70,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-06-01,870,855,235125,717750,525908,2,2,70,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-07-01,908,874,240350,749100,545267,5,4,69,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-08-01,895,864,237600,738375,551970,3,2,69,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-09-01,920,892,245300,759000,555173,4,3,68,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-10-01,890,848,233200,734250,493006,3,2,65,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-11-01,878,848,233200,724350,499486,5,4,62,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2025-12-01,876,831,228525,722700,482050,2,1,63,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-01-01,879,811,223025,725175,452687,3,2,62,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-02-01,903,842,231550,744975,447675,4,3,60,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-03-01,874,824,226600,721050,437630,2,1,57,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-04-01,913,827,227425,753225,445297,5,4,54,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-05-01,884,800,220000,729300,405695,3,2,55,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-06-01,879,821,225775,725175,407739,5,3,54,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-07-01,903,816,224400,744975,383843,5,3,49,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-08-01,926,836,229900,763950,385135,3,2,51,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Process Optimization,2026-09-01,876,781,214775,722700,350427,2,1,48,At Risk
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-01-01,1094,1081,351325,1244425,1003674,3,3,81,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-02-01,1123,1138,369850,1277413,1078607,5,5,81,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-03-01,1089,1085,352625,1238738,1013563,2,2,82,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-04-01,1098,1076,349700,1248975,1032642,4,4,82,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-05-01,1131,1118,363350,1286513,1071963,2,2,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-06-01,1060,1044,339300,1205750,1007611,3,3,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-07-01,1089,1070,347750,1238738,1036113,2,2,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-08-01,1070,1085,352625,1217125,1013892,5,4,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-09-01,1081,1063,345475,1229638,1071069,3,3,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-10-01,1076,1088,353600,1223950,1028400,2,2,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-11-01,1105,1096,356200,1256938,1055126,2,2,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2025-12-01,1105,1100,357500,1256938,1113887,5,5,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-01-01,1136,1132,367900,1292200,1137708,3,3,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-02-01,1104,1086,352950,1255800,1071858,3,3,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-03-01,1141,1128,366600,1297888,1128387,2,2,83,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-04-01,1092,1109,360425,1242150,1118248,4,4,86,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-05-01,1063,1051,341575,1209163,1087713,5,5,86,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-06-01,1095,1114,362050,1245563,1116929,3,3,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-07-01,1075,1087,353275,1222813,1119834,5,4,87,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-08-01,1142,1155,375375,1299025,1143432,4,4,85,On Track
+Northstar Enterprises,Logistics & Distribution,Northeast,Standard,Technology Modernization,2026-09-01,1108,1129,366925,1260350,1114559,5,5,84,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-01-01,1594,1588,555800,2120020,1882532,3,3,87,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-02-01,1585,1612,564200,2108050,1887986,4,4,84,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-03-01,1566,1599,559650,2082780,1937085,5,5,85,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-04-01,1606,1588,555800,2135980,1949589,3,3,84,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-05-01,1560,1553,543550,2074800,1933357,2,2,85,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-06-01,1589,1615,565250,2113370,2011404,2,2,85,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-07-01,1547,1526,534100,2057510,2013423,3,3,88,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-08-01,1647,1621,567350,2190510,2096844,4,3,88,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-09-01,1580,1586,555100,2101400,2031552,5,4,87,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-10-01,1548,1573,550550,2058840,2026755,3,3,88,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-11-01,1625,1610,563500,2161250,2190755,2,2,89,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2025-12-01,1567,1573,550550,2084110,2063769,5,5,89,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-01-01,1637,1665,582750,2177210,2179108,4,4,90,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-02-01,1608,1644,575400,2138640,2129413,5,5,89,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-03-01,1643,1658,580300,2185190,2194762,5,5,91,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-04-01,1628,1654,578900,2165240,2279435,2,2,92,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-05-01,1628,1673,585550,2165240,2220791,5,5,90,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-06-01,1594,1613,564550,2120020,2251960,2,2,92,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-07-01,1576,1594,557900,2096080,2203917,4,4,91,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-08-01,1640,1678,587300,2181200,2292667,2,2,93,On Track
+Crestline Partners,Technology,West,Premium,Digital Transformation,2026-09-01,1642,1672,585200,2183860,2362781,2,2,94,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-01-01,901,870,261000,864960,701613,4,3,81,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-02-01,897,886,265800,861120,695885,4,4,82,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-03-01,881,877,263100,845760,712079,5,5,83,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-04-01,911,901,270300,874560,723583,4,4,83,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-05-01,928,916,274800,890880,742888,2,2,84,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-06-01,916,912,273600,879360,771052,3,3,83,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-07-01,874,875,262500,839040,738454,2,2,83,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-08-01,923,898,269400,886080,757316,3,3,85,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-09-01,923,929,278700,886080,756100,4,3,85,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-10-01,879,857,257100,843840,724821,4,4,86,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-11-01,929,904,271200,891840,775809,5,4,84,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2025-12-01,900,883,264900,864000,788747,4,4,85,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-01-01,871,880,264000,836160,730764,5,5,84,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-02-01,893,883,264900,857280,760927,4,3,88,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-03-01,904,893,267900,867840,780359,5,4,86,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-04-01,927,930,279000,889920,811428,2,2,87,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-05-01,928,927,278100,890880,828776,5,5,87,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-06-01,932,943,282900,894720,824175,3,3,87,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-07-01,914,918,275400,877440,830917,5,5,86,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-08-01,906,911,273300,869760,836651,4,4,88,On Track
+Crestline Partners,Technology,West,Premium,Agile Transformation,2026-09-01,882,879,263700,846720,802018,2,2,89,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-01-01,592,568,147680,461760,378562,3,3,82,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-02-01,576,561,145860,449280,356171,2,2,81,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-03-01,596,575,149500,464880,365308,5,4,78,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-04-01,584,557,144820,455520,351466,3,3,81,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-05-01,620,605,157300,483600,386359,5,4,79,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-06-01,591,570,148200,460980,355068,3,2,80,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-07-01,618,599,155740,482040,381145,4,3,79,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-08-01,582,558,145080,453960,355420,2,2,77,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-09-01,609,578,150280,475020,371083,4,4,77,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-10-01,588,558,145080,458640,348613,4,3,76,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-11-01,619,599,155740,482820,372007,5,4,75,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2025-12-01,592,569,147940,461760,357102,2,2,76,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-01-01,595,576,149760,464100,365851,3,2,76,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-02-01,596,582,151320,464880,363454,5,4,74,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-03-01,608,588,152880,474240,363659,5,4,74,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-04-01,593,569,147940,462540,345209,3,2,72,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-05-01,601,584,151840,468780,358117,5,4,74,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-06-01,580,543,141180,452400,339195,3,2,73,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-07-01,596,566,147160,464880,361073,5,4,73,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-08-01,600,573,148980,468000,348623,5,4,72,On Track
+Crestline Partners,Technology,West,Premium,Change Management,2026-09-01,595,572,148720,464100,346931,4,3,71,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-01-01,507,478,119500,354900,278694,4,3,78,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-02-01,492,473,118250,344400,274757,5,4,75,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-03-01,503,484,121000,352100,263682,5,4,74,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-04-01,498,472,118000,348600,276147,5,4,73,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-05-01,498,467,116750,348600,266307,2,2,75,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-06-01,497,476,119000,347900,258776,4,3,73,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-07-01,496,470,117500,347200,269791,2,2,75,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-08-01,494,472,118000,345800,267114,4,3,74,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-09-01,484,466,116500,338800,260190,4,3,74,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-10-01,512,478,119500,358400,258117,5,4,73,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-11-01,506,466,116500,354200,267325,5,4,70,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2025-12-01,495,455,113750,346500,246969,2,2,70,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-01-01,507,480,120000,354900,256867,3,2,68,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-02-01,499,472,118000,349300,254839,5,4,71,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-03-01,501,463,115750,350700,247712,5,4,70,On Track
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-04-01,511,468,117000,357700,263028,2,1,68,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-05-01,486,452,113000,340200,249874,3,2,69,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-06-01,505,473,118250,353500,243109,5,4,68,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-07-01,512,482,120500,358400,259139,2,2,66,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-08-01,486,445,111250,340200,237710,3,2,67,At Risk
+Crestline Partners,Technology,West,Premium,Talent & Workforce Strategy,2026-09-01,506,457,114250,354200,242925,3,2,65,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-01-01,2053,2133,725220,2094060,1137938,4,3,62,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-02-01,1985,2114,718760,2024700,1129969,4,3,62,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-03-01,2078,2233,759220,2119560,1131294,2,1,57,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-04-01,2077,2267,770780,2118540,1143050,4,3,55,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-05-01,1967,2167,736780,2006340,1056950,3,2,53,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-06-01,2052,2303,783020,2093040,1015911,5,3,54,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-07-01,1954,2194,745960,1993080,991166,2,1,52,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-08-01,1925,2186,743240,1963500,903065,4,2,50,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-09-01,1951,2247,763980,1990020,822852,5,3,47,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-10-01,2033,2352,799680,2073660,828009,5,3,46,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-11-01,2044,2433,827220,2084880,826362,2,1,46,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2025-12-01,2003,2376,807840,2043060,746452,3,2,43,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-01-01,1935,2343,796620,1973700,733947,5,2,42,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-02-01,1973,2357,801380,2012460,691949,3,1,40,At Risk
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-03-01,1978,2400,816000,2017560,595622,3,1,38,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-04-01,1983,2419,822460,2022660,597586,3,1,37,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-05-01,1981,2467,838780,2020620,580558,2,1,33,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-06-01,1995,2486,845240,2034900,470718,4,2,32,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-07-01,1936,2439,829260,1974720,465273,5,2,28,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-08-01,2045,2626,892840,2085900,409273,2,1,26,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,ERP Implementation,2026-09-01,2047,2623,891820,2087940,364046,5,1,25,Critical
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-01-01,720,721,216300,648000,544245,4,4,84,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-02-01,694,682,204600,624600,520471,3,3,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-03-01,698,687,206100,628200,524835,4,4,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-04-01,673,669,200700,605700,502748,5,5,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-05-01,687,693,207900,618300,527375,2,2,84,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-06-01,715,716,214800,643500,550848,5,5,83,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-07-01,727,713,213900,654300,547464,4,4,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-08-01,690,687,206100,621000,522378,4,4,83,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-09-01,676,665,199500,608400,516887,3,3,84,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-10-01,718,704,211200,646200,548011,3,3,84,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-11-01,686,685,205500,617400,530114,5,4,86,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2025-12-01,685,696,208800,616500,548506,4,4,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-01-01,696,689,206700,626400,541243,4,4,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-02-01,680,693,207900,612000,539234,4,4,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-03-01,714,720,216000,642600,581368,5,5,86,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-04-01,694,688,206400,624600,554868,2,2,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-05-01,727,726,217800,654300,579867,3,3,87,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-06-01,699,700,210000,629100,568449,5,5,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-07-01,688,700,210000,619200,551433,4,4,87,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-08-01,690,688,206400,621000,549562,2,2,87,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Compliance & Risk,2026-09-01,683,677,203100,614700,545698,5,5,85,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-01-01,665,661,181775,548625,423203,4,3,78,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-02-01,640,618,169950,528000,391200,5,4,79,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-03-01,641,628,172700,528825,393819,2,2,82,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-04-01,630,622,171050,519750,394022,5,4,82,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-05-01,643,634,174350,530475,409345,5,4,79,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-06-01,665,663,182325,548625,414185,4,4,80,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-07-01,648,627,172425,534600,414605,5,4,81,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-08-01,671,655,180125,553575,420193,3,3,79,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-09-01,635,635,174625,523875,416400,4,4,82,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-10-01,659,653,179575,543675,432057,4,4,81,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-11-01,654,657,180675,539550,432581,4,4,82,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2025-12-01,661,646,177650,545325,437386,3,3,80,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-01-01,633,624,171600,522225,425497,2,2,81,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-02-01,668,656,180400,551100,444458,3,3,79,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-03-01,643,642,176550,530475,422028,2,2,82,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-04-01,636,644,177100,524700,424403,4,3,81,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-05-01,649,659,181225,535425,445418,4,4,78,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-06-01,665,660,181500,548625,455721,2,2,79,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-07-01,652,658,180950,537900,442174,3,3,80,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-08-01,669,675,185625,551925,447103,3,3,80,On Track
+Meridian Solutions,Healthcare,Midwest,Standard,Process Optimization,2026-09-01,626,625,171875,516450,432585,2,2,81,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-01-01,1210,1223,379130,1425380,1189129,2,2,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-02-01,1248,1256,389360,1470144,1236956,2,2,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-03-01,1181,1161,359910,1391218,1232934,3,3,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-04-01,1153,1159,359290,1358234,1239103,5,4,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-05-01,1228,1232,381920,1446584,1301851,2,2,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-06-01,1168,1169,362390,1375904,1231531,3,3,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-07-01,1228,1235,382850,1446584,1330118,4,4,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-08-01,1178,1190,368900,1387684,1334737,4,4,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-09-01,1197,1204,373240,1410066,1319896,4,4,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-10-01,1178,1168,362080,1387684,1364042,5,4,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-11-01,1240,1243,385330,1460720,1397734,2,2,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2025-12-01,1166,1159,359290,1373548,1353609,3,3,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-01-01,1169,1150,356500,1377082,1373840,5,5,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-02-01,1222,1220,378200,1439516,1485047,4,4,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-03-01,1243,1267,392770,1464254,1529300,2,2,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-04-01,1245,1230,381300,1466610,1531949,4,4,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-05-01,1180,1171,363010,1390040,1450975,4,4,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-06-01,1218,1203,372930,1434804,1537037,5,5,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-07-01,1225,1245,385950,1443050,1576493,2,2,93,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-08-01,1241,1256,389360,1461898,1586182,5,5,93,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Supply Chain Optimization,2026-09-01,1242,1229,380990,1463076,1622776,5,5,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-01-01,1293,1241,409530,1536084,1197644,5,5,81,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-02-01,1276,1246,411180,1515888,1248591,2,2,82,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-03-01,1327,1326,437580,1576476,1273906,2,2,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-04-01,1303,1302,429660,1547964,1262450,2,2,82,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-05-01,1255,1233,406890,1490940,1292739,4,4,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-06-01,1303,1304,430320,1547964,1372287,4,4,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-07-01,1323,1319,435270,1571724,1385279,5,4,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-08-01,1331,1302,429660,1581228,1423206,3,3,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-09-01,1261,1245,410850,1498068,1368800,4,4,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-10-01,1279,1253,413490,1519452,1363026,4,4,88,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-11-01,1295,1261,416130,1538460,1389835,3,3,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2025-12-01,1297,1289,425370,1540836,1418391,2,2,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-01-01,1273,1270,419100,1512324,1453258,5,4,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-02-01,1268,1270,419100,1506384,1444208,4,4,88,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-03-01,1348,1315,433950,1601424,1554802,5,4,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-04-01,1290,1292,426360,1532520,1516476,3,3,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-05-01,1352,1327,437910,1606176,1634559,5,5,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-06-01,1293,1280,422400,1536084,1571102,4,4,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-07-01,1325,1340,442200,1574100,1593017,2,2,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-08-01,1289,1262,416460,1531332,1606138,2,2,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Digital Manufacturing,2026-09-01,1321,1329,438570,1569348,1659668,2,2,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-01-01,873,880,255200,1012680,893121,3,3,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-02-01,921,915,265350,1068360,937033,4,4,88,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-03-01,898,904,262160,1041680,964752,5,4,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-04-01,884,902,261580,1025440,933445,5,5,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-05-01,870,853,247370,1009200,935953,5,5,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-06-01,929,920,266800,1077640,991794,5,5,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-07-01,921,934,270860,1068360,1025851,2,2,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-08-01,885,890,258100,1026600,974281,4,4,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-09-01,886,885,256650,1027760,1019997,4,4,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-10-01,920,914,265060,1067200,1054447,5,5,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-11-01,866,872,252880,1004560,1006899,5,5,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2025-12-01,929,942,273180,1077640,1103464,3,3,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-01-01,926,940,272600,1074160,1086613,5,5,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-02-01,897,889,257810,1040520,1095170,4,4,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-03-01,898,885,256650,1041680,1087328,3,3,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-04-01,933,951,275790,1082280,1138453,3,3,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-05-01,901,906,262740,1045160,1127614,3,3,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-06-01,906,905,262450,1050960,1121764,3,3,92,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-07-01,903,909,263610,1047480,1138786,2,2,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-08-01,877,867,251430,1017320,1141587,3,3,96,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Operational Excellence,2026-09-01,919,904,262160,1066040,1214773,3,3,94,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-01-01,516,519,134940,429312,351980,2,2,83,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-02-01,515,519,134940,428480,358109,4,3,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-03-01,494,490,127400,411008,346230,2,2,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-04-01,501,493,128180,416832,358739,4,3,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-05-01,507,498,129480,421824,360841,2,2,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-06-01,486,491,127660,404352,344034,4,4,84,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-07-01,502,495,128700,417664,353648,5,4,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-08-01,495,502,130520,411840,353899,4,4,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-09-01,492,499,129740,409344,357851,4,4,85,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-10-01,487,490,127400,405184,370897,5,5,87,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-11-01,503,497,129220,418496,374915,5,5,86,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2025-12-01,491,489,127140,408512,370778,3,3,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-01-01,518,528,137280,430976,400733,4,4,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-02-01,513,511,132860,426816,390712,5,5,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-03-01,488,486,126360,406016,369220,3,3,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-04-01,482,489,127140,401024,374903,2,2,88,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-05-01,486,477,124020,404352,388278,2,2,91,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-06-01,497,504,131040,413504,396189,2,2,88,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-07-01,512,510,132600,425984,400489,4,4,89,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-08-01,484,483,125580,402688,393350,2,2,90,On Track
+Vantage Group,Logistics & Distribution,South,Premium,Change Management,2026-09-01,502,509,132340,417664,414630,4,4,90,On Track
+Helix Industries,Energy,West,Standard,ESG & Sustainability,2026-06-01,808,756,226800,775680,236844,5,4,83,On Track
+Helix Industries,Energy,West,Standard,ESG & Sustainability,2026-07-01,817,778,233400,784320,307138,5,5,86,On Track
+Helix Industries,Energy,West,Standard,ESG & Sustainability,2026-08-01,772,763,228900,741120,367274,5,5,87,On Track
+Helix Industries,Energy,West,Standard,ESG & Sustainability,2026-09-01,821,805,241500,788160,500462,2,2,91,On Track
+Helix Industries,Energy,West,Standard,Operational Excellence,2026-06-01,929,882,255780,915994,337059,5,4,87,On Track
+Helix Industries,Energy,West,Standard,Operational Excellence,2026-07-01,871,850,246500,858806,418780,3,3,86,On Track
+Helix Industries,Energy,West,Standard,Operational Excellence,2026-08-01,921,912,264480,908106,539215,4,4,89,On Track
+Helix Industries,Energy,West,Standard,Operational Excellence,2026-09-01,893,908,263320,880498,618366,5,5,90,On Track
+Helix Industries,Energy,West,Standard,Technology Enablement,2026-06-01,713,677,209870,663090,186799,4,3,83,On Track
+Helix Industries,Energy,West,Standard,Technology Enablement,2026-07-01,676,657,203670,628680,231860,5,4,85,On Track
+Helix Industries,Energy,West,Standard,Technology Enablement,2026-08-01,722,685,212350,671460,335734,5,5,86,On Track
+Helix Industries,Energy,West,Standard,Technology Enablement,2026-09-01,699,673,208630,650070,364699,3,3,90,On Track

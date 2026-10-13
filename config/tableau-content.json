@@ -1,0 +1,72 @@
+{
+  "_readme": "Tableau Cloud content wiring. Two embedded dashboards: Value Intelligence (every customer) and Transportation Optimization & Savings (Vantage only). The KPI cards (Pulse metrics) and Premium benchmarks live inside the Value Intelligence dashboard. 'requires' lists the entitlements a customer must hold before the server will hand out the URL + token. 'width'/'height' = the dashboard's fixed size in Tableau. The portal reserves exactly that space, re-reads the real size from the Embedding API once loaded, and scales the dashboard down proportionally when the window is narrower.",
+  "views": {
+    "valueIntelligence": {
+      "title": "Your Value Intelligence Dashboard",
+      "subtitle": "Year-to-date value KPIs · Value Realization by Engagement · Net Business Value Over Time · Engagement Health · Value-to-Investment · Premium Industry Benchmarks",
+      "url": "https://10ax.online.tableau.com/t/cbsconnectors/views/ApexConsulting-ClientValueIntelligence/YourValueIntelligenceDashboard",
+      "width": 1366,
+      "height": 1200,
+      "requires": [],
+      "filters": [
+        {
+          "field": "Service Line",
+          "label": "Service Line",
+          "allLabel": "All service lines"
+        },
+        {
+          "field": "Engagement Type",
+          "label": "Engagement Type",
+          "allLabel": "All engagements"
+        }
+      ],
+      "contextLinks": {
+        "_comment": "When the customer selects a mark whose [field] equals 'value', the portal offers a jump to the linked page (only if they're entitled to it).",
+        "field": "Engagement Type",
+        "links": [
+          {
+            "value": "Supply Chain Optimization",
+            "view": "transportation",
+            "to": "/transportation",
+            "label": "Explore Transportation Optimization & Savings"
+          }
+        ]
+      }
+    },
+    "transportation": {
+      "title": "Transportation Optimization & Savings",
+      "subtitle": "Realized savings, freight cost, mileage, invoice status and lane analysis behind Supply Chain Optimization",
+      "url": "https://10ax.online.tableau.com/t/cbsconnectors/views/ApexConsulting-OperationalValueSavings/TransportationValuePerformance",
+      "width": 1200,
+      "height": 1400,
+      "requires": [
+        "transportation"
+      ],
+      "search": {
+        "_comment": "Shown whenever the active sheet has a categorical filter on 'field' (e.g. after drilling into Invoice & Shipment Details). Matches are applied as that filter's values.",
+        "field": "Invoice Number",
+        "label": "Invoice number",
+        "placeholder": "Search invoices — e.g. INV-202506-13"
+      }
+    },
+    "invoiceDetails": {
+      "title": "Invoice & Shipment Details",
+      "subtitle": "The invoice and shipment records behind the summary",
+      "url": "",
+      "width": 1200,
+      "height": 900,
+      "requires": [
+        "transportation"
+      ]
+    }
+  },
+  "drilldown": {
+    "_comment": "Optional portal-level drill-down. Only active when views.invoiceDetails.url is set: selecting a mark on sourceWorksheet opens Invoice & Shipment Details filtered to that value. Leave invoiceDetails.url empty if the workbook handles drill-down with its own actions.",
+    "enabled": true,
+    "sourceView": "transportation",
+    "sourceWorksheet": "Invoice Status Breakdown",
+    "field": "Invoice Status",
+    "targetView": "invoiceDetails",
+    "targetFilterField": "Invoice Status"
+  }
+}
