@@ -335,10 +335,17 @@ app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TO
 const DIST = path.join(__dirname, '..', 'dist');
 app.use('/api', (req, res) => res.status(404).json({ error: 'Not found' }));
 app.use(express.static(DIST, { index: false }));
+// index.html is served with absolute URLs for link-preview tags (og:image needs an absolute URL).
+const fs = require('fs');
+let indexHtml = null;
 app.get('*', (req, res) => {
-  res.sendFile(path.join(DIST, 'index.html'), (err) => {
-    if (err) res.status(503).send('Frontend not built yet — run `npm run build`, or use `npm run dev` and open http://localhost:5173');
-  });
+  try {
+    indexHtml = indexHtml || fs.readFileSync(path.join(DIST, 'index.html'), 'utf8');
+  } catch {
+    return res.status(503).send('Frontend not built yet — run `npm run build`, or use `npm run dev` and open http://localhost:5173');
+  }
+  const origin = `${req.protocol}://${req.get('host')}`;
+  res.type('html').send(indexHtml.replaceAll('__ORIGIN__', origin));
 });
 
 app.listen(env.port, () => {
