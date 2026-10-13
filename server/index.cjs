@@ -11,6 +11,7 @@ const path = require('path');
 const express = require('express');
 const { createCookieJar } = require('./lib/session.cjs');
 const { mintEmbedToken } = require('./lib/jwt.cjs');
+const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const store = require('./lib/store.cjs');
 
 const env = {
@@ -229,6 +230,88 @@ app.get('/api/embed/view/:key', requireUser, (req, res) => {
   } catch (e) {
     console.error('token error:', e.message);
     res.status(500).json({ error: e.message });
+  }
+});
+
+// ── Agent: Tableau Pulse Insight Brief (server-side proxy, per-user Tableau session) ──
+const userAttributes = (user) =>
+  Object.fromEntries(Object.entries(user.attributes || {}).map(([k, v]) => [k, Array.isArray(v) ? v : [v]]));
+const pulse = createPulseClient({
+  server: env.server,
+  site: env.site,
+  clientId: env.clientId,
+  secretId: env.secretId,
+  secretValue: env.secretValue,
+  attributeFor: userAttributes
+});
+
+function agentScope(tenant) {
+  const cfg = store.content.agent;
+  const ent = store.entitlementsFor(tenant);
+  return { datasources: cfg.datasources.filter((d) => (d.requires || []).every((r) => ent.has(r))) };
+}
+
+// Featured metrics (config) first, then the rest alphabetically.
+function orderMetrics(ctx) {
+  const featured = store.content.agent.featuredMetrics || [];
+  const rank = (n) => (featured.includes(n) ? featured.indexOf(n) : featured.length);
+  return [...ctx].sort((a, b) => rank(a.item.metadata.name) - rank(b.item.metadata.name) || a.item.metadata.name.localeCompare(b.item.metadata.name));
+}
+
+app.get('/api/agent/context', requireUser, async (req, res) => {
+  try {
+    const ctx = orderMetrics(await pulse.metricContext(req.user, agentScope(req.tenant)));
+    const metrics = ctx.map(({ source, item }) => ({ name: item.metadata.name, metricId: item.metadata.metric_id, source }));
+    res.json({ metrics, suggested: metrics.slice(0, store.content.agent.suggestedQuestions || 4).map((m) => `What are the ${m.name} trends?`) });
+  } catch (e) {
+    console.error('agent context error:', e.message);
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// Conversations live on the server (the Pulse history repeats the full metric context every turn —
+// too large to round-trip, and the browser shouldn't be able to edit what's sent to Tableau).
+const conversations = new Map(); // id -> { userId, messages, at }
+const CONVERSATION_TTL_MS = 60 * 60 * 1000;
+setInterval(() => {
+  for (const [id, c] of conversations) if (Date.now() - c.at > CONVERSATION_TTL_MS) conversations.delete(id);
+}, 5 * 60 * 1000).unref();
+
+app.post('/api/agent/chat', requireUser, async (req, res) => {
+  const question = String(req.body?.question || '').trim().slice(0, 1000);
+  if (!question) return res.status(400).json({ error: 'Please enter a question.' });
+  const prior = conversations.get(String(req.body?.conversationId || ''));
+  const conversationId = prior && prior.userId === req.user.id ? req.body.conversationId : require('crypto').randomUUID();
+  const history = prior && prior.userId === req.user.id ? prior.messages.slice(-20) : [];
+  const started = Date.now();
+  try {
+    const ctx = await pulse.metricContext(req.user, agentScope(req.tenant));
+    if (!ctx.length) return res.status(404).json({ error: 'You aren’t following any Tableau Pulse metrics yet, so the agent has nothing to answer from.' });
+    const messages = [
+      ...history,
+      {
+        role: 'ROLE_USER',
+        content: question,
+        action_type: 'ACTION_TYPE_ANSWER',
+        metric_group_context: ctx.map((c) => c.item),
+        metric_group_context_resolved: false // message-level field (rejected on the context items)
+      }
+    ];
+    const r = await pulse.brief(req.user, messages);
+    const content = r.markup || '';
+    const assistant = { role: 'ROLE_ASSISTANT', content, metric_group_context: r.group_context ?? [], metric_group_context_resolved: true };
+    res.json({
+      content,
+      notEnoughInformation: Boolean(r.not_enough_information),
+      followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean),
+      insightCards: (r.source_insights || []).map((si) => ({ id: si.id, type: si.type, markup: si.markup, series: extractSeries(si.viz, si.type) })),
+      conversationId
+    });
+    conversations.set(conversationId, { userId: req.user.id, messages: [...messages, assistant], at: Date.now() });
+    console.log(`⚡ brief for ${req.user.email} in ${Date.now() - started} ms (${ctx.length} metrics)`);
+  } catch (e) {
+    console.error('agent chat error:', e.message);
+    res.status(502).json({ error: e.message });
   }
 });
 

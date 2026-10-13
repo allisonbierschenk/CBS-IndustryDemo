@@ -68,5 +68,34 @@
     "field": "Invoice Status",
     "targetView": "invoiceDetails",
     "targetFilterField": "Invoice Status"
+  },
+  "agent": {
+    "_comment": "Agent = Tableau Pulse Insight Brief. Scope = ONLY the Pulse metrics the signed-in user follows in Tableau, limited to these data sources (by name) and their portal entitlements ('requires'). Row-level security on the published data source scopes each metric to the user's rows.",
+    "suggestedQuestions": 4,
+    "featuredMetrics": [
+      "Value Realization Rate",
+      "Value-to-Investment Ratio",
+      "Business Value Delivered",
+      "Engagement Health",
+      "Monthly Savings",
+      "Freight Cost",
+      "On-Time Milestone Rate",
+      "Hours Delivered vs. Plan (%)",
+      "Consulting Investment"
+    ],
+    "datasources": [
+      {
+        "name": "Apex Consulting - Client Value Intelligence",
+        "label": "Value Intelligence",
+        "requires": []
+      },
+      {
+        "name": "Apex Consulting - Operational Value & Savings",
+        "label": "Transportation",
+        "requires": [
+          "transportation"
+        ]
+      }
+    ]
   }
 }

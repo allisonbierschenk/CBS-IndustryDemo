@@ -54,7 +54,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 |---|---|
 | `/login` | Click a user to sign in (JWT is logged to the browser console with a jwt.io link) |
 | `/` | Landing page after sign-in: **Ask the agent** or **Open dashboards** |
-| `/agent` | Chat agent (not connected yet — composer disabled, links to dashboards) |
+| `/agent` | Chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics — see `docs/AGENT.md` |
 | `/dashboards` | Value Intelligence dashboard (Pulse KPIs, engagement charts, Premium benchmarks) — every customer |
 | `/dashboards#benchmarks` | Premium panel: Crestline/Vantage → "view in dashboard"; Standard → locked + upgrade request |
 | `/transportation` | Transportation Optimization & Savings — **Vantage only** (drill-down happens inside the workbook; invoice search above it) |
