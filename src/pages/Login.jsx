@@ -3,19 +3,8 @@ import { useEffect, useState } from 'react';
 import { Navigate, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
-import CompanyLogo from '../components/CompanyLogo.jsx';
-import Icon from '../components/Icon.jsx';
+import PersonaList from '../components/PersonaList.jsx';
 import { Brand } from '../components/TopBar.jsx';
-
-// Users grouped by company, in the order they appear in the user store.
-function byCompany(personas) {
-  const groups = new Map();
-  for (const p of personas) {
-    if (!groups.has(p.tenantId)) groups.set(p.tenantId, { ...p, users: [] });
-    groups.get(p.tenantId).users.push(p);
-  }
-  return [...groups.values()];
-}
 
 export default function Login() {
   const { status, signInAs } = useSession();
@@ -63,37 +52,8 @@ export default function Login() {
                   {error}
                 </p>
               )}
-              <div className="user-list">
-                {!personas && !error && <div className="muted">Loading…</div>}
-                {personas &&
-                  byCompany(personas).map((c) => (
-                    <section key={c.tenantId} className="co-group" aria-label={c.clientName}>
-                      <div className="co-head">
-                        <CompanyLogo tenantId={c.tenantId} color={c.color} size={36} />
-                        <div className="co-title">
-                          <span className="ur-company">{c.clientName}</span>
-                          <span className="co-industry">{c.industry}</span>
-                        </div>
-                        <span className={`mini-tier ${c.tier}`}>{c.tier}</span>
-                      </div>
-                      {c.users.map((p) => (
-                        <button key={p.userId} className="user-row" onClick={() => pick(p)}>
-                          <span className="ur-main">
-                            <span className="ur-name-row">
-                              <span className="uc-name">{p.name}</span>
-                              {p.persona && p.persona !== 'Executive' && <span className="persona-chip">{p.persona}</span>}
-                            </span>
-                            <span className="ur-meta">
-                              {p.title}
-                              {p.persona && p.persona !== 'Executive' ? ` · Sees: ${p.scope}` : p.demoFocus ? ` · ${p.demoFocus}` : ''}
-                            </span>
-                          </span>
-                          <Icon name="arrowRight" className="ur-go" />
-                        </button>
-                      ))}
-                    </section>
-                  ))}
-              </div>
+              {!personas && !error && <div className="muted">Loading…</div>}
+              {personas && <PersonaList personas={personas} onPick={pick} />}
             </div>
           </section>
         </main>

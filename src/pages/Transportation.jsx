@@ -61,7 +61,7 @@ export default function Transportation() {
         )}
       </div>
 
-      <div className="viz-card" data-tableau="Tableau Embedding API">
+      <div className="viz-card">
         <div className="viz-card-head">
           <div>
             <h3>{view.title}</h3>

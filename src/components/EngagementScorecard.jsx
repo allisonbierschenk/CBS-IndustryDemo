@@ -40,7 +40,7 @@ export default function EngagementScorecard({ viz, worksheet, keyField, maxRows 
 
   if (!viz) return null;
   return (
-    <div className="viz-card scorecard" data-tableau="Tableau Embedding API">
+    <div className="viz-card scorecard">
       <div className="viz-card-head">
         <div>
           <h3>Engagement scorecard</h3>

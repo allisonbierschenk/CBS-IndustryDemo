@@ -89,7 +89,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
 
   return (
     <>
-      <div className="sel-bar" role="region" aria-label="Actions for your selection" data-tableau="Embedding API · mark selection">
+      <div className="sel-bar" role="region" aria-label="Actions for your selection">
         {sel ? (
           <>
             <div className="sel-what">

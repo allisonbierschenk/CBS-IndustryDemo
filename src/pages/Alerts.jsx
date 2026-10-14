@@ -82,7 +82,7 @@ export default function Alerts() {
           </p>
         )}
         {subs.subscriptions?.length > 0 && (
-          <div className="list-card" data-tableau="Tableau REST + Pulse API">
+          <div className="list-card">
             {subs.subscriptions.map((s) => (
               <div className="list-row" key={s.id}>
                 <Icon name="mail" />
@@ -112,7 +112,7 @@ export default function Alerts() {
         {metrics.loading && <p className="muted">Loading…</p>}
         {metrics.error && <div className="error-msg">{metrics.error}</div>}
         {metrics.metrics?.length > 0 && (
-          <div className="list-card" data-tableau="Tableau REST + Pulse API">
+          <div className="list-card">
             {metrics.metrics.map((m) => (
               <div className="list-row" key={m.id}>
                 <Icon name="chart" />

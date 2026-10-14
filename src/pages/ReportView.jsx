@@ -26,7 +26,7 @@ export default function ReportView() {
   return (
     <div className="container">
       <Crumbs items={[{ label: 'Reports', to: '/reports' }, { label: title }]} />
-      <div className="viz-card" style={{ marginTop: 18 }} data-tableau="Tableau Embedding API">
+      <div className="viz-card" style={{ marginTop: 18 }}>
         <div className="viz-card-head">
           <div>
             <h3>{title}</h3>

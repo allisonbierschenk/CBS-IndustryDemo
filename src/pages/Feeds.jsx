@@ -40,7 +40,7 @@ export default function Feeds() {
       {state.loading && <p className="muted">Loading…</p>}
       {state.error && <div className="error-msg">{state.error}</div>}
       {state.feeds?.map((f) => (
-        <div className="viz-card feed-card" key={f.key} data-tableau="VizQL Data Service">
+        <div className="viz-card feed-card" key={f.key}>
           <div className="viz-card-head">
             <div>
               <h3>{f.title}</h3>

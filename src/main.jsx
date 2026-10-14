@@ -4,7 +4,6 @@ import App from './App.jsx';
 import ErrorBoundary from './components/ErrorBoundary.jsx';
 import { SessionProvider } from './context/SessionContext.jsx';
 import { ToastProvider } from './context/ToastContext.jsx';
-import { WhyTableauProvider } from './context/WhyTableauContext.jsx';
 import './styles/app.css';
 
 // No <StrictMode>: in development it runs every effect twice, which doubled API calls, minted two
@@ -14,9 +13,7 @@ createRoot(document.getElementById('root')).render(
     <BrowserRouter>
       <ToastProvider>
         <SessionProvider>
-          <WhyTableauProvider>
-            <App />
-          </WhyTableauProvider>
+          <App />
         </SessionProvider>
       </ToastProvider>
     </BrowserRouter>

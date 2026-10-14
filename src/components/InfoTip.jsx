@@ -1,14 +1,11 @@
-// (i) button that explains a Tableau-powered surface: freshness, source, security and — in Why Tableau
-// mode — why it's built on Tableau. Opens on hover (and on click / keyboard focus for touch and keyboard users);
+// (i) button that explains a Tableau-powered surface: freshness, source, security and why Tableau helps there. Opens on hover (and on click / keyboard focus for touch and keyboard users);
 // a short close delay lets the pointer move into the popover. Fixed-positioned so overflow:hidden cards can't clip it.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { provenance } from '../lib/provenance.js';
 import { useSession } from '../context/SessionContext.jsx';
-import { useWhyTableau } from '../context/WhyTableauContext.jsx';
 
 export default function InfoTip({ kind, extra, label = 'About this' }) {
   const { me } = useSession();
-  const { on: why } = useWhyTableau();
   const [open, setOpen] = useState(false);
   const [pos, setPos] = useState(null);
   const btn = useRef(null);
@@ -46,7 +43,7 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
       window.removeEventListener('resize', place);
       window.removeEventListener('scroll', place, true);
     };
-  }, [open, why]);
+  }, [open]);
 
   useEffect(() => {
     if (!open) return;
@@ -86,12 +83,10 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
           <p>{info.source}</p>
           <h4>Security</h4>
           <p>{info.security}</p>
-          {why && (
-            <div className="info-why">
-              <h4>Why Tableau helps here</h4>
-              <p>{info.why}</p>
-            </div>
-          )}
+          <div className="info-why">
+            <h4>Why Tableau helps here</h4>
+            <p>{info.why}</p>
+          </div>
         </div>
       )}
     </>

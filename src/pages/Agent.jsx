@@ -178,7 +178,7 @@ export default function Agent() {
         </div>
       </div>
 
-      <div className="chat" data-tableau="Tableau Pulse">
+      <div className="chat">
         <div className="chat-thread" ref={threadRef}>
           {messages.length === 0 && (
             <div className="chat-starters">

@@ -47,7 +47,7 @@ export default function AttentionPanel() {
   }, [load]);
 
   return (
-    <section className="attention" aria-labelledby="att-title" data-tableau="Tableau Pulse">
+    <section className="attention" aria-labelledby="att-title">
       <div className="attention-head">
         <div>
           <div className="kicker">From your Tableau Pulse metrics</div>

@@ -3,8 +3,9 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-import { useWhyTableau } from '../context/WhyTableauContext.jsx';
+import CompanyLogo from './CompanyLogo.jsx';
 import Icon from './Icon.jsx';
+import PersonaList, { byCompany } from './PersonaList.jsx';
 import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 
 const TABS = [
@@ -16,7 +17,6 @@ const TABS = [
 export default function PresenterDock() {
   const { me, signInAs } = useSession();
   const toast = useToast();
-  const whyTableau = useWhyTableau();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('switch');
   const [personas, setPersonas] = useState([]);
@@ -31,7 +31,7 @@ export default function PresenterDock() {
 
   useEffect(() => {
     api('/api/users')
-      .then((d) => setPersonas(d.personas))
+      .then((d) => setPersonas(byCompany(d.personas).flatMap((c) => c.users))) // ⌥1–⌥9 follow the on-screen order
       .catch(() => setPersonas([]));
   }, []);
 
@@ -67,20 +67,12 @@ export default function PresenterDock() {
   return (
     <>
       <button className="dock-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <span className="avatar" style={{ background: t.color }}>{t.monogram}</span>
+        <CompanyLogo tenantId={t.id} color={t.color} size={30} />
         Switch user · {t.shortName} <kbd>⌥P</kbd>
       </button>
       <section className={`dock${open ? ' open' : ''}`} aria-label="Presenter controls">
         <div className="dock-head">
           <div className="kicker">Demo controls</div>
-          <label className="why-switch" title="Outline everything Tableau powers and explain why (⌥W)">
-            <input type="checkbox" checked={whyTableau.on} onChange={whyTableau.toggle} />
-            <span className="why-track" aria-hidden="true" />
-            <span>
-              <b>Why Tableau</b>
-              <small>Outline what Tableau powers in blue; the (i) icons explain why · ⌥W</small>
-            </span>
-          </label>
         </div>
         <div className="tabs" role="tablist">
           {TABS.map(([k, label]) => (
@@ -102,26 +94,11 @@ export default function PresenterDock() {
 function SwitchTab({ personas, currentId, onPick }) {
   return (
     <>
-      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 12px' }}>
+      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 8px' }}>
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
-        with the new user's email as <span className="code-inline">sub</span>. Shortcut: <b>⌥1–⌥{personas.length || 5}</b>.
+        with the new user's email as <span className="code-inline">sub</span>. Shortcut: <b>⌥1–⌥{Math.min(personas.length, 9) || 5}</b>.
       </p>
-      {personas.map((p, i) => (
-        <button key={p.userId} className="persona" aria-current={p.userId === currentId} onClick={() => onPick(p)}>
-          <span className="avatar" style={{ background: p.color }}>{p.monogram}</span>
-          <span>
-            <b>{p.clientName}</b>
-            <span>
-              {p.name} · {p.persona || 'Executive'}
-            </span>
-          </span>
-          <span style={{ display: 'grid', gap: 6, justifyItems: 'end' }}>
-            <span className={`mini-tier ${p.tier}`}>{p.tier}</span>
-            <kbd>⌥{i + 1}</kbd>
-          </span>
-          <p>{p.story}</p>
-        </button>
-      ))}
+      <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact shortcuts />
     </>
   );
 }

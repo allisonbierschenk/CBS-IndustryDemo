@@ -140,7 +140,7 @@ export default function ValueIntelligence() {
       )}
 
       <section className="section" ref={dashRef} id="dashboard" aria-labelledby="vi-title" style={{ paddingTop: 24 }}>
-        <div className="viz-card" data-tableau="Tableau Embedding API + Pulse">
+        <div className="viz-card">
           <div className="viz-card-head">
             <div>
               <h3 id="vi-title">{vi.title}</h3>
