@@ -170,6 +170,30 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     return { metrics: rows.map(({ _mag, ...m }) => m), onTrack };
   }
 
+  // Keep every demo user's brief ready before anyone signs in: at startup and then on a timer, refresh
+  // each user's cached answer in the background (a couple at a time so briefs don't slow each other).
+  // Switching personas mid-demo then shows Needs attention instantly instead of waiting 30–60 s.
+  async function prewarmAll() {
+    const due = store.users.filter((u) => {
+      const hit = attentionCache.get(attentionKey(u));
+      return store.tenantFor(u) && !(hit && Date.now() - hit.at < attentionTtl() * 0.8);
+    });
+    if (!due.length) return;
+    const started = Date.now();
+    const queue = [...due];
+    const worker = async () => {
+      for (let u = queue.shift(); u; u = queue.shift()) {
+        await buildAttention(u, store.tenantFor(u)).catch((e) => console.warn(`attention pre-warm for ${u.email} skipped: ${e.message}`));
+      }
+    };
+    await Promise.all(Array.from({ length: Math.min(cfg.attention?.prewarmConcurrency || 2, due.length) }, worker));
+    console.log(`⚡ Needs attention pre-warmed for ${due.length} user(s) in ${Math.round((Date.now() - started) / 1000)} s`);
+  }
+  if (cfg.attention?.prewarm !== false && env.server) {
+    setTimeout(() => prewarmAll().catch(() => {}), 3000).unref();
+    setInterval(() => prewarmAll().catch(() => {}), attentionTtl() * 0.8).unref();
+  }
+
   /** Called at sign-in: build the brief in the background unless a fresh one is cached. */
   function warmAttention(user) {
     const tenant = store.tenantFor(user);

@@ -129,9 +129,11 @@
     ]
   },
   "attention": {
-    "_comment": "Asked of Tableau Pulse (Insight Brief) over the user's followed metrics; the answer is Pulse's. A brief takes ~20–35 s, so the server starts it at sign-in and caches it (memory + data/attention-cache.json); expired answers are shown immediately while a fresh one is built. Shorter-answer wordings were faster but made Pulse skip the metrics that actually moved.",
+    "_comment": "Asked of Tableau Pulse (Insight Brief) over the user's followed metrics; the answer is Pulse's. A brief takes ~20–60 s, so the server pre-builds every user's answer at startup and refreshes it every ~80% of cacheMinutes ('prewarm', 'prewarmConcurrency' at a time), also starts one at sign-in, caches in memory + data/attention-cache.json, and serves the last answer immediately while refreshing. Shorter-answer wordings were faster but made Pulse skip the metrics that actually moved.",
     "question": "Which of my metrics need attention right now, and why?",
-    "cacheMinutes": 15
+    "cacheMinutes": 15,
+    "prewarm": true,
+    "prewarmConcurrency": 2
   },
   "scorecard": {
     "_comment": "Engagement scorecard built from this worksheet's summary data in the Value Intelligence dashboard.",
