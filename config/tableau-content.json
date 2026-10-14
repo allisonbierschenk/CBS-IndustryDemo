@@ -82,7 +82,7 @@
     "targetFilterField": "Invoice Status"
   },
   "agent": {
-    "_comment": "Agent = Tableau Pulse Insight Brief. Scope = ONLY the Pulse metrics the signed-in user follows in Tableau, limited to these data sources (by name) and their portal entitlements ('requires'). Row-level security on the published data source scopes each metric to the user's rows.",
+    "_comment": "Agent = Tableau Pulse Insight Brief. Scope = ONLY the Pulse metrics the signed-in user follows in Tableau, limited to these data sources (by name) and their portal entitlements ('requires'). Row-level security on the published data source scopes each metric to the user's rows. 'view' is the dashboard (views key) built on each data source — used for 'Open dashboard' actions.",
     "suggestedQuestions": 4,
     "featuredMetrics": [
       "Value Realization Rate",
@@ -99,14 +99,16 @@
       {
         "name": "Apex Consulting - Client Value Intelligence",
         "label": "Value Intelligence",
-        "requires": []
+        "requires": [],
+        "view": "valueIntelligence"
       },
       {
         "name": "Apex Consulting - Operational Value & Savings",
         "label": "Transportation",
         "requires": [
           "transportation"
-        ]
+        ],
+        "view": "transportation"
       }
     ]
   },

@@ -844,3 +844,12 @@ textarea.input { resize: vertical; min-height: 110px; }
 .insight-q { margin: 0 0 14px auto; }
 .insight-scope { font-size: 12px; margin: 0 0 8px; }
 .insight-foot { padding: 12px 22px 18px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }
+.att-actions { margin-top: 18px; padding-top: 16px; border-top: 1px solid var(--line); display: grid; gap: 4px; }
+.att-actions .kicker { margin-bottom: 6px; }
+.att-row { display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 16px; padding: 10px 12px; border-radius: 14px; }
+.att-row:hover { background: var(--sage-2); }
+.att-what { display: grid; min-width: 0; }
+.att-what b { font-size: 14px; }
+.att-what span { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+.att-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+@media (max-width: 860px) { .att-row { grid-template-columns: 1fr; } .att-btns { justify-content: flex-start; } }

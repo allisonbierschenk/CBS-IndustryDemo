@@ -65,9 +65,22 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const r = await pulse.brief(req.user, [
         { role: 'ROLE_USER', content: cfg.attention.question, action_type: 'ACTION_TYPE_ANSWER', metric_group_context: ctx.map((c) => c.item), metric_group_context_resolved: false }
       ]);
+      const content = r.markup || '';
+      // Metrics the summary actually talks about (in the order it mentions them), with where to look further.
+      const ROUTES = { valueIntelligence: '/dashboards', transportation: '/transportation' };
+      const mentioned = ctx
+        .map((c) => ({ c, at: content.indexOf(c.item.metadata.name) }))
+        .filter((x) => x.at >= 0)
+        .sort((a, b) => a.at - b.at)
+        .map(({ c }) => {
+          const ds = cfg.agent.datasources.find((d) => d.label === c.source);
+          const view = ds?.view && store.canAccessView(req.tenant, ds.view) ? ds.view : null;
+          return { name: c.item.metadata.name, metricId: c.item.metadata.metric_id, source: c.source, dashboard: view ? { title: cfg.views[view].title, to: ROUTES[view] } : null };
+        });
       const value = {
         question: cfg.attention.question,
-        content: r.markup || '',
+        content,
+        metrics: mentioned,
         notEnoughInformation: Boolean(r.not_enough_information),
         followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean).slice(0, 3),
         insights: (r.source_insights || []).map((si) => ({ id: si.id, type: si.type, markup: si.markup })),
