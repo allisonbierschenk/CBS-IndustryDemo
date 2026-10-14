@@ -12,7 +12,7 @@ import EmbedPlaceholder, { EmbedLoading } from './EmbedPlaceholder.jsx';
 
 const HOST_PADDING = 8; // matches .viz-host padding
 
-export default function TableauViz({ viewKey, endpoint, authoring = false, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive }) {
+export default function TableauViz({ viewKey, endpoint, authoring = false, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive, events }) {
   const { config } = useSession();
   const hostRef = useRef(null);
   const mountRef = useRef(null);
@@ -20,6 +20,8 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
   const readyRef = useRef(onFirstInteractive);
   markRef.current = onMarkSelection;
   readyRef.current = onFirstInteractive;
+  const eventsRef = useRef(events); // extra Tableau events, e.g. { workbookreadytoclose: fn }
+  eventsRef.current = events;
   const [phase, setPhase] = useState({ kind: 'loading', label: 'Authenticating securely with Tableau…' });
   const [size, setSize] = useState({ width, height });
   const [available, setAvailable] = useState(null);
@@ -105,6 +107,7 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
         setPhase({ kind: 'error', message, tableau: true });
       });
       viz.addEventListener('markselectionchanged', (e) => markRef.current?.(e));
+      for (const name of Object.keys(eventsRef.current || {})) viz.addEventListener(name, (e) => eventsRef.current?.[name]?.(e));
 
       setPhase({ kind: 'mounting', label: 'Loading your analytics…' });
       mountRef.current?.appendChild(viz);
