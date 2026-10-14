@@ -177,6 +177,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
   startSession(res, user);
   console.log(`→ signed in ${user.id} (${user.email})`);
   activity.record(user, store.tenantFor(user), 'sign-in', {});
+  features.warmAttention(user); // start the (slow) Pulse brief now so Home doesn't wait for it
 
   // Mint a token right away so the browser can show (and log) exactly what Tableau will receive.
   // Only the signed token leaves the server — never the connected app secret.
@@ -364,7 +365,7 @@ app.post('/api/messages', requireUser, (req, res) => {
 app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TOPICS }));
 
 // ── Portal capabilities (library, subscriptions, attention, links, authoring, feeds, activity) ──
-registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret });
+const features = registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret });
 
 // ── React build (production) — BrowserRouter fallback to index.html ─────────
 const DIST = path.join(__dirname, '..', 'dist');

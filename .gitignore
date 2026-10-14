@@ -4,3 +4,4 @@ node_modules/
 *.log
 dist/
 data/activity.jsonl
+data/attention-cache.json

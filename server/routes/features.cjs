@@ -54,15 +54,32 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   }
 
   // ── Needs attention (#4) ──────────────────────────────────────────────────
-  const attentionCache = new Map(); // userId -> { at, value }
-  app.get('/api/attention', requireUser, async (req, res) => {
-    const ttl = (cfg.attention?.cacheMinutes || 15) * 60 * 1000;
-    const hit = attentionCache.get(req.user.id);
-    if (hit && Date.now() - hit.at < ttl && req.query.refresh !== '1') return res.json({ ...hit.value, cached: true });
-    try {
-      const ctx = await pulse.metricContext(req.user, agentScope(req.tenant));
-      if (!ctx.length) return res.json({ empty: true, reason: 'You aren’t following any Tableau Pulse metrics yet.' });
-      const r = await pulse.brief(req.user, [
+  // A Pulse brief takes ~15–35 s (time grows with the length of the answer), so the portal never makes
+  // the user wait for one it can avoid:
+  //  • started in the background at sign-in (warmAttention) — usually ready by the time Home renders
+  //  • one in-flight brief per user (sign-in warm-up, two tabs, a refresh click all share it)
+  //  • cached for cfg.attention.cacheMinutes, persisted to disk so dev restarts (node --watch) keep it
+  //  • after it expires the last answer is served immediately (stale) while a fresh one is built
+  const ATTENTION_FILE = require('path').join(__dirname, '..', '..', 'data', 'attention-cache.json');
+  const attentionCache = new Map(); // `${userId}|${question}` -> { at, value }
+  const attentionInflight = new Map(); // same key -> Promise<value>
+  try {
+    for (const [k, v] of Object.entries(JSON.parse(require('fs').readFileSync(ATTENTION_FILE, 'utf8')))) attentionCache.set(k, v);
+  } catch {
+    /* no cache yet */
+  }
+  const saveAttention = () => require('fs').writeFile(ATTENTION_FILE, JSON.stringify(Object.fromEntries(attentionCache)), () => {});
+  const attentionKey = (user) => `${user.id}|${cfg.attention.question}`;
+  const attentionTtl = () => (cfg.attention?.cacheMinutes || 15) * 60 * 1000;
+
+  function buildAttention(user, tenant) {
+    const key = attentionKey(user);
+    if (attentionInflight.has(key)) return attentionInflight.get(key);
+    const started = Date.now();
+    const job = (async () => {
+      const ctx = await pulse.metricContext(user, agentScope(tenant));
+      if (!ctx.length) return { empty: true, reason: 'You aren’t following any Tableau Pulse metrics yet.' };
+      const r = await pulse.brief(user, [
         { role: 'ROLE_USER', content: cfg.attention.question, action_type: 'ACTION_TYPE_ANSWER', metric_group_context: ctx.map((c) => c.item), metric_group_context_resolved: false }
       ]);
       const content = r.markup || '';
@@ -74,7 +91,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         .sort((a, b) => a.at - b.at)
         .map(({ c }) => {
           const ds = cfg.agent.datasources.find((d) => d.label === c.source);
-          const view = ds?.view && store.canAccessView(req.tenant, ds.view) ? ds.view : null;
+          const view = ds?.view && store.canAccessView(tenant, ds.view) ? ds.view : null;
           return { name: c.item.metadata.name, metricId: c.item.metadata.metric_id, source: c.source, dashboard: view ? { title: cfg.views[view].title, to: ROUTES[view] } : null };
         });
       const value = {
@@ -83,12 +100,37 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         metrics: mentioned,
         notEnoughInformation: Boolean(r.not_enough_information),
         followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean).slice(0, 3),
-        insights: (r.source_insights || []).map((si) => ({ id: si.id, type: si.type, markup: si.markup })),
         generatedAt: new Date().toISOString()
       };
-      attentionCache.set(req.user.id, { at: Date.now(), value });
-      activity.record(req.user, req.tenant, 'attention', { metrics: ctx.length });
-      res.json(value);
+      attentionCache.set(key, { at: Date.now(), value });
+      saveAttention();
+      console.log(`⚡ attention brief for ${user.email} in ${Date.now() - started} ms (${ctx.length} metrics)`);
+      activity.record(user, tenant, 'attention', { metrics: ctx.length, ms: Date.now() - started });
+      return value;
+    })().finally(() => attentionInflight.delete(key));
+    attentionInflight.set(key, job);
+    return job;
+  }
+
+  /** Called at sign-in: build the brief in the background unless a fresh one is cached. */
+  function warmAttention(user) {
+    const tenant = store.tenantFor(user);
+    const hit = attentionCache.get(attentionKey(user));
+    if (!tenant || (hit && Date.now() - hit.at < attentionTtl())) return;
+    buildAttention(user, tenant).catch((e) => console.warn(`attention warm-up for ${user.email} failed: ${e.message}`));
+  }
+
+  app.get('/api/attention', requireUser, async (req, res) => {
+    const hit = attentionCache.get(attentionKey(req.user));
+    const fresh = hit && Date.now() - hit.at < attentionTtl();
+    try {
+      if (req.query.refresh === '1') return res.json(await buildAttention(req.user, req.tenant));
+      if (fresh) return res.json({ ...hit.value, cached: true });
+      if (hit && req.query.wait !== '1') {
+        buildAttention(req.user, req.tenant).catch(() => {}); // refresh behind the stale answer
+        return res.json({ ...hit.value, cached: true, stale: true });
+      }
+      res.json(await buildAttention(req.user, req.tenant));
     } catch (e) {
       fail(res, e);
     }
@@ -300,7 +342,8 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const me = await pulse.me(req.user);
       await pulse.request(req.user, 'POST', '/pulse/subscriptions', { metric_id: req.params.metricId, follower: { user_id: me.userId } });
       pulse.resetContext(req.user);
-      attentionCache.delete(req.user.id);
+      attentionCache.delete(attentionKey(req.user));
+      saveAttention();
       activity.record(req.user, req.tenant, 'pulse-follow', { metricId: req.params.metricId, on: true });
       res.json({ ok: true });
     } catch (e) {
@@ -315,7 +358,8 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       if (!mine) return res.status(409).json({ error: 'You follow this metric through a group — ask your Apex team to change group follows.' });
       await pulse.request(req.user, 'DELETE', `/pulse/subscriptions/${mine.id}`);
       pulse.resetContext(req.user);
-      attentionCache.delete(req.user.id);
+      attentionCache.delete(attentionKey(req.user));
+      saveAttention();
       activity.record(req.user, req.tenant, 'pulse-follow', { metricId: req.params.metricId, on: false });
       res.json({ ok: true });
     } catch (e) {
@@ -420,4 +464,5 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       res.status(502).type('text').send(e.message);
     }
   });
+  return { warmAttention };
 };

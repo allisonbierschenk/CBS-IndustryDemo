@@ -28,9 +28,14 @@ export default function AttentionPanel() {
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
       const d = await api(`/api/attention${refresh ? '?refresh=1' : ''}`);
-      setState({ loading: false, ...d });
+      setState({ loading: Boolean(d.stale), ...d });
+      // A stale answer shows instantly; the server is already building a fresh one — swap it in when ready.
+      if (d.stale) {
+        const fresh = await api('/api/attention?wait=1');
+        setState({ loading: false, ...fresh });
+      }
     } catch (e) {
-      setState({ loading: false, error: e.message });
+      setState((s) => ({ ...s, loading: false, error: s.content ? null : e.message }));
     }
   }, []);
 
