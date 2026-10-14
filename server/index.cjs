@@ -10,7 +10,7 @@ const crypto = require('crypto');
 const path = require('path');
 const express = require('express');
 const { createCookieJar } = require('./lib/session.cjs');
-const { mintEmbedToken } = require('./lib/jwt.cjs');
+const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const store = require('./lib/store.cjs');
 
@@ -22,6 +22,8 @@ const env = {
   secretValue: process.env.CONNECTED_APP_SECRET_VALUE,
   ttl: Number(process.env.JWT_TTL_SECONDS || 300),
   attributeClaim: process.env.USER_ATTRIBUTE_CLAIM || 'client name',
+  // Optional override of the embed token's scopes (comma separated). Default: see DEFAULT_SCOPES in lib/jwt.cjs
+  embedScopes: (process.env.TABLEAU_EMBED_SCOPES || '').split(',').map((x) => x.trim()).filter(Boolean),
   sessionSecret: process.env.SESSION_SECRET,
   port: Number(process.env.PORT || 3000),
   production: process.env.NODE_ENV === 'production'
@@ -116,7 +118,8 @@ function mintFor(user) {
     secretValue: env.secretValue,
     username: user.email, // JWT sub = the user's email (their Tableau Cloud username)
     attributes,
-    ttlSeconds: env.ttl
+    ttlSeconds: env.ttl,
+    ...(env.embedScopes.length ? { scopes: env.embedScopes } : {})
   });
 }
 
@@ -352,5 +355,5 @@ app.listen(env.port, () => {
   console.log(`\nApex Client Value Intelligence API → http://localhost:${env.port}`);
   if (!env.server || !env.clientId) console.warn('⚠ Tableau Connected App not configured — embeds will show configuration placeholders.');
   console.log('  Login: one click per demo user (no password)');
-  console.log(`  JWT user attributes: every key in users.json 'attributes' (required: '${env.attributeClaim}')  ·  scopes: tableau:views:embed, tableau:insights:embed`);
+  console.log(`  JWT user attributes: every key in users.json 'attributes' (required: '${env.attributeClaim}')  ·  embed scopes: ${(env.embedScopes.length ? env.embedScopes : DEFAULT_SCOPES).join(', ')}`);
 });

@@ -449,9 +449,61 @@ a.eng:hover { transform: translateY(-3px); box-shadow: var(--shadow-md); }
 .modal-head h3 { font-size: 20px; margin-top: 4px; }
 .modal-body { padding: 18px 24px 24px; }
 .modal-actions { display: flex; justify-content: flex-end; gap: 10px; margin-top: 14px; }
-.input { font: inherit; font-size: 14px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--page); outline: none; width: 100%; }
-.input:focus { border-color: var(--ink); background: #fff; }
+.input { font: inherit; font-size: 14px; padding: 12px 14px; border-radius: 14px; border: 1.5px solid var(--line); background-color: var(--page); outline: none; width: 100%; }
+.input:focus { border-color: var(--ink); background-color: #fff; }
+/* custom select chevron with breathing room (native caret hugs the edge) */
+select.input {
+  appearance: none; -webkit-appearance: none; padding-right: 42px; cursor: pointer;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24' fill='none' stroke='%23111614' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat; background-position: right 16px center; background-size: 16px;
+}
+/* radio list (worksheet picker) */
+.radio-list { border: 0; padding: 0; margin: 0 0 14px; display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 8px; }
+.radio-list legend { display: flex; justify-content: space-between; align-items: center; width: 100%; font-size: 12.5px; font-weight: 700; margin-bottom: 8px; padding: 0; }
+.radio-list legend .link-btn { font-size: 12.5px; text-decoration: underline; }
+.check-box { width: 18px; height: 18px; border-radius: 5px; border: 2px solid var(--sage-3); flex: none; display: grid; place-items: center; }
+.radio-row.is-on .check-box { background: var(--ink); border-color: var(--ink); }
+.radio-row.is-on .check-box::after { content: ''; width: 8px; height: 4px; border-left: 2px solid var(--lime); border-bottom: 2px solid var(--lime); transform: rotate(-45deg) translate(1px, -1px); }
+.rr-pick { display: flex; align-items: center; gap: 10px; flex: 1; min-width: 0; cursor: pointer; }
+.radio-row:has(.rr-pick) { padding-right: 8px; cursor: default; }
+.preview-btn { margin-left: auto; flex: none; display: inline-flex; align-items: center; gap: 5px; padding: 5px 10px; border-radius: 99px; border: 1px solid var(--line); background: var(--surface); font: inherit; font-size: 11.5px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.preview-btn svg { width: 13px; height: 13px; }
+.preview-btn:hover { border-color: var(--ink); color: var(--ink); }
+.preview-btn.is-active { background: var(--lime-2); border-color: #e3e78c; color: var(--lime-ink); }
+.radio-row { display: flex; align-items: center; gap: 10px; padding: 10px 14px; border-radius: 12px; border: 1.5px solid var(--line); background: var(--page); font-size: 13.5px; font-weight: 600; cursor: pointer; transition: border-color .15s, background .15s; }
+.radio-row:hover { border-color: var(--sage-3); }
+.radio-row.is-on { border-color: var(--ink); background: var(--surface); }
+.radio-row input { position: absolute; opacity: 0; pointer-events: none; }
+.radio-dot { width: 18px; height: 18px; border-radius: 99px; border: 2px solid var(--sage-3); flex: none; display: grid; place-items: center; }
+.radio-row.is-on .radio-dot { border-color: var(--ink); }
+.radio-row.is-on .radio-dot::after { content: ''; width: 8px; height: 8px; border-radius: 99px; background: var(--ink); }
+.radio-row:has(input:focus-visible) { outline: 3px solid #9fb51a; outline-offset: 2px; }
 textarea.input { resize: vertical; min-height: 110px; }
+
+/* export menu */
+.export { position: relative; }
+.export-menu { position: absolute; right: 0; top: calc(100% + 8px); z-index: 60; width: 200px; padding: 6px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); animation: pop .14s ease-out; }
+.export-item { width: 100%; display: grid; grid-template-columns: 20px 1fr; align-items: center; gap: 12px; padding: 9px 10px; border: 0; background: none; border-radius: 10px; font: inherit; font-size: 14px; font-weight: 600; color: var(--ink); cursor: pointer; text-align: left; }
+.export-item:hover, .export-item:focus-visible { background: var(--sage-2); }
+.export-item svg { width: 19px; height: 19px; }
+.modal-wide { width: min(980px, 100%); }
+.seg { display: inline-flex; padding: 4px; border-radius: 999px; background: var(--sage-2); border: 1px solid var(--line); margin-bottom: 14px; }
+.seg button { border: 0; background: none; padding: 8px 14px; border-radius: 999px; font: inherit; font-size: 13px; font-weight: 700; color: var(--muted); cursor: pointer; }
+.seg button[aria-checked="true"] { background: var(--surface); color: var(--ink); box-shadow: var(--shadow-sm); }
+.sheet-picks { display: grid; gap: 6px; margin-bottom: 14px; }
+.sheet-pick { display: flex; align-items: center; gap: 10px; padding: 9px 12px; border-radius: 12px; border: 1px solid var(--line); background: var(--page); font: inherit; font-size: 13.5px; font-weight: 600; text-align: left; cursor: pointer; }
+.sheet-pick.is-on { border-color: var(--ink); background: var(--surface); }
+.sp-box { width: 20px; height: 20px; border-radius: 6px; border: 1.5px solid var(--sage-3); display: grid; place-items: center; font-size: 11px; font-weight: 800; }
+.sheet-pick.is-on .sp-box { background: var(--ink); border-color: var(--ink); color: var(--lime); }
+.ex-grid { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+.data-preview { border: 1px solid var(--line); border-radius: 14px; overflow: hidden; background: var(--surface); }
+.dp-meta { padding: 10px 14px; font-size: 12.5px; color: var(--muted); border-bottom: 1px solid var(--line); background: var(--sage-2); }
+.dp-scroll { max-height: 46vh; overflow: auto; }
+.dp-scroll table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.dp-scroll th { position: sticky; top: 0; background: var(--surface); text-align: left; padding: 8px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; font-weight: 800; }
+.dp-scroll td { padding: 7px 12px; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.dp-scroll tr:nth-child(even) td { background: var(--page); }
+@media (max-width: 700px) { .ex-grid { grid-template-columns: 1fr; } }
 
 /* contextual "explore deeper" bar, raised when a linked engagement is selected in the dashboard */
 .context-cta {

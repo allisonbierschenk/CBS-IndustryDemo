@@ -1,6 +1,7 @@
-import { useEffect } from 'react';
+import { useEffect, useRef } from 'react';
 import { Link, Outlet, useLocation } from 'react-router-dom';
 import { ContactProvider, useContact } from '../context/ContactContext.jsx';
+import { EmbedProvider, PersistentEmbeds, usePreloadViews } from '../context/EmbedContext.jsx';
 import { useSession } from '../context/SessionContext.jsx';
 import PresenterDock from './PresenterDock.jsx';
 import TopBar from './TopBar.jsx';
@@ -8,6 +9,9 @@ import TopBar from './TopBar.jsx';
 export default function Layout() {
   const { me } = useSession();
   const { pathname } = useLocation();
+  const pageRef = useRef(null);
+  // Preloaded right after sign-in so the dashboard is ready when the user opens it.
+  const preload = usePreloadViews(['valueIntelligence']);
 
   useEffect(() => {
     document.documentElement.style.setProperty('--client', me.tenant.color);
@@ -19,16 +23,19 @@ export default function Layout() {
 
   return (
     <ContactProvider>
-      <div className="frame">
-        <div className="page">
-          <TopBar />
-          <main>
-            <Outlet />
-          </main>
-          <Footer clientName={me.tenant.clientName} />
+      <EmbedProvider views={preload}>
+        <div className="frame">
+          <div className="page" ref={pageRef} style={{ position: 'relative' }}>
+            <TopBar />
+            <main>
+              <Outlet />
+            </main>
+            <Footer clientName={me.tenant.clientName} />
+            <PersistentEmbeds containerRef={pageRef} />
+          </div>
+          <PresenterDock />
         </div>
-        <PresenterDock />
-      </div>
+      </EmbedProvider>
     </ContactProvider>
   );
 }

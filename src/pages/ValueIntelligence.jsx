@@ -8,9 +8,11 @@ import { useContact } from '../context/ContactContext.jsx';
 import { useSession } from '../context/SessionContext.jsx';
 import DashboardFilters from '../components/DashboardFilters.jsx';
 import EngagementCards from '../components/EngagementCards.jsx';
+import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
+import ExportMenu from '../components/ExportMenu.jsx';
 import Icon from '../components/Icon.jsx';
 import PremiumPanel from '../components/PremiumPanel.jsx';
-import TableauViz from '../components/TableauViz.jsx';
+import { EmbedSlot } from '../context/EmbedContext.jsx';
 import TierBadge from '../components/TierBadge.jsx';
 
 function greeting() {
@@ -119,23 +121,16 @@ export default function ValueIntelligence() {
               <h3 id="vi-title">{vi.title}</h3>
               <p>Year-to-date performance across {t.shortName}&apos;s engagements</p>
             </div>
-            {opsEngagement && (
-              <span className="tip">
-                <Icon name="pointer" />
-                Select {opsEngagement.dataValue || opsEngagement.name} to open its operational results
-              </span>
-            )}
+            <div className="viz-meta">
+              <AnalyticsAssistantButton viz={viz} />
+              <ExportMenu viz={viz} title={vi.title} />
+            </div>
           </div>
           {viz && vi.filters.length > 0 && (
             <DashboardFilters viz={viz} filters={vi.filters} onChange={onFilterChange} request={filterRequest} />
           )}
-          <TableauViz
-            viewKey="valueIntelligence"
-            width={vi.width}
-            height={vi.height}
-            onMarkSelection={onMarkSelection}
-            onFirstInteractive={(e, v) => setViz(v)}
-          />
+          {/* The dashboard is preloaded at sign-in (see EmbedContext); this slot is where it appears. */}
+          <EmbedSlot viewKey="valueIntelligence" onMarkSelection={onMarkSelection} onViz={setViz} />
         </div>
       </section>
 

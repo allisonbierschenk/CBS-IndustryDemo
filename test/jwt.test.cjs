@@ -17,7 +17,7 @@ test('produces a Direct Trust JWT with required header and claims', () => {
   assert.strictEqual(claims.aud, 'tableau');
   assert.ok(claims.jti && claims.jti.length >= 32);
   assert.ok(claims.exp - Math.floor(Date.now() / 1000) <= 600);
-  assert.deepStrictEqual(claims.scp, ['tableau:views:embed', 'tableau:insights:embed']);
+  assert.deepStrictEqual(claims.scp, ['tableau:views:embed', 'tableau:insights:embed', 'tableau:content:read']);
   assert.deepStrictEqual(claims['client name'], ['Northstar Enterprises']);
   const expected = crypto.createHmac('sha256', base.secretValue).update(`${h}.${p}`).digest('base64url');
   assert.strictEqual(s, expected);

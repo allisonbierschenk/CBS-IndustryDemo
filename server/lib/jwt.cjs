@@ -9,8 +9,22 @@ const crypto = require('crypto');
 const MAX_TTL_SECONDS = 600;
 
 const DEFAULT_SCOPES = [
-  'tableau:views:embed',   // <tableau-viz>
-  'tableau:insights:embed' // <tableau-pulse>
+  'tableau:views:embed', // <tableau-viz>
+  'tableau:insights:embed', // <tableau-pulse> and Pulse metrics on dashboards
+  'tableau:content:read', // required by Tableau Agent (Analytics Assistant) in embedded dashboards (e.g. getDatasources)
+   "tableau:*:*",
+  "tableau:content:read",
+  "tableau:datasources:read",
+  "tableau:workbooks:read",
+  "tableau:projects:read",
+  "tableau:metric_subscriptions:read",
+  "tableau:insight_definitions_metrics:read",
+  "tableau:insight_metrics:read",
+  "tableau:metrics:download",
+  "tableau:viz_data_service:read",
+  "tableau:mcp_site_settings:read",
+  "tableau:insight_brief:create",
+  "tableau:views:embed_authoring",
 ];
 
 const b64url = (obj) => Buffer.from(JSON.stringify(obj)).toString('base64url');

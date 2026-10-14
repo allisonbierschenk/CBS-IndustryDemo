@@ -61,6 +61,16 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
     let alive = true;
     (async () => {
       setBusy(true);
+      // The dashboard may be preloaded and already filtered (e.g. returning to the page): read current values.
+      const current = await Promise.all(
+        filters.map(async (f) => {
+          const [first] = await sheetsWithFilter(viz, f.field);
+          const fl = first?.filter;
+          const value = !fl || fl.isAllSelected || !fl.appliedValues?.length ? ALL : String(fl.appliedValues[0].value ?? fl.appliedValues[0].formattedValue);
+          return [f.field, value];
+        })
+      );
+      if (alive) setState((s) => ({ ...s, ...Object.fromEntries(current.map(([k, v]) => [k, { ...s[k], value: v }])) }));
       await refreshOptions(null);
       if (alive) setBusy(false);
     })();

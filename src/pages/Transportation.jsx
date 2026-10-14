@@ -5,6 +5,8 @@ import { selectedValue } from '../lib/tableau.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
+import ExportMenu from '../components/ExportMenu.jsx';
 import InvoiceSearch from '../components/InvoiceSearch.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 
@@ -59,6 +61,10 @@ export default function Transportation() {
           <div>
             <h3>{view.title}</h3>
             <p>{view.subtitle}</p>
+          </div>
+          <div className="viz-meta">
+            <AnalyticsAssistantButton viz={viz} />
+            <ExportMenu viz={viz} title={view.title} />
           </div>
         </div>
         {viz && view.search && <InvoiceSearch viz={viz} {...view.search} />}
