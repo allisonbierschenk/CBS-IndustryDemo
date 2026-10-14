@@ -1,5 +1,5 @@
 {
-  "_readme": "Apex portal user store. 'email' is both the portal identity and the JWT 'sub' — it must EXACTLY match a Tableau Cloud username on the site (add each as Viewer). Every entry in 'attributes' is injected into the Connected App JWT as a user attribute claim and can be read in Tableau with USERATTRIBUTE / USERATTRIBUTEINCLUDES (names are case sensitive). 'client name' must EXACTLY match [Client Name] in the data; 'subscription tier' matches [Subscription Tier] (Premium / Standard). Optional scope attributes: 'service line' and 'engagement type' narrow a user below their organization; multiple 'client name' values span several clients. 'persona' is a display label. 'roles': ['activity'] grants the portal activity log page.",
+  "_readme": "Apex portal user store. 'email' is both the portal identity and the JWT 'sub' — it must EXACTLY match a Tableau Cloud username on the site (add each as Viewer). Every entry in 'attributes' is injected into the Connected App JWT as a user attribute claim and can be read in Tableau with USERATTRIBUTE / USERATTRIBUTEINCLUDES (names are case sensitive). 'client name' must EXACTLY match [Client Name] in the data; 'subscription tier' matches [Subscription Tier] (Premium / Standard). 'service line' and 'engagement type' list exactly what the user may see and must EXACTLY match [Service Line] / [Engagement Type] in the data (a user missing either sees nothing); multiple 'client name' values span several clients. 'persona' is a display label. 'roles': ['activity'] grants the portal activity log page.",
   "users": [
     {
       "id": "u-northstar",
@@ -13,6 +13,15 @@
         ],
         "subscription tier": [
           "Standard"
+        ],
+        "service line": [
+          "Operations",
+          "Technology"
+        ],
+        "engagement type": [
+          "Operational Transformation",
+          "Process Optimization",
+          "Technology Modernization"
         ]
       },
       "persona": "Executive"
@@ -29,6 +38,16 @@
         ],
         "subscription tier": [
           "Premium"
+        ],
+        "service line": [
+          "People & Org",
+          "Technology"
+        ],
+        "engagement type": [
+          "Agile Transformation",
+          "Change Management",
+          "Digital Transformation",
+          "Talent & Workforce Strategy"
         ]
       },
       "persona": "Executive"
@@ -45,6 +64,16 @@
         ],
         "subscription tier": [
           "Standard"
+        ],
+        "service line": [
+          "Operations",
+          "Risk & Compliance",
+          "Technology"
+        ],
+        "engagement type": [
+          "Compliance & Risk",
+          "ERP Implementation",
+          "Process Optimization"
         ]
       },
       "persona": "Executive"
@@ -61,6 +90,17 @@
         ],
         "subscription tier": [
           "Premium"
+        ],
+        "service line": [
+          "Operations",
+          "People & Org",
+          "Technology"
+        ],
+        "engagement type": [
+          "Change Management",
+          "Digital Manufacturing",
+          "Operational Excellence",
+          "Supply Chain Optimization"
         ]
       },
       "persona": "Executive"
@@ -77,6 +117,16 @@
         ],
         "subscription tier": [
           "Standard"
+        ],
+        "service line": [
+          "Operations",
+          "Risk & Compliance",
+          "Technology"
+        ],
+        "engagement type": [
+          "ESG & Sustainability",
+          "Operational Excellence",
+          "Technology Enablement"
         ]
       },
       "persona": "Executive"
@@ -97,6 +147,10 @@
         ],
         "service line": [
           "Operations"
+        ],
+        "engagement type": [
+          "Operational Transformation",
+          "Process Optimization"
         ]
       }
     },
@@ -113,6 +167,9 @@
         ],
         "subscription tier": [
           "Premium"
+        ],
+        "service line": [
+          "Technology"
         ],
         "engagement type": [
           "Digital Transformation"
@@ -133,6 +190,21 @@
         ],
         "subscription tier": [
           "Premium"
+        ],
+        "service line": [
+          "Operations",
+          "People & Org",
+          "Risk & Compliance",
+          "Technology"
+        ],
+        "engagement type": [
+          "Agile Transformation",
+          "Change Management",
+          "Digital Transformation",
+          "ESG & Sustainability",
+          "Operational Excellence",
+          "Talent & Workforce Strategy",
+          "Technology Enablement"
         ]
       },
       "roles": [

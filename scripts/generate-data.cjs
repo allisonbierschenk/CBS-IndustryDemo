@@ -1,7 +1,6 @@
 // Generates reference data for the Apex demo Tableau content (deterministic — same output every run).
 //   data/apex_engagement_performance.csv  monthly facts per client × engagement (the five stories)
 //   data/apex_industry_benchmarks.csv     anonymized peer quantiles + the client's own YTD value (one row per client × KPI)
-//   data/apex_client_entitlements.csv     Tableau Username → Client Name, generated from server/data/users.json (Pulse RLS)
 // Use these if your existing data source doesn't already contain all five clients with a [Client Name] column.
 const fs = require('fs');
 const path = require('path');
@@ -189,22 +188,6 @@ for (const c of CLIENTS) {
   }
 }
 
-// ── Pulse entitlements (from the Apex user store) ───────────────────────────
-const users = JSON.parse(fs.readFileSync(path.join(ROOT, 'server', 'data', 'users.json'), 'utf8')).users;
-const ent = users.flatMap((u) =>
-  (u.attributes['client name'] || []).flatMap((cn) =>
-    (u.attributes['service line'] || ['*']).flatMap((sl) =>
-      (u.attributes['engagement type'] || ['*']).map((et) => ({
-        'Tableau Username': u.email,
-        'Client Name': cn,
-        'Subscription Tier': (u.attributes['subscription tier'] || [''])[0],
-        'Entitled Service Line': sl,
-        'Entitled Engagement Type': et
-      }))
-    )
-  )
-);
-
 // ── Write CSVs ──────────────────────────────────────────────────────────────
 function toCsv(rows) {
   const cols = Object.keys(rows[0]);
@@ -213,12 +196,11 @@ function toCsv(rows) {
 }
 fs.writeFileSync(path.join(OUT, 'apex_engagement_performance.csv'), toCsv(perf));
 fs.writeFileSync(path.join(OUT, 'apex_industry_benchmarks.csv'), toCsv(bench));
-fs.writeFileSync(path.join(OUT, 'apex_client_entitlements.csv'), toCsv(ent));
 
 // ── Story check ─────────────────────────────────────────────────────────────
 const pct = (v) => `${(v * 100).toFixed(1)}%`;
 const usd = (v) => `$${(v / 1e6).toFixed(2)}M`;
-console.log(`Wrote ${perf.length} performance rows, ${bench.length} benchmark rows, ${ent.length} entitlement rows → data/\n`);
+console.log(`Wrote ${perf.length} performance rows, ${bench.length} benchmark rows → data/\n`);
 for (const c of CLIENTS) {
   const all = perf.filter((r) => r['Client Name'] === c.client);
   const y = aggregate(ytd(all));

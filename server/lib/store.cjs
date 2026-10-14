@@ -37,13 +37,23 @@ function canAccessView(tenant, viewKey) {
 }
 
 // A user's data scope, from their JWT user attributes (the same values Tableau's RLS evaluates).
+// 'narrowed' = the user sees fewer service lines / engagement types than their organization has.
 function scopeFor(user) {
   const a = user.attributes || {};
-  const list = (k) => (Array.isArray(a[k]) ? a[k] : a[k] ? [a[k]] : null);
-  const scope = { clients: list('client name') || [], serviceLines: list('service line'), engagementTypes: list('engagement type') };
+  const list = (k) => (Array.isArray(a[k]) ? a[k] : a[k] ? [a[k]] : []);
+  const scope = { clients: list('client name'), serviceLines: list('service line'), engagementTypes: list('engagement type') };
+  const all = tenantFor(user)?.engagements || [];
+  const allLines = new Set(all.map((e) => e.serviceLine));
+  const allTypes = new Set(all.map((e) => e.dataValue || e.name));
+  const fewerLines = [...allLines].some((x) => !scope.serviceLines.includes(x));
+  const fewerTypes = [...allTypes].some((x) => !scope.engagementTypes.includes(x));
+  // Types narrower than the service lines alone would allow → describe by engagement type.
+  const typesWithinLines = all.filter((e) => scope.serviceLines.includes(e.serviceLine)).map((e) => e.dataValue || e.name);
+  const typesNarrower = typesWithinLines.some((x) => !scope.engagementTypes.includes(x));
   const parts = [scope.clients.join(' + ')];
-  if (scope.serviceLines) parts.push(`${scope.serviceLines.join(', ')} service line`);
-  if (scope.engagementTypes) parts.push(scope.engagementTypes.join(', '));
+  if (typesNarrower) parts.push(scope.engagementTypes.join(', '));
+  else if (fewerLines) parts.push(`${scope.serviceLines.join(', ')} service line`);
+  scope.narrowed = fewerLines || fewerTypes;
   scope.label = parts.join(' · ');
   return scope;
 }
@@ -53,8 +63,8 @@ function engagementsFor(user, tenant) {
   const sc = scopeFor(user);
   return tenant.engagements.filter(
     (e) =>
-      (!sc.serviceLines || sc.serviceLines.includes(e.serviceLine)) &&
-      (!sc.engagementTypes || sc.engagementTypes.includes(e.dataValue || e.name)) &&
+      sc.serviceLines.includes(e.serviceLine) &&
+      sc.engagementTypes.includes(e.dataValue || e.name) &&
       (!e.client || sc.clients.includes(e.client))
   );
 }
