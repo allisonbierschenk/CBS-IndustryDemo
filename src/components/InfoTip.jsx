@@ -1,5 +1,6 @@
 // (i) button that explains a Tableau-powered surface: freshness, source, security and — in Why Tableau
-// mode — why it's built on Tableau. The popover is fixed-positioned so cards with overflow:hidden can't clip it.
+// mode — why it's built on Tableau. Opens on hover (and on click / keyboard focus for touch and keyboard users);
+// a short close delay lets the pointer move into the popover. Fixed-positioned so overflow:hidden cards can't clip it.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
 import { provenance } from '../lib/provenance.js';
 import { useSession } from '../context/SessionContext.jsx';
@@ -12,6 +13,16 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
   const [pos, setPos] = useState(null);
   const btn = useRef(null);
   const pop = useRef(null);
+  const closeTimer = useRef(null);
+  const show = () => {
+    clearTimeout(closeTimer.current);
+    setOpen(true);
+  };
+  const hideSoon = () => {
+    clearTimeout(closeTimer.current);
+    closeTimer.current = setTimeout(() => setOpen(false), 180);
+  };
+  useEffect(() => () => clearTimeout(closeTimer.current), []);
   const info = provenance(kind, me, extra);
 
   useLayoutEffect(() => {
@@ -52,11 +63,22 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
   if (!info) return null;
   return (
     <>
-      <button ref={btn} type="button" className={`info-btn${open ? ' is-open' : ''}`} onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={label} title={label}>
+      <button
+        ref={btn}
+        type="button"
+        className={`info-btn${open ? ' is-open' : ''}`}
+        onMouseEnter={show}
+        onMouseLeave={hideSoon}
+        onFocus={show}
+        onBlur={hideSoon}
+        onClick={show}
+        aria-expanded={open}
+        aria-label={label}
+      >
         i
       </button>
       {open && (
-        <div ref={pop} className="info-pop" role="dialog" aria-label={label} style={pos ? { top: pos.top, left: pos.left, width: pos.width } : { visibility: 'hidden' }}>
+        <div ref={pop} className="info-pop" role="dialog" aria-label={label} onMouseEnter={show} onMouseLeave={hideSoon} style={pos ? { top: pos.top, left: pos.left, width: pos.width } : { visibility: 'hidden' }}>
           <div className="info-tag">{info.tag}</div>
           <h4>Freshness</h4>
           <p>{info.freshness}</p>
