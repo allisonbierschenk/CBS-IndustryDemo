@@ -42,6 +42,18 @@
       "requires": [
         "transportation"
       ],
+      "filters": [
+        {
+          "field": "Carrier",
+          "label": "Carrier",
+          "allLabel": "All carriers"
+        },
+        {
+          "field": "Optimization Initiative",
+          "label": "Savings & Optimization Initiative",
+          "allLabel": "All initiatives"
+        }
+      ],
       "search": {
         "_comment": "Shown whenever the active sheet has a categorical filter on 'field' (e.g. after drilling into Invoice & Shipment Details). Matches are applied as that filter's values.",
         "field": "Invoice Number",

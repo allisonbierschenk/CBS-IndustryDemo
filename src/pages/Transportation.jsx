@@ -6,6 +6,7 @@ import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
+import DashboardFilters from '../components/DashboardFilters.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
@@ -72,6 +73,7 @@ export default function Transportation() {
             <ExportMenu viz={viz} title={view.title} />
           </div>
         </div>
+        {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} />}
         {viz && view.search && <InvoiceSearch viz={viz} {...view.search} />}
         <TableauViz
           viewKey="transportation"
