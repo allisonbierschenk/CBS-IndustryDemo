@@ -1,12 +1,13 @@
 // Act on a mark selection in an embedded dashboard: ask the Agent about it, share it to Slack (demo),
 // schedule time with Apex about it, or download the selected rows. Listens to the viz's
 // 'markselectionchanged' event; the bar hides when nothing is selected.
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { track } from '../lib/api.js';
 import { selectionSummary } from '../lib/tableau.js';
 import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
+import SelectionInsight from './SelectionInsight.jsx';
 import SlackDialog from './SlackDialog.jsx';
 
 const csvCell = (v) => (/[",\n]/.test(String(v)) ? `"${String(v).replace(/"/g, '""')}"` : String(v));
@@ -18,11 +19,14 @@ export function describeSelection(sel) {
   return sel.measure ? `${sel.measure} for ${subject}` : subject;
 }
 
-export default function SelectionActions({ viz, title, ignoreWorksheets = [], extra, onDismissExtra }) {
+// pulseSource: a Pulse data source label (e.g. "Transportation"). When set, questions about the selection
+// use only that source's metrics, and "Explain with Pulse" answers right beside the dashboard.
+export default function SelectionActions({ viz, title, ignoreWorksheets = [], extra, onDismissExtra, pulseSource }) {
   const navigate = useNavigate();
   const contact = useContact();
   const [sel, setSel] = useState(null);
   const [slack, setSlack] = useState(false);
+  const [insight, setInsight] = useState(null); // { question, what, worksheet }
   const worksheetRef = useRef(null);
   const ignoreKey = ignoreWorksheets.join('|');
 
@@ -43,18 +47,30 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
     return () => viz.removeEventListener('markselectionchanged', onSelect);
   }, [viz, ignoreKey]);
 
+  // Stable so the drawer's request effect doesn't re-run on every render.
+  const closeInsight = useCallback(() => setInsight(null), []);
+
   const clear = () => {
     setSel(null);
     worksheetRef.current?.clearSelectedMarksAsync?.().catch(() => {});
   };
 
-  if (!sel && !extra) return null;
+  const drawer = insight && <SelectionInsight {...insight} source={pulseSource} onClose={closeInsight} />;
+  if (drawer || (!sel && !extra)) return drawer || null; // the drawer replaces the bar while open
   const what = describeSelection(sel);
+  const question = () => {
+    const subject = sel.dimensions.join(' and ') || 'the selected items';
+    return sel.measure ? `What is driving ${sel.measure} for ${subject}?` : `What should I know about ${subject}?`;
+  };
 
   const askAgent = () => {
-    track('selection-action', { action: 'agent', worksheet: sel.worksheet });
-    const q = sel.measure ? `What is driving ${sel.measure} for ${sel.dimensions.join(' and ') || 'the selected items'}?` : `What should I know about ${sel.dimensions.join(' and ')}?`;
-    navigate(`/agent?q=${encodeURIComponent(q)}`);
+    track('selection-action', { action: 'agent', worksheet: sel.worksheet, source: pulseSource || 'all' });
+    navigate(`/agent?q=${encodeURIComponent(question())}${pulseSource ? `&source=${encodeURIComponent(pulseSource)}` : ''}`);
+  };
+
+  const explain = () => {
+    track('selection-action', { action: 'explain', worksheet: sel.worksheet, source: pulseSource });
+    setInsight({ question: question(), what, worksheet: sel.worksheet });
   };
 
   const schedule = () => {
@@ -84,7 +100,13 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
               </span>
             </div>
             <div className="sel-actions">
-              <button className="btn btn-lime btn-sm" onClick={askAgent}>
+              {pulseSource && (
+                <button className="btn btn-lime btn-sm" onClick={explain}>
+                  <Icon name="spark" />
+                  Explain with Pulse
+                </button>
+              )}
+              <button className={`btn ${pulseSource ? 'btn-sel' : 'btn-lime'} btn-sm`} onClick={askAgent}>
                 <Icon name="agent" />
                 Ask the Agent
               </button>
@@ -126,6 +148,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
           </>
         )}
       </div>
+      {drawer}
       {slack && sel && <SlackDialog selection={sel} what={what} title={title} onClose={() => setSlack(false)} />}
     </>
   );

@@ -54,7 +54,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 |---|---|
 | `/login` | Click a user to sign in (JWT is logged to the browser console with a jwt.io link) |
 | `/` | Landing page after sign-in: **Ask the agent** or **Open dashboards** |
-| `/agent` | Chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics — see `docs/AGENT.md` |
+| `/agent` | Chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics. Users who follow metrics on more than one data source (Elena: Value Intelligence + Transportation) pick **All / one source**; each source is its own conversation (`?source=` deep-links it) — see `docs/AGENT.md` |
 | `/dashboards` | Value Intelligence dashboard (Pulse KPIs, engagement charts, Premium benchmarks) — every customer |
 | `/dashboards#benchmarks` | Premium panel: Crestline/Vantage → "view in dashboard"; Standard → locked + upgrade request |
 | `/transportation` | Transportation Optimization & Savings — **Vantage only** (drill-down happens inside the workbook; invoice search above it) |
@@ -75,6 +75,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 - **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.
 - **Export → Share** — signed link + QR code that reopens the page with its filters (`?service-line=…&engagement-type=…`).
 - **Select marks → act** — selecting marks raises an action bar: *Ask the Agent* (question built from the selection), *Share to Slack* (demo; recorded, not posted), *Schedule with Apex* (contact form prefilled with the selection) and *Download rows* (CSV of the selected marks).
+- **Explain with Pulse** (Transportation) — selecting marks asks the Insight Brief about them using only the Transportation metrics the user follows, and shows the answer in a side panel; *Continue in the Agent* keeps the same source.
 - **Engagement scorecard** (Value Intelligence) — read from the `scorecard.worksheet` summary data; follows the filters, and clicking a row filters the dashboard.
 - **Needs attention** (Home) — a Pulse Insight Brief over the user's followed metrics, cached `attention.cacheMinutes`. A live brief can take ~30–40 s, so the first load after a restart is slow.
 

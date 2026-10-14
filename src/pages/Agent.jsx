@@ -73,6 +73,8 @@ export default function Agent() {
   const threadRef = useRef(null);
   const lastRef = useRef(null);
   const [params, setParams] = useSearchParams();
+  // Which data source's metrics to ask: 'all' or a source label (e.g. "Transportation"). ?source= sets it.
+  const [source, setSource] = useState(() => params.get('source') || 'all');
 
   useEffect(() => {
     api('/api/agent/context')
@@ -97,9 +99,9 @@ export default function Agent() {
     setInput('');
     setLoading(true);
     try {
-      const d = await api('/api/agent/chat', { method: 'POST', body: { question, conversationId } });
+      const d = await api('/api/agent/chat', { method: 'POST', body: { question, conversationId, source } });
       setConversationId(d.conversationId);
-      setMessages((m) => [...m, { role: 'assistant', content: d.content, insightCards: d.insightCards || [] }]);
+      setMessages((m) => [...m, { role: 'assistant', content: d.content, insightCards: d.insightCards || [], source: d.source, metricCount: d.metricCount }]);
       setFollowups((d.followups || []).slice(0, 3));
     } catch (e) {
       setMessages((m) => [...m, { role: 'error', text: e.message }]);
@@ -125,6 +127,17 @@ export default function Agent() {
     setFollowups([]);
   };
 
+  const pickSource = (s) => {
+    if (s === source) return;
+    setSource(s);
+    reset(); // each data source is its own conversation
+  };
+
+  const multiSource = prep.sources?.length > 1;
+  const inScope = (prep.metrics || []).filter((m) => source === 'all' || m.source === source);
+  const suggested = source === 'all' ? prep.suggested || [] : prep.suggestedBySource?.[source] || [];
+  const sourceLabel = source === 'all' ? 'all your metrics' : `${source} metrics`;
+
   return (
     <div className="container">
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Agent' }]} />
@@ -132,6 +145,18 @@ export default function Agent() {
         <div>
           <h1>Agent</h1>
           <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your Tableau Pulse metrics.</p>
+          {multiSource && (
+            <div className="seg source-seg" role="radiogroup" aria-label="Data source">
+              <button role="radio" aria-checked={source === 'all'} onClick={() => pickSource('all')}>
+                All metrics <span>{prep.metrics.length}</span>
+              </button>
+              {prep.sources.map((s) => (
+                <button key={s.label} role="radio" aria-checked={source === s.label} onClick={() => pickSource(s.label)}>
+                  {s.label} <span>{s.count}</span>
+                </button>
+              ))}
+            </div>
+          )}
         </div>
         <div style={{ display: 'flex', gap: 10 }}>
           {messages.length > 0 && (
@@ -168,9 +193,9 @@ export default function Agent() {
               )}
               {prep.metrics && (
                 <>
-                  <div className="kicker">Metrics in scope</div>
+                  <div className="kicker">Metrics in scope{source !== 'all' ? ` · ${source}` : ''}</div>
                   <div className="metric-pills">
-                    {prep.metrics.map((m) => (
+                    {inScope.map((m) => (
                       <span key={m.metricId} className="metric-pill" title={m.source}>
                         {m.name}
                       </span>
@@ -180,7 +205,7 @@ export default function Agent() {
                     Suggested questions
                   </div>
                   <div className="starter-list">
-                    {prep.suggested.map((q) => (
+                    {suggested.map((q) => (
                       <button key={q} className="starter" onClick={() => send(q)}>
                         {q}
                         <Icon name="arrowRight" />
@@ -204,6 +229,11 @@ export default function Agent() {
               </div>
             ) : (
               <div key={i} ref={ref} style={{ scrollMarginTop: 12 }}>
+                {multiSource && m.source && (
+                  <div className="answer-source">
+                    From {m.source === 'all' ? 'all your' : m.source} Pulse metrics{m.metricCount ? ` · ${m.metricCount}` : ''}
+                  </div>
+                )}
                 <Answer msg={m} />
               </div>
             );
@@ -242,7 +272,7 @@ export default function Agent() {
               className="input"
               value={input}
               onChange={(e) => setInput(e.target.value)}
-              placeholder="Ask about your engagements…"
+              placeholder={`Ask about ${sourceLabel}…`}
               aria-label="Ask the agent"
               disabled={!prep.metrics}
             />

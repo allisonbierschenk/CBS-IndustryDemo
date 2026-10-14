@@ -279,7 +279,12 @@ app.get('/api/agent/context', requireUser, async (req, res) => {
   try {
     const ctx = orderMetrics(await pulse.metricContext(req.user, agentScope(req.tenant)));
     const metrics = ctx.map(({ source, item }) => ({ name: item.metadata.name, metricId: item.metadata.metric_id, source }));
-    res.json({ metrics, suggested: metrics.slice(0, store.content.agent.suggestedQuestions || 4).map((m) => `What are the ${m.name} trends?`) });
+    const n = store.content.agent.suggestedQuestions || 4;
+    const ask = (list) => list.slice(0, n).map((m) => `What are the ${m.name} trends?`);
+    // One entry per data source the user follows metrics on (e.g. Value Intelligence, Transportation).
+    const sources = [...new Set(metrics.map((m) => m.source))].map((label) => ({ label, count: metrics.filter((m) => m.source === label).length }));
+    const suggestedBySource = Object.fromEntries(sources.map(({ label }) => [label, ask(metrics.filter((m) => m.source === label))]));
+    res.json({ metrics, sources, suggested: ask(metrics), suggestedBySource });
   } catch (e) {
     console.error('agent context error:', e.message);
     res.status(502).json({ error: e.message });
@@ -297,13 +302,18 @@ setInterval(() => {
 app.post('/api/agent/chat', requireUser, async (req, res) => {
   const question = String(req.body?.question || '').trim().slice(0, 1000);
   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
-  const prior = conversations.get(String(req.body?.conversationId || ''));
-  const conversationId = prior && prior.userId === req.user.id ? req.body.conversationId : require('crypto').randomUUID();
-  const history = prior && prior.userId === req.user.id ? prior.messages.slice(-20) : [];
+  // source: a data source label (e.g. "Transportation") to ask only that source's metrics; default all.
+  const source = String(req.body?.source || 'all');
+  const found = conversations.get(String(req.body?.conversationId || ''));
+  const prior = found && found.userId === req.user.id && found.source === source ? found : null; // switching source = new conversation
+  const conversationId = prior ? req.body.conversationId : require('crypto').randomUUID();
+  const history = prior ? prior.messages.slice(-20) : [];
   const started = Date.now();
   try {
-    const ctx = await pulse.metricContext(req.user, agentScope(req.tenant));
-    if (!ctx.length) return res.status(404).json({ error: 'You aren’t following any Tableau Pulse metrics yet, so the agent has nothing to answer from.' });
+    const all = await pulse.metricContext(req.user, agentScope(req.tenant));
+    if (!all.length) return res.status(404).json({ error: 'You aren’t following any Tableau Pulse metrics yet, so the agent has nothing to answer from.' });
+    const ctx = source === 'all' ? all : all.filter((c) => c.source === source);
+    if (!ctx.length) return res.status(400).json({ error: `You don’t follow any Pulse metrics on ${source}.` });
     const messages = [
       ...history,
       {
@@ -322,11 +332,13 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
       notEnoughInformation: Boolean(r.not_enough_information),
       followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean),
       insightCards: (r.source_insights || []).map((si) => ({ id: si.id, type: si.type, markup: si.markup, series: extractSeries(si.viz, si.type) })),
-      conversationId
+      conversationId,
+      source,
+      metricCount: ctx.length
     });
-    conversations.set(conversationId, { userId: req.user.id, messages: [...messages, assistant], at: Date.now() });
-    console.log(`⚡ brief for ${req.user.email} in ${Date.now() - started} ms (${ctx.length} metrics)`);
-    activity.record(req.user, req.tenant, 'agent-question', { question, ms: Date.now() - started });
+    conversations.set(conversationId, { userId: req.user.id, source, messages: [...messages, assistant], at: Date.now() });
+    console.log(`⚡ brief for ${req.user.email} in ${Date.now() - started} ms (${ctx.length} metrics, source: ${source})`);
+    activity.record(req.user, req.tenant, 'agent-question', { question, source, ms: Date.now() - started });
   } catch (e) {
     console.error('agent chat error:', e.message);
     res.status(502).json({ error: e.message });

@@ -828,3 +828,19 @@ textarea.input { resize: vertical; min-height: 110px; }
 .slack-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
 .slack-table tr:last-child td { border-bottom: 0; }
 .slack-table tr:nth-child(even) td { background: var(--page); }
+
+/* Agent data-source picker and per-answer source tag */
+.source-seg { margin: 14px 0 0; }
+.source-seg span { display: inline-grid; place-items: center; min-width: 20px; height: 20px; padding: 0 6px; margin-left: 4px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); font-size: 11px; color: var(--muted); }
+.source-seg button[aria-checked="true"] span { background: var(--lime); border-color: var(--lime); color: var(--lime-ink); }
+.answer-source { font-size: 11.5px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--faint); margin: 0 0 6px 4px; }
+
+/* "Explain with Pulse" drawer beside the dashboard */
+.insight-drawer { position: fixed; top: 16px; right: 16px; bottom: 16px; width: min(460px, calc(100vw - 32px)); z-index: 90; display: flex; flex-direction: column; background: var(--surface); border: 1px solid var(--line); border-radius: 24px; box-shadow: var(--shadow-lg); animation: slidein .2s ease-out; }
+@keyframes slidein { from { opacity: 0; transform: translateX(16px); } }
+.insight-head { display: flex; justify-content: space-between; gap: 12px; padding: 20px 22px 12px; border-bottom: 1px solid var(--line); }
+.insight-head h3 { font-size: 18px; margin: 4px 0 2px; }
+.insight-body { flex: 1; overflow-y: auto; padding: 16px 22px; font-size: 14px; line-height: 1.6; color: var(--ink-2); }
+.insight-q { margin: 0 0 14px auto; }
+.insight-scope { font-size: 12px; margin: 0 0 8px; }
+.insight-foot { padding: 12px 22px 18px; border-top: 1px solid var(--line); display: flex; justify-content: flex-end; }

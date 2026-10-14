@@ -82,7 +82,7 @@ export default function Transportation() {
         />
       </div>
       {/* The drill-down worksheet navigates instead, so it's excluded here. */}
-      <SelectionActions viz={viz} title={view.title} ignoreWorksheets={dd ? [dd.sourceWorksheet] : []} />
+      <SelectionActions viz={viz} title={view.title} ignoreWorksheets={dd ? [dd.sourceWorksheet] : []} pulseSource="Transportation" />
     </div>
   );
 }
