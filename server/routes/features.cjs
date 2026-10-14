@@ -69,7 +69,8 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     /* no cache yet */
   }
   const saveAttention = () => require('fs').writeFile(ATTENTION_FILE, JSON.stringify(Object.fromEntries(attentionCache)), () => {});
-  const attentionKey = (user) => `${user.id}|${cfg.attention.question}`;
+  const ATTENTION_FORMAT = 5; // bump when the cached shape changes so old entries are ignored
+  const attentionKey = (user) => `v${ATTENTION_FORMAT}|${user.id}|${cfg.attention.question}`;
   const attentionTtl = () => (cfg.attention?.cacheMinutes || 15) * 60 * 1000;
 
   function buildAttention(user, tenant) {
@@ -83,21 +84,68 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         { role: 'ROLE_USER', content: cfg.attention.question, action_type: 'ACTION_TYPE_ANSWER', metric_group_context: ctx.map((c) => c.item), metric_group_context_resolved: false }
       ]);
       const content = r.markup || '';
-      // Metrics the summary actually talks about (in the order it mentions them), with where to look further.
+      // Per-metric detail from Pulse's source insights (each names its metric in its text; the answer's
+      // citation ids don't match insight ids, so match by name — longest first so names can't collide).
+      const plain = (m) => String(m || '').replace(/<[^>]+>/g, '').replace(/\s+/g, ' ').trim();
+      const byLength = [...ctx].sort((a, b) => b.item.metadata.name.length - a.item.metadata.name.length);
+      const insightsFor = new Map();
+      for (const si of r.source_insights || []) {
+        const text = plain(si.markup);
+        const c = byLength.find((x) => text.includes(x.item.metadata.name));
+        if (!c || !text) continue;
+        const list = insightsFor.get(c.item.metadata.metric_id) || [];
+        list.push({ type: si.type, text, facts: si.facts || null, sentiment: si.facts?.sentiment || null, noData: /no data/i.test(text) });
+        insightsFor.set(c.item.metadata.metric_id, list);
+      }
+      const TYPE_ORDER = ['popc', 'top-drivers', 'unusualchange', 'currenttrend', 'trendchange'];
+      const rank = (i) => (TYPE_ORDER.indexOf(i.type) + 1 || 99);
       const ROUTES = { valueIntelligence: '/dashboards', transportation: '/transportation' };
-      const mentioned = ctx
-        .map((c) => ({ c, at: content.indexOf(c.item.metadata.name) }))
-        .filter((x) => x.at >= 0)
-        .sort((a, b) => a.at - b.at)
-        .map(({ c }) => {
+      const mentionedAt = (c) => content.indexOf(c.item.metadata.name);
+      const weight = (m) => (m.noData ? 3 : m.sentiment === 'negative' ? 0 : m.sentiment === 'positive' ? 2 : 1);
+      const metrics = ctx
+        .filter((c) => insightsFor.has(c.item.metadata.metric_id) || mentionedAt(c) >= 0)
+        .map((c) => {
+          const all = (insightsFor.get(c.item.metadata.metric_id) || []).sort((a, b) => rank(a) - rank(b));
+          const real = all.filter((i) => !i.noData);
+          // Compact headline from the period-over-period facts + the first top driver, e.g.
+          // "$86.5K Oct 2026 · down 10.4% (-$10.0K) vs Sep 2026 · Active decreased by $38.1K."
+          const popc = real.find((i) => i.type === 'popc' && i.facts?.target_period_value);
+          const f = popc?.facts;
+          const total = String(f?.difference?.absolute?.formatted || '').replace(/^[-+]/, '');
+          // First driver that says something beyond the total (a one-member breakdown just restates it).
+          const driver = real
+            .filter((i) => /drivers|detractors/.test(i.type))
+            .map((i) => i.text.split(/(?<=\.)\s+/).slice(1).join(' '))
+            .find((t) => t && !(total && t.includes(total)));
+          const rel = String(f?.difference?.relative?.formatted || '');
+          const vs = f?.comparison_time_period?.label || 'the prior period';
+          const change = !rel
+            ? `no significant change vs ${vs}`
+            : f.difference.direction === 'flat'
+              ? `little change (${rel}) vs ${vs}`
+              : `${f.difference.direction} ${rel.replace(/^[-+]/, '')} (${f.difference.absolute?.formatted}) vs ${vs}`;
+          const compact = f ? [`${f.target_period_value.formatted} ${f.target_time_period?.label || ''}`.trim(), change, driver].filter(Boolean).join(' · ') : null;
           const ds = cfg.agent.datasources.find((d) => d.label === c.source);
           const view = ds?.view && store.canAccessView(tenant, ds.view) ? ds.view : null;
-          return { name: c.item.metadata.name, metricId: c.item.metadata.metric_id, source: c.source, dashboard: view ? { title: cfg.views[view].title, to: ROUTES[view] } : null };
-        });
+          return {
+            name: c.item.metadata.name,
+            metricId: c.item.metadata.metric_id,
+            source: c.source,
+            sentiment: real.find((i) => i.sentiment)?.sentiment || null,
+            noData: !real.length,
+            headline: compact || real[0]?.text || 'No data in the current period yet.',
+            details: [...new Set(real.map((i) => i.text))].slice(0, 4),
+            dashboard: view ? { title: cfg.views[view].title, to: ROUTES[view] } : null,
+            _order: mentionedAt(c) >= 0 ? mentionedAt(c) : 1e9
+          };
+        })
+        // Unfavorable first, then flat/unknown, then favorable, metrics without data last; ties keep the summary's order.
+        .sort((a, b) => weight(a) - weight(b) || a._order - b._order)
+        .map(({ _order, ...m }) => m);
       const value = {
         question: cfg.attention.question,
         content,
-        metrics: mentioned,
+        metrics,
         notEnoughInformation: Boolean(r.not_enough_information),
         followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean).slice(0, 3),
         generatedAt: new Date().toISOString()

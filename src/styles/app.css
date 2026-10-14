@@ -851,5 +851,13 @@ textarea.input { resize: vertical; min-height: 110px; }
 .att-what { display: grid; min-width: 0; }
 .att-what b { font-size: 14px; }
 .att-what span { font-size: 12.5px; color: var(--muted); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
-.att-btns { display: flex; gap: 6px; flex-wrap: wrap; justify-content: flex-end; }
+.att-btns { display: flex; gap: 6px; justify-content: flex-end; }
+.att-icon { display: inline-grid; place-items: center; width: 38px; height: 38px; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); cursor: pointer; transition: background .15s, transform .15s; }
+.att-icon:hover { background: var(--lime); transform: translateY(-1px); }
+.att-icon.is-dark { background: var(--ink); color: #fff; }
+.att-icon.is-dark:hover { background: var(--ink-2); }
+.att-icon svg { width: 17px; height: 17px; }
+.att-row { border-left: 3px solid transparent; }
+.att-row.is-negative { border-left-color: var(--bad); }
+.att-row.is-nodata .att-what span { font-style: italic; }
 @media (max-width: 860px) { .att-row { grid-template-columns: 1fr; } .att-btns { justify-content: flex-start; } }

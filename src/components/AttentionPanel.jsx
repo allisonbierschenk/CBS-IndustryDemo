@@ -7,18 +7,6 @@ import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
 import PulseMarkup from './PulseMarkup.jsx';
 
-/** Pulse markup → plain text lines (no tags, markdown or citation links). */
-const plainLines = (markup) =>
-  String(markup)
-    .replace(/\[\[\d+\]\]\([^)]*\)/g, '')
-    .replace(/<[^>]+>/g, '')
-    .split('\n')
-    .map((l) => l.replace(/^[\s>#*\-•\d.)]+/, '').replace(/\*\*|__|\*/g, '').replace(/\s+/g, ' ').trim())
-    .filter((l) => l.length > 12 && !/^-{3,}$/.test(l));
-
-/** What the summary says about one metric (the lines that mention it). */
-const linesAbout = (markup, name) => plainLines(markup).filter((l) => l.toLowerCase().includes(name.toLowerCase()));
-
 export default function AttentionPanel() {
   const contact = useContact();
   const [state, setState] = useState({ loading: true });
@@ -81,8 +69,7 @@ export default function AttentionPanel() {
             <div className="att-actions">
               <div className="kicker">Take action</div>
               {state.metrics.slice(0, 5).map((m) => {
-                const about = linesAbout(state.content, m.name);
-                const agentQ = `Why does ${m.name} need attention, and what is driving it?`;
+                const agentQ = m.noData ? `Why is there no current data for ${m.name}?` : `What is driving the latest change in ${m.name}?`;
                 const discuss = () => {
                   track('selection-action', { action: 'attention-contact', metric: m.name });
                   const agenda = (state.followups || []).filter((q) => q.toLowerCase().includes(m.name.toLowerCase()));
@@ -90,31 +77,28 @@ export default function AttentionPanel() {
                     'Schedule a review',
                     [
                       `I'd like to discuss ${m.name} (${m.source}). Tableau Pulse flagged it in my portal's Needs attention summary on ${new Date(state.generatedAt).toLocaleDateString([], { dateStyle: 'medium' })}.`,
-                      about.length ? `\nWhat Pulse flagged:\n${about.slice(0, 4).map((l) => `• ${l}`).join('\n')}` : '',
+                      m.details?.length ? `\nWhat Pulse flagged:\n${m.details.map((l) => `• ${l}`).join('\n')}` : '\nPulse has no data for this metric in the current period yet.',
                       `\nWhat I'd like to cover:\n${(agenda.length ? agenda : [`What is driving the change in ${m.name}?`, 'What should we do about it, and by when?']).map((q) => `• ${q}`).join('\n')}`
                     ].join('\n')
                   );
                 };
                 return (
-                  <div className="att-row" key={m.metricId}>
+                  <div className={`att-row${m.sentiment === 'negative' ? ' is-negative' : ''}${m.noData ? ' is-nodata' : ''}`} key={m.metricId}>
                     <div className="att-what">
                       <b>{m.name}</b>
-                      <span>{about[0] || `${m.source} metric`}</span>
+                      <span title={m.headline}>{m.headline}</span>
                     </div>
                     <div className="att-btns">
-                      <Link className="btn btn-ghost btn-sm" to={`/agent?q=${encodeURIComponent(agentQ)}&source=${encodeURIComponent(m.source)}`}>
+                      <Link className="att-icon" to={`/agent?q=${encodeURIComponent(agentQ)}&source=${encodeURIComponent(m.source)}`} title="Ask the Agent" aria-label={`Ask the Agent about ${m.name}`}>
                         <Icon name="agent" />
-                        Ask the Agent
                       </Link>
                       {m.dashboard && (
-                        <Link className="btn btn-ghost btn-sm" to={m.dashboard.to} title={m.dashboard.title}>
+                        <Link className="att-icon" to={m.dashboard.to} title={`Open ${m.dashboard.title}`} aria-label={`Open ${m.dashboard.title}`}>
                           <Icon name="dashboard" />
-                          Open dashboard
                         </Link>
                       )}
-                      <button className="btn btn-dark btn-sm" onClick={discuss}>
+                      <button className="att-icon is-dark" onClick={discuss} title="Contact Apex about this" aria-label={`Contact Apex about ${m.name}`}>
                         <Icon name="mail" />
-                        Contact Apex
                       </button>
                     </div>
                   </div>
