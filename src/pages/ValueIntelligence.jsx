@@ -1,7 +1,7 @@
 // Value Intelligence — the client's home page: account summary, the embedded Value Intelligence
 // dashboard (KPI cards, engagement charts, Premium benchmarks), engagements and benchmark access.
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Link, useLocation } from 'react-router-dom';
+import { Link, useLocation, useSearchParams } from 'react-router-dom';
 import { formatMonth } from '../lib/api.js';
 import { selectedValue } from '../lib/tableau.js';
 import { useContact } from '../context/ContactContext.jsx';
@@ -10,10 +10,16 @@ import DashboardFilters from '../components/DashboardFilters.jsx';
 import EngagementCards from '../components/EngagementCards.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import EngagementScorecard from '../components/EngagementScorecard.jsx';
+import SubscribeButton from '../components/SubscribeButton.jsx';
+import ViewsMenu from '../components/ViewsMenu.jsx';
 import Icon from '../components/Icon.jsx';
 import PremiumPanel from '../components/PremiumPanel.jsx';
 import { EmbedSlot } from '../context/EmbedContext.jsx';
 import TierBadge from '../components/TierBadge.jsx';
+
+// Filter state lives in the URL (?service-line=…&engagement-type=…) so links and QR codes reopen it.
+const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
 
 function greeting() {
   const h = new Date().getHours();
@@ -27,7 +33,13 @@ export default function ValueIntelligence() {
   const dashRef = useRef(null);
   const [contextLink, setContextLink] = useState(null);
   const [viz, setViz] = useState(null);
-  const [filterRequest, setFilterRequest] = useState(null);
+  const [params, setParams] = useSearchParams();
+  // A link with filters (e.g. from Share / QR) is applied once the dashboard is ready.
+  const [filterRequest, setFilterRequest] = useState(() => {
+    const values = {};
+    for (const f of me.views.valueIntelligence.filters || []) if (params.get(slug(f.field))) values[f.field] = params.get(slug(f.field));
+    return Object.keys(values).length ? { values, nonce: Date.now() } : null;
+  });
   const t = me.tenant;
   const vi = me.views.valueIntelligence;
   const early = me.relationship.monthsOfHistory <= 6;
@@ -56,8 +68,17 @@ export default function ValueIntelligence() {
     (field, value) => {
       const ctx = me.contextLinks;
       if (ctx && field === ctx.field) setContextLink(ctx.links.find((l) => l.value === value) || null);
+      setParams(
+        (p) => {
+          const n = new URLSearchParams(p);
+          if (value) n.set(slug(field), value);
+          else n.delete(slug(field));
+          return n;
+        },
+        { replace: true }
+      );
     },
-    [me.contextLinks]
+    [me.contextLinks, setParams]
   );
 
   const viewEngagement = (e) => {
@@ -128,6 +149,8 @@ export default function ValueIntelligence() {
             </div>
             <div className="viz-meta">
               <AnalyticsAssistantButton viz={viz} />
+              <ViewsMenu viz={viz} />
+              <SubscribeButton viewKey="valueIntelligence" title={vi.title} />
               <ExportMenu viz={viz} title={vi.title} />
             </div>
           </div>
@@ -138,6 +161,21 @@ export default function ValueIntelligence() {
           <EmbedSlot viewKey="valueIntelligence" onMarkSelection={onMarkSelection} onViz={setViz} />
         </div>
       </section>
+
+      {viz && me.features?.scorecard && (
+        <section className="section" id="scorecard" style={{ paddingTop: 24 }}>
+          <EngagementScorecard
+            viz={viz}
+            worksheet={me.features.scorecard.worksheet}
+            keyField={me.features.scorecard.keyField}
+            maxRows={me.features.scorecard.maxRows}
+            onSelect={(value) => {
+              setFilterRequest({ field: me.features.scorecard.keyField, value, nonce: Date.now() });
+              scrollToDashboard();
+            }}
+          />
+        </section>
+      )}
 
       <section className="section" id="engagements" aria-labelledby="eng-title">
         <div className="section-head">

@@ -7,6 +7,8 @@ import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import SubscribeButton from '../components/SubscribeButton.jsx';
+import ViewsMenu from '../components/ViewsMenu.jsx';
 import InvoiceSearch from '../components/InvoiceSearch.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 
@@ -64,6 +66,8 @@ export default function Transportation() {
           </div>
           <div className="viz-meta">
             <AnalyticsAssistantButton viz={viz} />
+            <ViewsMenu viz={viz} />
+            <SubscribeButton viewKey="transportation" title={view.title} />
             <ExportMenu viz={viz} title={view.title} />
           </div>
         </div>

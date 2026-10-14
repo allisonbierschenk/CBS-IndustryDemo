@@ -27,7 +27,7 @@ export function SessionProvider({ children }) {
 
   /** Sign in as a demo user — clicking the user is the whole authentication step. */
   const signInAs = useCallback(
-    async (persona) => {
+    async (persona, next) => {
       const res = await api('/api/auth/login', { method: 'POST', body: { userId: persona.userId } });
       if (res.token) {
         // Client-side only: log the freshly minted JWT (+ jwt.io link) for the demo.
@@ -35,7 +35,8 @@ export function SessionProvider({ children }) {
         sessionStorage.setItem('apex.lastJwt', JSON.stringify({ label: `Sign-in · ${persona.clientName}`, token: res.token }));
       }
       await load();
-      navigate('/', { replace: true });
+      // Home, unless the user arrived through a shared link (internal paths only).
+      navigate(next && /^\/(?!\/)/.test(next) ? next : '/', { replace: true });
     },
     [load, navigate]
   );

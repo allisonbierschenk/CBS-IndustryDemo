@@ -1,5 +1,5 @@
 {
-  "_readme": "Apex portal user store. 'email' is both the portal identity and the JWT 'sub' — it must EXACTLY match a Tableau Cloud username on the site (add each as Viewer). Every entry in 'attributes' is injected into the Connected App JWT as a user attribute claim and can be read in Tableau with USERATTRIBUTE / USERATTRIBUTEINCLUDES (names are case sensitive). 'client name' must EXACTLY match [Client Name] in the data; 'subscription tier' matches [Subscription Tier] (Premium / Standard). Optional scope attributes: 'service line' and 'engagement type' narrow a user below their organization; multiple 'client name' values span several clients. 'persona' is a display label.",
+  "_readme": "Apex portal user store. 'email' is both the portal identity and the JWT 'sub' — it must EXACTLY match a Tableau Cloud username on the site (add each as Viewer). Every entry in 'attributes' is injected into the Connected App JWT as a user attribute claim and can be read in Tableau with USERATTRIBUTE / USERATTRIBUTEINCLUDES (names are case sensitive). 'client name' must EXACTLY match [Client Name] in the data; 'subscription tier' matches [Subscription Tier] (Premium / Standard). Optional scope attributes: 'service line' and 'engagement type' narrow a user below their organization; multiple 'client name' values span several clients. 'persona' is a display label. 'roles': ['activity'] grants the portal activity log page.",
   "users": [
     {
       "id": "u-northstar",
@@ -134,7 +134,10 @@
         "subscription tier": [
           "Premium"
         ]
-      }
+      },
+      "roles": [
+        "activity"
+      ]
     }
   ]
 }

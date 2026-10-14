@@ -58,9 +58,26 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 | `/dashboards` | Value Intelligence dashboard (Pulse KPIs, engagement charts, Premium benchmarks) — every customer |
 | `/dashboards#benchmarks` | Premium panel: Crestline/Vantage → "view in dashboard"; Standard → locked + upgrade request |
 | `/transportation` | Transportation Optimization & Savings — **Vantage only** (drill-down happens inside the workbook; invoice search above it) |
+| `/reports` | Report library: every entitled view in `library.project`, with Tableau favorites (star) |
+| `/reports/:viewId` | Any library view, embedded with the same JWT + RLS |
+| `/reports/new` | **Premium** — build your own report (embedded web authoring, `tableau:views:embed_authoring`) |
+| `/alerts` | Email subscriptions (Tableau REST) and Pulse metric follows; group follows are read-only |
+| `/feeds` | Personal, signed CSV feed (VizQL Data Service as the user, so RLS applies) for Excel / Google Sheets |
+| `/activity` | Portal activity log — users with `roles: ["activity"]` only |
+| `/l/:token` | Signed share link (keeps dashboard filters); recipient signs in as themselves |
 | `/help` | How to use the portal + KPI definitions |
 | `/privacy` | How client data is protected |
 | Contact Apex (top bar, footer, “Schedule a review”, “Ask about Premium”) | In-portal message to the Apex team → `POST /api/messages`, returns a reference number (demo: logged on the server) |
+
+### On the dashboard pages
+
+- **Views** — save the current filters as a Tableau custom view and make it your default (opens automatically next time).
+- **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.
+- **Export → Share** — signed link + QR code that reopens the page with its filters (`?service-line=…&engagement-type=…`).
+- **Engagement scorecard** (Value Intelligence) — read from the `scorecard.worksheet` summary data; follows the filters, and clicking a row filters the dashboard.
+- **Needs attention** (Home) — a Pulse Insight Brief over the user's followed metrics, cached `attention.cacheMinutes`. A live brief can take ~30–40 s, so the first load after a restart is slow.
+
+Hierarchy / multi-scope RLS personas are documented in `docs/RLS_PERSONAS.md`.
 
 ## Principles
 

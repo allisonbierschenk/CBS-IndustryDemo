@@ -12,6 +12,8 @@ const express = require('express');
 const { createCookieJar } = require('./lib/session.cjs');
 const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
+const activity = require('./lib/activity.cjs');
+const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
 
 const env = {
@@ -173,6 +175,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
 
   startSession(res, user);
   console.log(`→ signed in ${user.id} (${user.email})`);
+  activity.record(user, store.tenantFor(user), 'sign-in', {});
 
   // Mint a token right away so the browser can show (and log) exactly what Tableau will receive.
   // Only the signed token leaves the server — never the connected app secret.
@@ -219,7 +222,12 @@ app.get('/api/me', (req, res) => {
     // Only links to pages this customer is entitled to ever reach the browser.
     contextLinks: ctx ? { field: ctx.field, links: ctx.links.filter((l) => store.canAccessView(tenant, l.view)) } : null,
     attributeClaim: env.attributeClaim,
-    attributeClaims: Object.keys(user.attributes || {})
+    attributeClaims: Object.keys(user.attributes || {}),
+    features: {
+      scorecard: store.content.scorecard || null,
+      authoring: (store.content.authoring?.requires || []).every((r) => ent.has(r)),
+      activityLog: (user.roles || []).includes('activity')
+    }
   });
 });
 
@@ -232,6 +240,7 @@ app.get('/api/embed/view/:key', requireUser, (req, res) => {
   }
   if (!view.url) return res.json({ configured: false });
   try {
+    activity.record(req.user, req.tenant, 'dashboard-token', { view: view.title });
     res.json({ configured: true, src: view.url, ...tokenResponse(mintFor(req.user)) });
   } catch (e) {
     console.error('token error:', e.message);
@@ -315,6 +324,7 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
     });
     conversations.set(conversationId, { userId: req.user.id, messages: [...messages, assistant], at: Date.now() });
     console.log(`⚡ brief for ${req.user.email} in ${Date.now() - started} ms (${ctx.length} metrics)`);
+    activity.record(req.user, req.tenant, 'agent-question', { question, ms: Date.now() - started });
   } catch (e) {
     console.error('agent chat error:', e.message);
     res.status(502).json({ error: e.message });
@@ -336,6 +346,9 @@ app.post('/api/messages', requireUser, (req, res) => {
   res.json({ ok: true, ref, topic });
 });
 app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TOPICS }));
+
+// ── Portal capabilities (library, subscriptions, attention, links, authoring, feeds, activity) ──
+registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret });
 
 // ── React build (production) — BrowserRouter fallback to index.html ─────────
 const DIST = path.join(__dirname, '..', 'dist');

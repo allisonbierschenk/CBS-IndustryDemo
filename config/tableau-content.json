@@ -97,5 +97,93 @@
         ]
       }
     ]
+  },
+  "library": {
+    "_comment": "Report library: every view the user can open in this project, limited to these workbooks and their portal entitlements.",
+    "project": "Industry Demo: Professional Services",
+    "workbooks": [
+      {
+        "name": "Apex Consulting - Client Value Intelligence",
+        "requires": []
+      },
+      {
+        "name": "Apex Consulting - Operational Value & Savings",
+        "requires": [
+          "transportation"
+        ]
+      }
+    ]
+  },
+  "attention": {
+    "_comment": "Asked of Tableau Pulse (Insight Brief) over the user's followed metrics; the answer is Pulse's.",
+    "question": "Which of my metrics need attention right now, and why?",
+    "cacheMinutes": 15
+  },
+  "scorecard": {
+    "_comment": "Engagement scorecard built from this worksheet's summary data in the Value Intelligence dashboard.",
+    "worksheet": "Engagement Performance",
+    "keyField": "Engagement Type",
+    "maxRows": 25
+  },
+  "links": {
+    "_comment": "Signed share links (with filters) and QR codes.",
+    "ttlHours": 72
+  },
+  "authoring": {
+    "_comment": "Build-your-own report: new workbook from a published data source (embedded web authoring).",
+    "requires": [
+      "authoring"
+    ],
+    "datasources": [
+      {
+        "name": "Apex Consulting - Client Value Intelligence",
+        "label": "Engagement value data"
+      }
+    ]
+  },
+  "feeds": {
+    "_comment": "Refreshable, row-level-secured CSV feeds (VizQL Data Service as the signed-in user). Requires the user's API Access capability on the data source.",
+    "tokenDays": 30,
+    "items": [
+      {
+        "key": "engagement-monthly",
+        "title": "Engagement performance by month",
+        "datasource": "Apex Consulting - Client Value Intelligence",
+        "fields": [
+          {
+            "fieldCaption": "Client Name"
+          },
+          {
+            "fieldCaption": "Service Line"
+          },
+          {
+            "fieldCaption": "Engagement Type"
+          },
+          {
+            "fieldCaption": "Engagement Status"
+          },
+          {
+            "fieldCaption": "Date",
+            "function": "TRUNC_MONTH"
+          },
+          {
+            "fieldCaption": "Business Value Delivered",
+            "function": "SUM"
+          },
+          {
+            "fieldCaption": "Consulting Investment",
+            "function": "SUM"
+          },
+          {
+            "fieldCaption": "Billable Hours",
+            "function": "SUM"
+          },
+          {
+            "fieldCaption": "Planned Hours",
+            "function": "SUM"
+          }
+        ]
+      }
+    ]
   }
 }

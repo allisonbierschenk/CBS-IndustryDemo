@@ -1,6 +1,7 @@
 // Landing page after sign-in: choose how to work — chat with the agent or use the BI dashboards.
 import { Link } from 'react-router-dom';
 import { useSession } from '../context/SessionContext.jsx';
+import AttentionPanel from '../components/AttentionPanel.jsx';
 import Icon from '../components/Icon.jsx';
 
 function greeting() {
@@ -50,6 +51,7 @@ export default function Home() {
           </Link>
         </div>
       </section>
+      <AttentionPanel />
     </div>
   );
 }

@@ -2,7 +2,7 @@
 // Every word of each answer comes from Pulse; the portal only renders it. Metrics in scope are the
 // signed-in customer's Pulse metrics (row-level security applies), discovered by the server.
 import { useEffect, useRef, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
@@ -72,6 +72,7 @@ export default function Agent() {
   const [loading, setLoading] = useState(false);
   const threadRef = useRef(null);
   const lastRef = useRef(null);
+  const [params, setParams] = useSearchParams();
 
   useEffect(() => {
     api('/api/agent/context')
@@ -106,6 +107,17 @@ export default function Agent() {
       setLoading(false);
     }
   };
+
+  // A question handed over from elsewhere in the portal (e.g. "Needs attention" on Home): /agent?q=…
+  const handedOff = useRef(false);
+  useEffect(() => {
+    const q = params.get('q');
+    if (!q || handedOff.current) return;
+    handedOff.current = true;
+    setParams({}, { replace: true });
+    send(q);
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   const reset = () => {
     setMessages([]);

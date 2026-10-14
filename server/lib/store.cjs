@@ -22,7 +22,10 @@ function tenantFor(user) {
 // Feature entitlements are resolved on the server; the browser only ever receives the result.
 function entitlementsFor(tenant) {
   const set = new Set(tenant.features || []);
-  if (tenant.tier === 'premium') set.add('benchmarks');
+  if (tenant.tier === 'premium') {
+    set.add('benchmarks');
+    set.add('authoring'); // build-your-own reports
+  }
   return set;
 }
 
@@ -57,7 +60,7 @@ function engagementsFor(user, tenant) {
 }
 
 function publicUser(user) {
-  return { id: user.id, name: user.name, title: user.title, email: user.email, persona: user.persona, attributes: user.attributes };
+  return { id: user.id, name: user.name, title: user.title, email: user.email, persona: user.persona, roles: user.roles || [], attributes: user.attributes };
 }
 
 module.exports = { users, tenants, content, findUserById, tenantFor, entitlementsFor, canAccessView, publicUser, scopeFor, engagementsFor };

@@ -1,4 +1,5 @@
 import { useEffect, useRef, useState } from 'react';
+import { Link } from 'react-router-dom';
 import { initials } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from './Icon.jsx';
@@ -53,9 +54,23 @@ export default function AccountMenu() {
         <div className="menu-sec">
           <div style={{ display: 'flex', gap: 8, alignItems: 'center', color: 'var(--ink-2)', fontWeight: 600 }}>
             <Icon name="lock" size={14} />
-            Data access is limited to {tenant.clientName}
+            Data access is limited to {me.scope?.label || tenant.clientName}
           </div>
         </div>
+        <Link className="menu-item" role="menuitem" to="/alerts" onClick={() => setOpen(false)}>
+          <Icon name="mail" />
+          Alerts &amp; subscriptions
+        </Link>
+        <Link className="menu-item" role="menuitem" to="/feeds" onClick={() => setOpen(false)}>
+          <Icon name="database" />
+          Data feeds
+        </Link>
+        {me.features?.activityLog && (
+          <Link className="menu-item" role="menuitem" to="/activity" onClick={() => setOpen(false)}>
+            <Icon name="table" />
+            Activity log
+          </Link>
+        )}
         <button className="menu-item" role="menuitem" onClick={signOut}>
           <Icon name="logout" />
           Sign out

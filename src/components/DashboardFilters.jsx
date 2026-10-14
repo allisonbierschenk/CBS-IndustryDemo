@@ -117,11 +117,15 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
 
   // External requests (e.g. "View in dashboard" on an engagement card): { field, value, nonce }.
   // Other filters are cleared first so the combination can't produce an empty dashboard.
+  // request = { field, value, nonce } or { values: { [field]: value }, nonce } (e.g. from a shared link).
   useEffect(() => {
-    if (!request || !filters.some((f) => f.field === request.field)) return;
+    if (!request) return;
+    const values = request.values || { [request.field]: request.value };
+    const wanted = filters.filter((f) => f.field in values);
+    if (!wanted.length) return;
     (async () => {
-      for (const f of filters) if (f.field !== request.field && state[f.field].value !== ALL) await apply(f.field, ALL);
-      await apply(request.field, request.value);
+      for (const f of filters) if (!(f.field in values) && state[f.field].value !== ALL) await apply(f.field, ALL);
+      for (const f of wanted) await apply(f.field, values[f.field] ?? ALL);
     })();
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [request?.nonce]);

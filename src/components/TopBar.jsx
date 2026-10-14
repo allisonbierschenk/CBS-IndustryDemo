@@ -37,6 +37,7 @@ export default function TopBar() {
           Value Intelligence
         </Link>
         {me.views.transportation?.entitled && <NavLink to="/transportation">Transportation</NavLink>}
+        <NavLink to="/reports">Reports</NavLink>
         <Link to={{ pathname: '/dashboards', hash: '#benchmarks' }} aria-current={onBenchmarks ? 'page' : undefined}>
           Industry Benchmarks
           {!me.entitlements.includes('benchmarks') && <Icon name="lock" className="lock" />}

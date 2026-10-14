@@ -28,3 +28,8 @@ export const initials = (name) =>
 
 export const formatMonth = (iso) =>
   new Date(`${iso}T00:00:00Z`).toLocaleDateString('en-US', { month: 'long', year: 'numeric', timeZone: 'UTC' });
+
+/** Record a portal activity event (fire-and-forget; never blocks the UI). */
+export function track(type, detail = {}) {
+  fetch('/api/activity', { method: 'POST', credentials: 'same-origin', headers: { 'Content-Type': 'application/json' }, body: JSON.stringify({ type, detail }) }).catch(() => {});
+}

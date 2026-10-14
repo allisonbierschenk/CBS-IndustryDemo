@@ -8,7 +8,9 @@
 //  Share      → copies a portal link (Tableau's Share dialog produces Tableau links external customers can't open)
 // Summary data only: Viewer site roles can't read underlying/logical-table data.
 import { useEffect, useRef, useState } from 'react';
+import { track } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
+import ShareDialog from './ShareDialog.jsx';
 import Icon from './Icon.jsx';
 
 const ITEMS = [
@@ -40,34 +42,13 @@ function sheetsOf(viz) {
 
 const errMsg = (e) => e?.message || String(e);
 
-/** Copy text: async Clipboard API, then the legacy execCommand path. Returns false if both are refused. */
-async function copyText(text) {
-  try {
-    await navigator.clipboard.writeText(text);
-    return true;
-  } catch {
-    const ta = Object.assign(document.createElement('textarea'), { value: text });
-    ta.setAttribute('readonly', '');
-    Object.assign(ta.style, { position: 'fixed', top: '-1000px', opacity: '0' });
-    document.body.appendChild(ta);
-    ta.select();
-    let ok = false;
-    try {
-      ok = document.execCommand('copy');
-    } catch {
-      ok = false;
-    }
-    ta.remove();
-    return ok;
-  }
-}
 
 export default function ExportMenu({ viz, title }) {
   const toast = useToast();
   const [open, setOpen] = useState(false);
   const [dialog, setDialog] = useState(null); // 'data' | 'crosstab' | 'pdf' | 'ppt'
   const [busy, setBusy] = useState(null);
-  const [shareLink, setShareLink] = useState(null); // shown when the browser refuses clipboard access
+  const [shareOpen, setShareOpen] = useState(false);
   const ref = useRef(null);
 
   const run = async (key, fn, done) => {
@@ -76,6 +57,7 @@ export default function ExportMenu({ viz, title }) {
     try {
       await fn();
       console.info(`[export] ${key} → Tableau started the download (${Math.round(performance.now() - t)} ms)`);
+      track('export', { kind: key });
       if (done) toast(done);
     } catch (e) {
       toast(`${ITEMS.find((i) => i.key === key)?.label || 'Export'} failed: ${errMsg(e)}`);
@@ -90,11 +72,7 @@ export default function ExportMenu({ viz, title }) {
     if (!viz) return;
     if (key === 'image') return run('image', () => viz.exportImageAsync(), 'Image download started');
     if (key === 'workbook') return run('workbook', () => viz.displayDialogAsync('export-workbook'));
-    if (key === 'share') {
-      return copyText(window.location.href).then((ok) =>
-        ok ? toast('Portal link copied — anyone with portal access can open it') : setShareLink(window.location.href)
-      );
-    }
+    if (key === 'share') return setShareOpen(true);
     setDialog(key);
   };
 
@@ -127,30 +105,7 @@ export default function ExportMenu({ viz, title }) {
         </div>
       )}
       {dialog && <ExportDialog kind={dialog} viz={viz} title={title} onClose={() => setDialog(null)} run={run} />}
-      {shareLink && (
-        <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && setShareLink(null)}>
-          <div className="modal" role="dialog" aria-modal="true" aria-labelledby="share-title">
-            <div className="modal-head">
-              <div>
-                <div className="kicker">{title}</div>
-                <h3 id="share-title">Share this page</h3>
-              </div>
-              <button className="icon-btn" aria-label="Close" onClick={() => setShareLink(null)}>
-                ✕
-              </button>
-            </div>
-            <div className="modal-body">
-              <p className="muted" style={{ marginTop: 0, fontSize: 13.5 }}>Your browser blocked automatic copying. Copy the link below — anyone with portal access can open it.</p>
-              <input className="input" readOnly value={shareLink} onFocus={(e) => e.target.select()} autoFocus />
-              <div className="modal-actions">
-                <button className="btn btn-dark" onClick={() => setShareLink(null)}>
-                  Done
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )}
+      {shareOpen && <ShareDialog title={title} onClose={() => setShareOpen(false)} />}
     </div>
   );
 }

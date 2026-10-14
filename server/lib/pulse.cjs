@@ -12,19 +12,30 @@ const BRIEF_TYPES = {
   accept: 'application/vnd.tableau.pulse.embeddingsservice.v1.GenerateInsightBriefResponse+json'
 };
 
+// Scopes for the per-user REST/Pulse session (agent, attention panel, library, favorites,
+// subscriptions, Pulse follows, data feeds). Each still respects the user's own Tableau permissions.
 const SCOPES = [
   'tableau:content:read',
+  'tableau:views:download',
+  'tableau:favorites:update',
+  'tableau:favorites:delete',
+  'tableau:tasks:read',
+  'tableau:tasks:create',
+  'tableau:tasks:delete',
   'tableau:metric_subscriptions:read',
+  'tableau:metric_subscriptions:create',
+  'tableau:metric_subscriptions:delete',
   'tableau:insight_definitions_metrics:read',
   'tableau:insight_metrics:read',
   'tableau:insights:read',
-  'tableau:insight_brief:create'
+  'tableau:insight_brief:create',
+  'tableau:viz_data_service:read'
 ];
 
 const SESSION_TTL_MS = 110 * 60 * 1000; // REST sessions last longer; renew well before, and on any 401
 const CONTEXT_TTL_MS = 2 * 60 * 1000; // pick up follow/unfollow changes quickly
 
-function createPulseClient({ server, site, apiVersion = '3.26', clientId, secretId, secretValue, attributeFor }) {
+function createPulseClient({ server, site, apiVersion = '3.27', clientId, secretId, secretValue, attributeFor }) {
   const sessions = new Map(); // email -> { token, siteId, cookies, xsrf, expires }
   const datasourceIds = new Map(); // name -> luid (per process; names are site-wide)
   const contexts = new Map(); // userId -> { at, value }
@@ -49,7 +60,7 @@ function createPulseClient({ server, site, apiVersion = '3.26', clientId, secret
     const text = await res.text();
     if (!res.ok) throw new Error(`Tableau sign-in failed for ${user.email} (HTTP ${res.status}): ${text.slice(0, 400)}`);
     const { credentials } = JSON.parse(text);
-    const session = { token: credentials.token, siteId: credentials.site.id, cookies: {}, xsrf: null, expires: Date.now() + SESSION_TTL_MS };
+    const session = { token: credentials.token, siteId: credentials.site.id, userId: credentials.user?.id, cookies: {}, xsrf: null, expires: Date.now() + SESSION_TTL_MS };
     captureCookies(session, res);
     sessions.set(user.email, session);
     console.log(`⚡ Pulse session for ${user.email}`);
@@ -151,7 +162,43 @@ function createPulseClient({ server, site, apiVersion = '3.26', clientId, secret
     return request(user, 'POST', '/pulse/insights/brief', { messages }, { types: BRIEF_TYPES });
   }
 
-  return { metricContext, brief };
+  /** Raw authenticated GET (e.g. PNG thumbnails). */
+  async function getBinary(user, restPath) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const s = attempt === 0 ? await session(user) : await signIn(user);
+      const res = await fetch(`${server}/api/${apiVersion}/sites/${s.siteId}${restPath}`, { headers: { 'X-Tableau-Auth': s.token } });
+      if (res.status === 401 && attempt === 0) continue;
+      if (!res.ok) throw Object.assign(new Error(`Tableau GET ${restPath} failed (HTTP ${res.status})`), { status: res.status });
+      return { type: res.headers.get('content-type'), body: Buffer.from(await res.arrayBuffer()) };
+    }
+  }
+
+  async function me(user) {
+    const s = await session(user);
+    if (!s.userId) {
+      const j = await request(user, 'GET', `/users?filter=name:eq:${encodeURIComponent(user.email)}`, null, { base: 'rest' });
+      s.userId = j.users?.user?.[0]?.id;
+    }
+    return { userId: s.userId, siteId: s.siteId };
+  }
+
+  /** VizQL Data Service query as the user (RLS applies). Returns { ok, status, text }. */
+  async function vds(user, datasourceLuid, fields) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const s = attempt === 0 ? await session(user) : await signIn(user);
+      const res = await fetch(`${server}/api/v1/vizql-data-service/query-datasource`, {
+        method: 'POST',
+        headers: { 'X-Tableau-Auth': s.token, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ datasource: { datasourceLuid }, query: { fields } })
+      });
+      if (res.status === 401 && attempt === 0) continue;
+      return { ok: res.ok, status: res.status, text: await res.text() };
+    }
+  }
+
+  const resetContext = (user) => contexts.delete(user.id);
+
+  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds };
 }
 
 /** Vega-Lite spec → [{date, value}] for the trend chart (drops forecast/projection points). */

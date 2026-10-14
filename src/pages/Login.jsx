@@ -1,6 +1,6 @@
 // Sign-in: pick a customer user. Clicking signs them in and mints their Tableau JWT.
 import { useEffect, useState } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useSearchParams } from 'react-router-dom';
 import { api, initials } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from '../components/Icon.jsx';
@@ -18,6 +18,10 @@ export default function Login() {
   const { status, signInAs } = useSession();
   const [personas, setPersonas] = useState(null);
   const [error, setError] = useState('');
+  const [params] = useSearchParams();
+  // Shared links land here as /login?next=<internal path>; anything else goes Home.
+  const next = /^\/(?!\/)/.test(params.get('next') || '') ? params.get('next') : null;
+  const linkExpired = params.get('link') === 'expired';
 
   useEffect(() => {
     api('/api/users')
@@ -26,12 +30,12 @@ export default function Login() {
   }, []);
 
   // Every sign-in lands on the home page (agent or dashboards choice).
-  if (status === 'authenticated') return <Navigate to="/" replace />;
+  if (status === 'authenticated') return <Navigate to={next || '/'} replace />;
 
   const pick = async (p) => {
     setError('');
     try {
-      await signInAs(p);
+      await signInAs(p, next);
     } catch (e) {
       setError(e.message);
     }
@@ -49,6 +53,8 @@ export default function Login() {
             <div className="signin-card">
               <h1>Sign in to your client portal</h1>
               <p className="muted">Choose who you are. Each user sees only their own organization&apos;s engagements.</p>
+              {next && <div className="notice info" style={{ margin: '0 0 12px' }}>Sign in to open the shared link. You&apos;ll see it with your own data access.</div>}
+              {linkExpired && <div className="notice" style={{ margin: '0 0 12px' }}>That shared link has expired or isn&apos;t valid. Ask the sender for a new one.</div>}
               {error && (
                 <p className="form-error" role="alert">
                   {error}

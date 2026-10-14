@@ -12,7 +12,7 @@ import EmbedPlaceholder, { EmbedLoading } from './EmbedPlaceholder.jsx';
 
 const HOST_PADDING = 8; // matches .viz-host padding
 
-export default function TableauViz({ viewKey, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive }) {
+export default function TableauViz({ viewKey, endpoint, authoring = false, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive }) {
   const { config } = useSession();
   const hostRef = useRef(null);
   const mountRef = useRef(null);
@@ -48,7 +48,7 @@ export default function TableauViz({ viewKey, width = 1200, height = 900, filter
     (async () => {
       let data;
       try {
-        data = await api(`/api/embed/view/${encodeURIComponent(viewKey)}`);
+        data = await api(endpoint || `/api/embed/view/${encodeURIComponent(viewKey)}`);
         if (cancelled) return;
         if (!data.configured) return setPhase({ kind: 'unconfigured' });
         await loadEmbeddingLibrary(config?.embeddingLibrary);
@@ -59,11 +59,14 @@ export default function TableauViz({ viewKey, width = 1200, height = 900, filter
       if (cancelled) return;
       announceToken('view', viewKey, data);
 
-      viz = document.createElement('tableau-viz');
+      // authoring: Tableau web authoring (<tableau-authoring-viz>) for building a new report.
+      viz = document.createElement(authoring ? 'tableau-authoring-viz' : 'tableau-viz');
       viz.setAttribute('src', data.src);
       viz.setAttribute('token', data.token);
-      viz.setAttribute('toolbar', 'hidden'); // Tableau recommends hiding the toolbar with connected apps
-      viz.setAttribute('hide-tabs', '');
+      if (!authoring) {
+        viz.setAttribute('toolbar', 'hidden'); // Tableau recommends hiding the toolbar with connected apps
+        viz.setAttribute('hide-tabs', '');
+      }
       viz.setAttribute('width', `${width}px`);
       viz.setAttribute('height', `${height}px`);
       for (const f of JSON.parse(filterKey)) {
@@ -76,10 +79,10 @@ export default function TableauViz({ viewKey, width = 1200, height = 900, filter
         if (cancelled) return;
         autoRetried.current = false;
         // Use the dashboard's real size if Tableau reports a fixed / max size.
-        const s = viz.workbook?.activeSheet?.size;
+        const s = authoring ? null : viz.workbook?.activeSheet?.size;
         const w = s?.maxSize?.width || s?.minSize?.width;
         const h = s?.maxSize?.height || s?.minSize?.height;
-        console.info(`Tableau "${viewKey}" sheet size`, JSON.stringify(s));
+        if (s) console.info(`Tableau "${viewKey}" sheet size`, JSON.stringify(s));
         if (w > 200 && h > 200) {
           viz.setAttribute('width', `${w}px`);
           viz.setAttribute('height', `${h}px`);
@@ -111,7 +114,7 @@ export default function TableauViz({ viewKey, width = 1200, height = 900, filter
       cancelled = true;
       viz?.remove();
     };
-  }, [viewKey, width, height, filterKey, config?.embeddingLibrary, attempt]);
+  }, [viewKey, endpoint, authoring, width, height, filterKey, config?.embeddingLibrary, attempt]);
 
   const live = phase.kind === 'loading' || phase.kind === 'mounting' || phase.kind === 'ready';
   const scale = available ? Math.min(1, available / size.width) : 1;
