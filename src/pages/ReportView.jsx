@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import Crumbs from '../components/Crumbs.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import SelectionActions from '../components/SelectionActions.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
 
@@ -38,6 +39,7 @@ export default function ReportView() {
         </div>
         <TableauViz key={viewId} viewKey={`library:${viewId}`} endpoint={`/api/embed/library/${encodeURIComponent(viewId)}`} onFirstInteractive={(e, v) => setViz(v)} />
       </div>
+      <SelectionActions viz={viz} title={title} />
     </div>
   );
 }

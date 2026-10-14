@@ -74,6 +74,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 - **Views** — save the current filters as a Tableau custom view and make it your default (opens automatically next time).
 - **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.
 - **Export → Share** — signed link + QR code that reopens the page with its filters (`?service-line=…&engagement-type=…`).
+- **Select marks → act** — selecting marks raises an action bar: *Ask the Agent* (question built from the selection), *Share to Slack* (demo; recorded, not posted), *Schedule with Apex* (contact form prefilled with the selection) and *Download rows* (CSV of the selected marks).
 - **Engagement scorecard** (Value Intelligence) — read from the `scorecard.worksheet` summary data; follows the filters, and clicking a row filters the dashboard.
 - **Needs attention** (Home) — a Pulse Insight Brief over the user's followed metrics, cached `attention.cacheMinutes`. A live brief can take ~30–40 s, so the first load after a restart is slow.
 

@@ -69,8 +69,14 @@ function engagementsFor(user, tenant) {
   );
 }
 
+/** Demo Slack destinations for a tenant (Slack isn't connected; these are display names only). */
+function slackChannelsFor(tenant) {
+  const slug = String(tenant.shortName || tenant.clientName).toLowerCase().replace(/[^a-z0-9]+/g, '-');
+  return [`#${slug}-apex-engagement`, `#${slug}-leadership`, `#${slug}-operations`, '@ Your Apex engagement lead'];
+}
+
 function publicUser(user) {
   return { id: user.id, name: user.name, title: user.title, email: user.email, persona: user.persona, roles: user.roles || [], attributes: user.attributes };
 }
 
-module.exports = { users, tenants, content, findUserById, tenantFor, entitlementsFor, canAccessView, publicUser, scopeFor, engagementsFor };
+module.exports = { users, tenants, content, findUserById, tenantFor, entitlementsFor, canAccessView, publicUser, scopeFor, engagementsFor, slackChannelsFor };

@@ -507,14 +507,32 @@ textarea.input { resize: vertical; min-height: 110px; }
 .dp-scroll tr:nth-child(even) td { background: var(--page); }
 @media (max-width: 700px) { .ex-grid { grid-template-columns: 1fr; } }
 
-/* contextual "explore deeper" bar, raised when a linked engagement is selected in the dashboard */
-.context-cta {
-  position: fixed; left: 50%; bottom: 26px; transform: translateX(-50%); z-index: 65;
-  display: flex; align-items: center; gap: 14px; padding: 8px 8px 8px 20px; border-radius: 999px;
+/* selection action bar, raised when marks are selected in a dashboard (also carries contextual deep links) */
+.sel-bar {
+  position: fixed; left: 0; right: 0; bottom: 26px; margin-inline: auto; width: max-content; z-index: 65; max-width: calc(100vw - 40px);
+  display: flex; align-items: center; gap: 14px; padding: 8px 8px 8px 12px; border-radius: 999px;
   background: var(--ink); color: #fff; box-shadow: var(--shadow-lg); font-size: 13.5px; animation: pop .2s ease-out;
 }
-.context-cta b { color: var(--lime); }
-.context-cta .icon-btn { width: 34px; height: 34px; background: transparent; border-color: rgba(255, 255, 255, .2); color: #fff; }
+.sel-bar > span b { color: var(--lime); }
+.sel-bar .icon-btn { width: 34px; height: 34px; flex: none; background: transparent; border-color: rgba(255, 255, 255, .2); color: #fff; }
+.sel-what { display: flex; align-items: center; gap: 10px; min-width: 0; }
+.sel-what > span:last-child { display: grid; line-height: 1.25; min-width: 0; }
+.sel-what b { color: #fff; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.sel-what small { color: rgba(255, 255, 255, .6); font-size: 11.5px; white-space: nowrap; overflow: hidden; text-overflow: ellipsis; max-width: 300px; }
+.sel-count { display: grid; place-items: center; min-width: 28px; height: 28px; padding: 0 8px; border-radius: 999px; background: var(--lime); color: var(--lime-ink); font-weight: 800; font-size: 12.5px; }
+.sel-actions { display: flex; gap: 6px; flex-wrap: wrap; }
+@media (max-width: 1500px) { .sel-bar { bottom: 88px; } }
+.btn-sel { background: rgba(255, 255, 255, .08); border-color: rgba(255, 255, 255, .16); color: #fff; }
+.btn-sel:hover { background: rgba(255, 255, 255, .16); }
+@media (max-width: 1100px) { .sel-bar { border-radius: 22px; flex-wrap: wrap; } }
+
+.slack-preview { display: grid; grid-template-columns: 36px 1fr; gap: 10px; margin-top: 6px; padding: 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--page); font-size: 13px; }
+.slack-avatar { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; background: var(--ink); color: var(--lime); font-weight: 800; font-size: 12px; }
+.slack-meta span { color: var(--faint); font-size: 12px; }
+.slack-preview p { margin: 2px 0 8px; color: var(--ink-2); }
+.slack-card { border-left: 4px solid var(--lime); padding: 6px 12px; display: grid; gap: 3px; color: var(--ink-2); font-size: 12.5px; background: var(--surface); border-radius: 0 8px 8px 0; }
+.slack-link { color: #1264a3; font-weight: 700; margin-top: 4px; }
+#slack-msg { min-height: 64px; }
 
 /* ── Methodology ──────────────────────────────────────────────────────── */
 .method { display: grid; grid-template-columns: repeat(4, 1fr); gap: 22px; }

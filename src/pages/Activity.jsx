@@ -19,7 +19,9 @@ const LABELS = {
   subscription: 'Subscription',
   'pulse-follow': 'Pulse follow',
   authoring: 'Built a report',
-  feed: 'Data feed refreshed'
+  feed: 'Data feed refreshed',
+  'slack-share': 'Shared to Slack (demo)',
+  'selection-action': 'Acted on a selection'
 };
 
 const describe = (d = {}) =>

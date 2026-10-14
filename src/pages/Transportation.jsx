@@ -7,6 +7,7 @@ import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
 import InvoiceSearch from '../components/InvoiceSearch.jsx';
@@ -80,6 +81,8 @@ export default function Transportation() {
           onFirstInteractive={(e, v) => setViz(v)}
         />
       </div>
+      {/* The drill-down worksheet navigates instead, so it's excluded here. */}
+      <SelectionActions viz={viz} title={view.title} ignoreWorksheets={dd ? [dd.sourceWorksheet] : []} />
     </div>
   );
 }

@@ -11,6 +11,7 @@ import EngagementCards from '../components/EngagementCards.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
 import EngagementScorecard from '../components/EngagementScorecard.jsx';
+import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
 import Icon from '../components/Icon.jsx';
@@ -194,20 +195,8 @@ export default function ValueIntelligence() {
         <PremiumPanel me={me} onViewBenchmarks={scrollToDashboard} />
       </section>
 
-      {contextLink && (
-        <div className="context-cta" role="status">
-          <span>
-            <b>{contextLink.value}</b> selected
-          </span>
-          <Link className="btn btn-lime btn-sm" to={contextLink.to}>
-            {contextLink.label}
-            <Icon name="arrowRight" />
-          </Link>
-          <button className="icon-btn" aria-label="Dismiss" onClick={() => setContextLink(null)}>
-            ✕
-          </button>
-        </div>
-      )}
+      {/* Select marks in the dashboard → act on them; also carries the contextual deep link. */}
+      <SelectionActions viz={viz} title={vi.title} extra={contextLink} onDismissExtra={() => setContextLink(null)} />
     </div>
   );
 }

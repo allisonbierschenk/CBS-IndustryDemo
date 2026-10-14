@@ -227,7 +227,8 @@ app.get('/api/me', (req, res) => {
     features: {
       scorecard: store.content.scorecard || null,
       authoring: (store.content.authoring?.requires || []).every((r) => ent.has(r)),
-      activityLog: (user.roles || []).includes('activity')
+      activityLog: (user.roles || []).includes('activity'),
+      slackChannels: store.slackChannelsFor(tenant)
     }
   });
 });
