@@ -18,13 +18,12 @@ export default function SlackDialog({ selection, what, title, onClose }) {
     return () => document.removeEventListener('keydown', onKey);
   }, [onClose]);
 
-  const rows = selection.rows.slice(0, 5);
 
   const send = async (e) => {
     e.preventDefault();
     setState({ kind: 'sending' });
     try {
-      const r = await api('/api/actions/slack', { method: 'POST', body: { channel, message, worksheet: selection.worksheet, view: title, rows: selection.rows.slice(0, 25) } });
+      const r = await api('/api/actions/slack', { method: 'POST', body: { channel, message, worksheet: selection.worksheet, view: title, rows: selection.rows.slice(0, 200) } });
       setState({ kind: 'sent', channel: r.channel });
     } catch (err) {
       setState({ kind: 'error', message: err.message });
@@ -33,7 +32,7 @@ export default function SlackDialog({ selection, what, title, onClose }) {
 
   return (
     <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
-      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="slack-title">
+      <div className="modal slack-modal" role="dialog" aria-modal="true" aria-labelledby="slack-title">
         <div className="modal-head">
           <div>
             <div className="kicker">{title}</div>
@@ -81,11 +80,29 @@ export default function SlackDialog({ selection, what, title, onClose }) {
                 </div>
                 <p>{message}</p>
                 <div className="slack-card">
-                  <b>{selection.worksheet}</b>
-                  {rows.map((r, i) => (
-                    <div key={i}>{Object.entries(r).map(([k, v]) => `${k}: ${v}`).join(' · ')}</div>
-                  ))}
-                  {selection.count > rows.length && <div className="muted">+{selection.count - rows.length} more</div>}
+                  <b>
+                    {selection.worksheet} · {selection.count} selected
+                  </b>
+                  <div className="slack-table">
+                    <table>
+                      <thead>
+                        <tr>
+                          {selection.columns.map((c) => (
+                            <th key={c}>{c}</th>
+                          ))}
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {selection.rows.map((r, i) => (
+                          <tr key={i}>
+                            {selection.columns.map((c) => (
+                              <td key={c}>{r[c]}</td>
+                            ))}
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               </div>
             </div>

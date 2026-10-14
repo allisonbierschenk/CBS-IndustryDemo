@@ -530,7 +530,7 @@ textarea.input { resize: vertical; min-height: 110px; }
 .slack-avatar { width: 36px; height: 36px; border-radius: 8px; display: grid; place-items: center; background: var(--ink); color: var(--lime); font-weight: 800; font-size: 12px; }
 .slack-meta span { color: var(--faint); font-size: 12px; }
 .slack-preview p { margin: 2px 0 8px; color: var(--ink-2); }
-.slack-card { border-left: 4px solid var(--lime); padding: 6px 12px; display: grid; gap: 3px; color: var(--ink-2); font-size: 12.5px; background: var(--surface); border-radius: 0 8px 8px 0; }
+.slack-card { border-left: 4px solid var(--lime); padding: 8px 12px; display: grid; gap: 8px; min-width: 0; color: var(--ink-2); font-size: 12.5px; background: var(--surface); border-radius: 0 8px 8px 0; }
 #slack-msg { min-height: 64px; }
 
 /* ── Methodology ──────────────────────────────────────────────────────── */
@@ -820,3 +820,11 @@ textarea.input { resize: vertical; min-height: 110px; }
 .am-email { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--ink); text-decoration: none; }
 .am-email:hover { text-decoration: underline; }
 .am-email svg { width: 15px; height: 15px; }
+.slack-modal { width: min(720px, 100%); max-height: calc(100vh - 40px); overflow-y: auto; }
+.slack-preview > div { min-width: 0; }
+.slack-table { max-height: 260px; overflow: auto; border: 1px solid var(--line); border-radius: 8px; }
+.slack-table table { border-collapse: collapse; width: 100%; font-size: 12.5px; }
+.slack-table th { position: sticky; top: 0; background: var(--sage-2); text-align: left; padding: 7px 10px; font-weight: 800; white-space: nowrap; border-bottom: 1px solid var(--line); }
+.slack-table td { padding: 6px 10px; border-bottom: 1px solid var(--line); white-space: nowrap; font-variant-numeric: tabular-nums; }
+.slack-table tr:last-child td { border-bottom: 0; }
+.slack-table tr:nth-child(even) td { background: var(--page); }
