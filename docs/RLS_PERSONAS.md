@@ -11,9 +11,9 @@ The same dashboards serve users with different scopes. Every scope comes from **
 
 Attributes are multi-valued. A user with no `service line` or `engagement type` attribute is not narrowed on that field.
 
-## 1. Dashboards: add a second data source filter
+## 1. Add one scope filter to the Value Intelligence published data source
 
-Keep your existing client-name calculation and its data source filter as they are. Add a **new** calculated field in the Value Intelligence workbook's data source, and add it as a second **data source filter = True**. Tableau combines data source filters with AND, so a row must pass both: the right client *and* the right scope within that client.
+Keep your existing client-name calculation and filter as they are. Add a **new** calculated field to the published data source **Apex Consulting - Client Value Intelligence**, and add it as a second **data source filter = True**. Tableau combines data source filters with AND, so a row must pass both: the right client *and* the right scope within that client.
 
 ```
 // Scope RLS  (service line / engagement type narrowing)
@@ -25,31 +25,13 @@ OR (
 )
 ```
 
-- A user without the attribute isn't narrowed on that field: `USERATTRIBUTE` returns NULL when the JWT doesn't carry it. That covers the executives and Alex Morgan. It also covers authoring in Tableau without a JWT.
-- Multi-client access (Alex: Crestline + Helix) needs no change, because your existing `USERATTRIBUTEINCLUDES("client name", …)` already matches any value in the list.
-- Don't add this to the transportation workbook. Its data has no `Service Line` or `Engagement Type`, and the client-only rule is enough there.
+Because the filter lives in the published data source, it applies to the embedded dashboard and the Pulse metrics built on it. Pulse honors user attribute functions, so no entitlement table is needed.
 
-## 2. Pulse: add a second filter on the published data source
+- A user without the attribute isn't narrowed on that field: `USERATTRIBUTE` returns NULL when the JWT doesn't carry it. That covers the executives and Alex Morgan.
+- Multi-client access (Alex: Crestline + Helix) is already handled by your existing `USERATTRIBUTEINCLUDES("client name", …)`.
+- **Not on Apex Consulting - Operational Value & Savings.** That data source has no `Service Line` or `Engagement Type`. VizQL Data Service returns `Unknown Field: Service Line`. Its client-only rule is enough.
 
-Pulse can't read user attributes, which aren't supported in published data sources on Tableau Cloud, so it relies on `USERNAME()` and an entitlement table. Keep your existing `USERNAME()` client filter. Then:
-
-1. Refresh the entitlement table from `data/apex_client_entitlements.csv` (`npm run generate-data`). It now has `Entitled Service Line` and `Entitled Engagement Type` columns, where `*` means all, plus rows for the three new users.
-2. Make sure the entitlement table joins to the data on `Client Name`. It should be the same table your existing `USERNAME()` filter uses, so both filters evaluate the same entitlement row.
-3. Add a new calculated field as a second data source filter = True:
-
-```
-// Pulse Scope RLS
-ISMEMBEROF("admin")
-OR (
-  ( [Entitled Service Line]    = "*" OR [Entitled Service Line]    = [Service Line] )
-  AND
-  ( [Entitled Engagement Type] = "*" OR [Entitled Engagement Type] = [Engagement Type] )
-)
-```
-
-4. Republish the data source. Pulse metrics built on it pick up the filter automatically.
-
-## 3. Tableau Cloud setup for the new personas
+## 2. Tableau Cloud setup for the new personas
 
 1. Add the three new users. Give them the same site role as the existing demo users, and the same group membership and permissions on the Apex content.
 2. Have each new user follow the Pulse metrics they should ask the agent about. The agent's scope is the user's followed metrics.
