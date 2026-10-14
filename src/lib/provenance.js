@@ -48,9 +48,9 @@ export function provenance(key, me, extra = {}) {
         freshness: extra.generatedAt
           ? `Pulse brief generated ${new Date(extra.generatedAt).toLocaleString([], { dateStyle: 'medium', timeStyle: 'short' })}; refreshed automatically about every 12 minutes.`
           : 'Pulse brief, refreshed automatically about every 12 minutes.',
-        source: 'Tableau Pulse Insight Brief over the Pulse metrics you follow. The numbers, drivers and trends are Pulse’s statistically computed insights; Pulse’s generative AI (behind the Einstein Trust Layer) writes the summary wording. The Take action rows use only those statistical facts — no generated text.',
+        source: 'Tableau Pulse Insight Brief over the Pulse metrics you follow. The numbers, drivers and trends come from Tableau’s insights platform; built-in AI on the Einstein Trust Layer describes them in natural language. The Take action rows use only the insights platform’s facts — no generated text.',
         security: 'Runs as you in Tableau, so Pulse only sees your rows (same row-level security as the dashboards) and only metrics you follow.',
-        why: 'There is an LLM here, but it only writes the wording: Pulse computes each metric’s change, drivers and which direction counts as good with statistical methods over governed definitions, so the analysis is deterministic — the same data always yields the same facts, and they match the dashboard and the Agent. The model never sees raw data, so it can’t invent a number. And there are no tokens to buy and no unknown costs: Pulse’s AI is included in the Tableau license and unmetered, however often clients look.'
+        why: 'Pulse proactively flags the metrics that need attention: its insights platform automatically detects each metric’s change, drivers and outliers on your governed metrics — the single source of truth — so the analysis is deterministic, not probabilistic, and matches the dashboard and the Agent. Built-in AI on the Einstein Trust Layer describes those insights in natural language without compromising data security or privacy; it never analyzes your raw data, so it can’t invent a number. It’s included with Tableau+ and unmetered — no tokens, no usage bill, no surprise costs, however often you check.'
       };
     case 'agent':
       return {
