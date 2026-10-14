@@ -531,7 +531,8 @@ textarea.input { resize: vertical; min-height: 110px; }
 .slack-meta span { color: var(--faint); font-size: 12px; }
 .slack-preview p { margin: 2px 0 8px; color: var(--ink-2); }
 .slack-card { border-left: 4px solid var(--lime); padding: 6px 12px; display: grid; gap: 3px; color: var(--ink-2); font-size: 12.5px; background: var(--surface); border-radius: 0 8px 8px 0; }
-.slack-link { color: #1264a3; font-weight: 700; margin-top: 4px; }
+.slack-link { color: #1264a3; font-weight: 700; margin-top: 4px; text-decoration: none; }
+a.slack-link:hover { text-decoration: underline; }
 #slack-msg { min-height: 64px; }
 
 /* ── Methodology ──────────────────────────────────────────────────────── */

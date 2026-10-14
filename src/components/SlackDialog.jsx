@@ -90,7 +90,13 @@ export default function SlackDialog({ selection, what, title, onClose }) {
                     <div key={i}>{Object.entries(r).map(([k, v]) => `${k}: ${v}`).join(' · ')}</div>
                   ))}
                   {selection.count > rows.length && <div className="muted">+{selection.count - rows.length} more</div>}
-                  <span className="slack-link">{link ? 'Open in Apex portal →' : 'Creating link…'}</span>
+                  {link ? (
+                    <a className="slack-link" href={link} target="_blank" rel="noreferrer" title={link}>
+                      Open in Apex portal →
+                    </a>
+                  ) : (
+                    <span className="slack-link">Creating link…</span>
+                  )}
                 </div>
               </div>
             </div>
