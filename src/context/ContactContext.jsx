@@ -26,6 +26,7 @@ function ContactDialog({ initial, onClose }) {
   const [message, setMessage] = useState(initial.message);
   const [state, setState] = useState({ kind: 'editing' }); // editing | sending | sent | error
   const textRef = useRef(null);
+  const am = me.tenant.accountManager;
 
   useEffect(() => {
     textRef.current?.focus();
@@ -39,7 +40,7 @@ function ContactDialog({ initial, onClose }) {
     setState({ kind: 'sending' });
     try {
       const res = await api('/api/messages', { method: 'POST', body: { topic, message } });
-      setState({ kind: 'sent', ref: res.ref });
+      setState({ kind: 'sent', ref: res.ref, to: res.to });
     } catch (err) {
       setState({ kind: 'error', message: err.message });
     }
@@ -64,7 +65,7 @@ function ContactDialog({ initial, onClose }) {
               <Icon name="check" />
               <div>
                 <b>Message received · Reference {state.ref}</b>
-                Your Apex engagement team will reply to {me.user.email}. Quote the reference if you follow up.
+                Sent to {state.to ? `${state.to.name} (${state.to.email})` : 'your Apex team'}. They&apos;ll reply to {me.user.email}. Quote the reference if you follow up.
               </div>
             </div>
             <div className="modal-actions">
@@ -75,6 +76,21 @@ function ContactDialog({ initial, onClose }) {
           </div>
         ) : (
           <form className="modal-body" onSubmit={send}>
+            {am && (
+              <div className="am-card">
+                <span className="am-avatar" aria-hidden="true">
+                  {am.name.split(' ').map((p) => p[0]).join('')}
+                </span>
+                <div>
+                  <b>{am.name}</b>
+                  <span>{am.title}</span>
+                </div>
+                <a className="am-email" href={`mailto:${am.email}`}>
+                  <Icon name="mail" />
+                  {am.email}
+                </a>
+              </div>
+            )}
             <div className="field">
               <label htmlFor="c-topic">Topic</label>
               <select id="c-topic" className="input" value={topic} onChange={(e) => setTopic(e.target.value)}>
@@ -98,7 +114,8 @@ function ContactDialog({ initial, onClose }) {
               />
             </div>
             <p className="muted" style={{ fontSize: 12.5, margin: '0 0 4px' }}>
-              Sent from {me.user.name} · {me.user.email}
+              From {me.user.name} · {me.user.email}
+              {am && ` → ${am.name}`}
             </p>
             {state.kind === 'error' && (
               <p className="form-error" role="alert">

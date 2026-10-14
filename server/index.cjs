@@ -342,10 +342,12 @@ app.post('/api/messages', requireUser, (req, res) => {
   const body = String(req.body?.message || '').trim().slice(0, 2000);
   if (!body) return res.status(400).json({ error: 'Please enter a message.' });
   const ref = `APX-${Date.now().toString(36).toUpperCase().slice(-6)}`;
-  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, topic, body };
+  const to = req.tenant.accountManager || null;
+  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, to: to?.email || null, topic, body };
   messages.push(entry);
   console.log('✉ message for Apex team', entry);
-  res.json({ ok: true, ref, topic });
+  activity.record(req.user, req.tenant, 'message', { topic, to: to?.email || '', ref });
+  res.json({ ok: true, ref, topic, to });
 });
 app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TOPICS }));
 

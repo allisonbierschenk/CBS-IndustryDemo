@@ -20,6 +20,7 @@ const LABELS = {
   'pulse-follow': 'Pulse follow',
   authoring: 'Built a report',
   feed: 'Data feed refreshed',
+  message: 'Messaged Apex',
   'slack-share': 'Shared to Slack (demo)',
   'selection-action': 'Acted on a selection'
 };

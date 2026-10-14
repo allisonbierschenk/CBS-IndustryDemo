@@ -815,3 +815,10 @@ a.slack-link:hover { text-decoration: underline; }
 @media (max-width: 700px) { .feed-how { grid-template-columns: 1fr; } }
 .builder-head { padding: 8px 0 16px; }
 .builder-head h1 { font-size: clamp(24px, 2.6vw, 32px); }
+.am-card { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 12px 14px; margin-bottom: 14px; border-radius: 16px; background: var(--sage-2); border: 1px solid var(--line); }
+.am-avatar { width: 38px; height: 38px; border-radius: 999px; display: grid; place-items: center; background: var(--ink); color: var(--lime); font-weight: 800; font-size: 13px; }
+.am-card b { display: block; font-size: 14px; }
+.am-card span { font-size: 12px; color: var(--muted); }
+.am-email { display: inline-flex; align-items: center; gap: 6px; font-size: 12.5px; font-weight: 700; color: var(--ink); text-decoration: none; }
+.am-email:hover { text-decoration: underline; }
+.am-email svg { width: 15px; height: 15px; }

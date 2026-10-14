@@ -1,5 +1,5 @@
 {
-  "_readme": "Customer (tenant) profiles. Qualitative context only — no metric values live here; all KPIs and charts come from the embedded Tableau dashboards. 'features' drive server-side entitlements ('transportation' = Vantage's Transportation Optimization & Savings page); tier 'premium' grants 'benchmarks'. 'dataValue' is the engagement name as it appears in the Tableau data when it differs from the display name. 'clientNames' (optional) lists every [Client Name] a consolidated/portfolio tenant spans; each engagement's 'serviceLine' mirrors [Service Line] in the data.",
+  "_readme": "Customer (tenant) profiles. Qualitative context only — no metric values live here; all KPIs and charts come from the embedded Tableau dashboards. 'features' drive server-side entitlements ('transportation' = Vantage's Transportation Optimization & Savings page); tier 'premium' grants 'benchmarks'. 'dataValue' is the engagement name as it appears in the Tableau data when it differs from the display name. 'clientNames' (optional) lists every [Client Name] a consolidated/portfolio tenant spans; each engagement's 'serviceLine' mirrors [Service Line] in the data. 'accountManager' is the (fictional) Apex contact shown in Contact Apex; messages are addressed to them.",
   "tenants": [
     {
       "id": "northstar",
@@ -41,6 +41,11 @@
           "Note the locked Premium benchmarks — Northstar is a Standard client (upgrade opportunity)."
         ],
         "message": "Give clients transparent, ongoing visibility into the business value you're delivering."
+      },
+      "accountManager": {
+        "name": "Jamie Rivera",
+        "title": "Account Manager",
+        "email": "jamie.rivera@apexconsulting.com"
       }
     },
     {
@@ -88,6 +93,11 @@
           "Open Industry Benchmarks — Premium unlocks peer percentile rankings, improvement opportunities and advisory recommendations (anonymized peers only)."
         ],
         "message": "Securely personalize analytics for every customer and monetize advanced insights."
+      },
+      "accountManager": {
+        "name": "Taylor Brooks",
+        "title": "Account Manager",
+        "email": "taylor.brooks@apexconsulting.com"
       }
     },
     {
@@ -129,6 +139,11 @@
           "Explain how the client can raise this with Apex before it undermines expected outcomes."
         ],
         "message": "Help clients identify issues before they undermine expected business outcomes."
+      },
+      "accountManager": {
+        "name": "Casey Nguyen",
+        "title": "Account Manager",
+        "email": "casey.nguyen@apexconsulting.com"
       }
     },
     {
@@ -183,6 +198,11 @@
           "Premium benchmarks in the dashboard: Vantage against an anonymized logistics peer group — no other client is identifiable."
         ],
         "message": "Connect strategic consulting outcomes to measurable operational results."
+      },
+      "accountManager": {
+        "name": "Riley Thompson",
+        "title": "Account Manager",
+        "email": "riley.thompson@apexconsulting.com"
       }
     },
     {
@@ -224,6 +244,11 @@
           "Focus on milestones, on-time delivery and the developing value trend."
         ],
         "message": "Meaningful analytics from the very first months of a relationship."
+      },
+      "accountManager": {
+        "name": "Avery Collins",
+        "title": "Account Manager",
+        "email": "avery.collins@apexconsulting.com"
       }
     },
     {
@@ -300,6 +325,11 @@
           "Filter by Engagement Type to compare across the two clients; Meridian, Northstar and Vantage never appear."
         ],
         "message": "Consolidated reporting across accounts, governed by the same row-level security."
+      },
+      "accountManager": {
+        "name": "Drew Patterson",
+        "title": "Account Manager",
+        "email": "drew.patterson@apexconsulting.com"
       }
     }
   ]
