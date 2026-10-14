@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
+import { useWhyTableau } from '../context/WhyTableauContext.jsx';
 import Icon from './Icon.jsx';
 import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 
@@ -15,6 +16,7 @@ const TABS = [
 export default function PresenterDock() {
   const { me, signInAs } = useSession();
   const toast = useToast();
+  const whyTableau = useWhyTableau();
   const [open, setOpen] = useState(false);
   const [tab, setTab] = useState('switch');
   const [personas, setPersonas] = useState([]);
@@ -71,6 +73,14 @@ export default function PresenterDock() {
       <section className={`dock${open ? ' open' : ''}`} aria-label="Presenter controls">
         <div className="dock-head">
           <div className="kicker">Demo controls</div>
+          <label className="why-switch" title="Outline everything Tableau powers and explain why (⌥W)">
+            <input type="checkbox" checked={whyTableau.on} onChange={whyTableau.toggle} />
+            <span className="why-track" aria-hidden="true" />
+            <span>
+              <b>Why Tableau</b>
+              <small>Outline what Tableau powers in blue; the (i) icons explain why · ⌥W</small>
+            </span>
+          </label>
         </div>
         <div className="tabs" role="tablist">
           {TABS.map(([k, label]) => (

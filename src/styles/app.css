@@ -868,3 +868,33 @@ textarea.input { resize: vertical; min-height: 110px; }
 .att-ontrack { display: flex; gap: 8px; align-items: baseline; margin: 8px 14px 0; font-size: 12.5px; color: var(--muted); }
 .att-ontrack svg { color: var(--good, #2e7d32); flex: none; position: relative; top: 2px; }
 @media (max-width: 860px) { .att-row { grid-template-columns: 1fr; } .att-btns { justify-content: flex-start; } }
+
+/* ── (i) provenance popovers + Why Tableau mode ───────────────────────── */
+.title-row { display: flex; align-items: center; gap: 12px; }
+.info-btn { display: inline-grid; place-items: center; width: 26px; height: 26px; flex: none; border-radius: 999px; border: 1.5px solid var(--ink); background: var(--surface); color: var(--ink); font: 800 13px/1 Georgia, 'Times New Roman', serif; font-style: italic; cursor: pointer; transition: background .15s; }
+.info-btn:hover, .info-btn.is-open { background: var(--ink); color: #fff; }
+.info-pop { position: fixed; z-index: 140; max-height: calc(100vh - 24px); overflow-y: auto; padding: 18px 20px 16px; border-radius: 18px; background: var(--surface); border: 1px solid var(--line); box-shadow: var(--shadow-lg); animation: pop .14s ease-out; text-align: left; }
+.info-pop h4 { font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--ink); margin: 12px 0 4px; }
+.info-pop h4:first-of-type { margin-top: 6px; }
+.info-pop p { margin: 0; font-size: 13px; line-height: 1.55; color: var(--ink-2); font-weight: 400; letter-spacing: 0; text-transform: none; }
+.info-tag { display: inline-block; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; padding: 3px 8px; border-radius: 999px; background: var(--sage-2); border: 1px solid var(--line); color: var(--ink-2); }
+.info-why { margin-top: 14px; padding-top: 4px; border-top: 2px dashed var(--tableau-blue); }
+.info-why h4 { color: var(--tableau-blue); }
+:root { --tableau-blue: #2f5fe0; }
+body.why-tableau .info-tag { background: var(--tableau-blue); border-color: var(--tableau-blue); color: #fff; }
+body.why-tableau [data-tableau] { outline: 2px solid var(--tableau-blue); outline-offset: 3px; }
+body.why-tableau [data-tableau]:not(.sel-bar) { position: relative; }
+body.why-tableau .viz-card[data-tableau], body.why-tableau .attention[data-tableau], body.why-tableau .feed-card[data-tableau] { overflow: visible; }
+body.why-tableau [data-tableau]::before { content: attr(data-tableau); position: absolute; top: -13px; left: 16px; z-index: 5; padding: 3px 9px; border-radius: 999px; background: var(--tableau-blue); color: #fff; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; white-space: nowrap; pointer-events: none; }
+body.why-tableau .info-btn { border-color: var(--tableau-blue); color: var(--tableau-blue); box-shadow: 0 0 0 4px rgba(47, 95, 224, .14); }
+body.why-tableau .info-btn:hover, body.why-tableau .info-btn.is-open { background: var(--tableau-blue); color: #fff; }
+
+.why-switch { display: grid; grid-template-columns: auto 1fr; gap: 10px; align-items: center; margin: 10px 0 2px; padding: 10px 12px; border-radius: 14px; border: 1px solid var(--line); background: var(--page); cursor: pointer; }
+.why-switch input { position: absolute; opacity: 0; pointer-events: none; }
+.why-track { width: 36px; height: 20px; border-radius: 999px; background: var(--line); position: relative; transition: background .15s; }
+.why-track::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 999px; background: #fff; box-shadow: 0 1px 3px rgba(0,0,0,.25); transition: transform .15s; }
+.why-switch input:checked + .why-track { background: var(--tableau-blue); }
+.why-switch input:checked + .why-track::after { transform: translateX(16px); }
+.why-switch input:focus-visible + .why-track { outline: 2px solid var(--ink); outline-offset: 2px; }
+.why-switch b { display: block; font-size: 13.5px; }
+.why-switch small { font-size: 11.5px; color: var(--muted); }

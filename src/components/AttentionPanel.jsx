@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { api, track } from '../lib/api.js';
 import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
+import InfoTip from './InfoTip.jsx';
 import PulseMarkup from './PulseMarkup.jsx';
 
 export default function AttentionPanel() {
@@ -46,17 +47,20 @@ export default function AttentionPanel() {
   }, [load]);
 
   return (
-    <section className="attention" aria-labelledby="att-title">
+    <section className="attention" aria-labelledby="att-title" data-tableau="Tableau Pulse">
       <div className="attention-head">
         <div>
           <div className="kicker">From your Tableau Pulse metrics</div>
           <h2 id="att-title">Needs attention</h2>
         </div>
-        {state.generatedAt && (
-          <button className="btn btn-ghost btn-sm" onClick={() => load(true)} disabled={state.loading}>
-            {state.loading ? 'Refreshing…' : `Updated ${new Date(state.generatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
-          </button>
-        )}
+        <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>
+          {state.generatedAt && (
+            <button className="btn btn-ghost btn-sm" onClick={() => load(true)} disabled={state.loading}>
+              {state.loading ? 'Refreshing…' : `Updated ${new Date(state.generatedAt).toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' })}`}
+            </button>
+          )}
+          <InfoTip kind="attention" extra={{ generatedAt: state.generatedAt }} label="About Needs attention" />
+        </div>
       </div>
       {state.loading && !state.content && (
         <div className="attention-skel" aria-label="Loading">

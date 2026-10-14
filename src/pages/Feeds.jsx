@@ -3,6 +3,7 @@ import { useEffect, useState } from 'react';
 import { api, track } from '../lib/api.js';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 
 export default function Feeds() {
   const [state, setState] = useState({ loading: true });
@@ -29,14 +30,17 @@ export default function Feeds() {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Data feeds' }]} />
       <div className="page-head">
         <div>
-          <h1>Data feeds</h1>
+          <div className="title-row">
+            <h1>Data feeds</h1>
+            <InfoTip kind="feeds" label="About data feeds" />
+          </div>
           <p className="lead">Connect Excel or Google Sheets to a live CSV of your data. It refreshes from Tableau every time it’s opened.</p>
         </div>
       </div>
       {state.loading && <p className="muted">Loading…</p>}
       {state.error && <div className="error-msg">{state.error}</div>}
       {state.feeds?.map((f) => (
-        <div className="viz-card feed-card" key={f.key}>
+        <div className="viz-card feed-card" key={f.key} data-tableau="VizQL Data Service">
           <div className="viz-card-head">
             <div>
               <h3>{f.title}</h3>

@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import Crumbs from '../components/Crumbs.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
@@ -25,7 +26,7 @@ export default function ReportView() {
   return (
     <div className="container">
       <Crumbs items={[{ label: 'Reports', to: '/reports' }, { label: title }]} />
-      <div className="viz-card" style={{ marginTop: 18 }}>
+      <div className="viz-card" style={{ marginTop: 18 }} data-tableau="Tableau Embedding API">
         <div className="viz-card-head">
           <div>
             <h3>{title}</h3>
@@ -35,6 +36,7 @@ export default function ReportView() {
             <AnalyticsAssistantButton viz={viz} />
             <ViewsMenu viz={viz} />
             <ExportMenu viz={viz} title={title} />
+            <InfoTip kind="report" extra={{ workbook: info?.workbook }} label="About this report" />
           </div>
         </div>
         <TableauViz key={viewId} viewKey={`library:${viewId}`} endpoint={`/api/embed/library/${encodeURIComponent(viewId)}`} onFirstInteractive={(e, v) => setViz(v)} />

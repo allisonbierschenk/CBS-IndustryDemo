@@ -11,6 +11,7 @@ import ExportMenu from '../components/ExportMenu.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 import InvoiceSearch from '../components/InvoiceSearch.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 
@@ -60,7 +61,7 @@ export default function Transportation() {
         )}
       </div>
 
-      <div className="viz-card">
+      <div className="viz-card" data-tableau="Tableau Embedding API">
         <div className="viz-card-head">
           <div>
             <h3>{view.title}</h3>
@@ -71,6 +72,7 @@ export default function Transportation() {
             <ViewsMenu viz={viz} />
             <SubscribeButton viewKey="transportation" title={view.title} />
             <ExportMenu viz={viz} title={view.title} />
+            <InfoTip kind="transportation" label="About this dashboard" />
           </div>
         </div>
         {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} />}

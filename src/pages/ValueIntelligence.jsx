@@ -15,6 +15,7 @@ import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
 import Icon from '../components/Icon.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 import PremiumPanel from '../components/PremiumPanel.jsx';
 import { EmbedSlot } from '../context/EmbedContext.jsx';
 import TierBadge from '../components/TierBadge.jsx';
@@ -139,7 +140,7 @@ export default function ValueIntelligence() {
       )}
 
       <section className="section" ref={dashRef} id="dashboard" aria-labelledby="vi-title" style={{ paddingTop: 24 }}>
-        <div className="viz-card">
+        <div className="viz-card" data-tableau="Tableau Embedding API + Pulse">
           <div className="viz-card-head">
             <div>
               <h3 id="vi-title">{vi.title}</h3>
@@ -150,6 +151,7 @@ export default function ValueIntelligence() {
               <ViewsMenu viz={viz} />
               <SubscribeButton viewKey="valueIntelligence" title={vi.title} />
               <ExportMenu viz={viz} title={vi.title} />
+              <InfoTip kind="valueIntelligence" label="About this dashboard" />
             </div>
           </div>
           {viz && vi.filters.length > 0 && (

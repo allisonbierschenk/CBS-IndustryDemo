@@ -7,6 +7,7 @@ import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 import PulseMarkup, { direction } from '../components/PulseMarkup.jsx';
 import TrendChart from '../components/TrendChart.jsx';
 
@@ -149,7 +150,10 @@ export default function Agent() {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Agent' }]} />
       <div className="page-head">
         <div>
-          <h1>Agent</h1>
+          <div className="title-row">
+            <h1>Agent</h1>
+            <InfoTip kind="agent" extra={{ source }} label="About the Agent" />
+          </div>
           <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your Tableau Pulse metrics.</p>
           {multiSource && (
             <div className="seg source-seg" role="radiogroup" aria-label="Data source">
@@ -174,7 +178,7 @@ export default function Agent() {
         </div>
       </div>
 
-      <div className="chat">
+      <div className="chat" data-tableau="Tableau Pulse">
         <div className="chat-thread" ref={threadRef}>
           {messages.length === 0 && (
             <div className="chat-starters">

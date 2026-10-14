@@ -1,0 +1,77 @@
+// (i) button that explains a Tableau-powered surface: freshness, source, security and — in Why Tableau
+// mode — why it's built on Tableau. The popover is fixed-positioned so cards with overflow:hidden can't clip it.
+import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { provenance } from '../lib/provenance.js';
+import { useSession } from '../context/SessionContext.jsx';
+import { useWhyTableau } from '../context/WhyTableauContext.jsx';
+
+export default function InfoTip({ kind, extra, label = 'About this' }) {
+  const { me } = useSession();
+  const { on: why } = useWhyTableau();
+  const [open, setOpen] = useState(false);
+  const [pos, setPos] = useState(null);
+  const btn = useRef(null);
+  const pop = useRef(null);
+  const info = provenance(kind, me, extra);
+
+  useLayoutEffect(() => {
+    if (!open || !btn.current) return;
+    const place = () => {
+      const r = btn.current.getBoundingClientRect();
+      const width = Math.min(380, window.innerWidth - 24);
+      const left = Math.max(12, Math.min(r.right - width, window.innerWidth - width - 12));
+      const h = Math.min(pop.current?.offsetHeight || 0, window.innerHeight - 24);
+      // Below the button if it fits, else above it, else pinned inside the window.
+      let top = r.bottom + 8;
+      if (top + h > window.innerHeight - 12) top = r.top - h - 8 >= 12 ? r.top - h - 8 : Math.max(12, window.innerHeight - h - 12);
+      setPos({ top, left, width });
+    };
+    place();
+    const frame = requestAnimationFrame(place); // again once the popover has its real height
+    window.addEventListener('resize', place);
+    window.addEventListener('scroll', place, true);
+    return () => {
+      cancelAnimationFrame(frame);
+      window.removeEventListener('resize', place);
+      window.removeEventListener('scroll', place, true);
+    };
+  }, [open, why]);
+
+  useEffect(() => {
+    if (!open) return;
+    const onDoc = (e) => !btn.current?.contains(e.target) && !pop.current?.contains(e.target) && setOpen(false);
+    const onKey = (e) => e.key === 'Escape' && setOpen(false);
+    document.addEventListener('mousedown', onDoc);
+    document.addEventListener('keydown', onKey);
+    return () => {
+      document.removeEventListener('mousedown', onDoc);
+      document.removeEventListener('keydown', onKey);
+    };
+  }, [open]);
+
+  if (!info) return null;
+  return (
+    <>
+      <button ref={btn} type="button" className={`info-btn${open ? ' is-open' : ''}`} onClick={() => setOpen((o) => !o)} aria-expanded={open} aria-label={label} title={label}>
+        i
+      </button>
+      {open && (
+        <div ref={pop} className="info-pop" role="dialog" aria-label={label} style={pos ? { top: pos.top, left: pos.left, width: pos.width } : { visibility: 'hidden' }}>
+          <div className="info-tag">{info.tag}</div>
+          <h4>Freshness</h4>
+          <p>{info.freshness}</p>
+          <h4>Source</h4>
+          <p>{info.source}</p>
+          <h4>Security</h4>
+          <p>{info.security}</p>
+          {why && (
+            <div className="info-why">
+              <h4>Why Tableau helps here</h4>
+              <p>{info.why}</p>
+            </div>
+          )}
+        </div>
+      )}
+    </>
+  );
+}

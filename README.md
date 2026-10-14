@@ -79,6 +79,9 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 - **Engagement scorecard** (Value Intelligence) — read from the `scorecard.worksheet` summary data; follows the filters, and clicking a row filters the dashboard.
 - **Needs attention** (Home) — a Pulse Insight Brief over the user's followed metrics, cached `attention.cacheMinutes`. A live brief can take ~30–40 s, so the first load after a restart is slow.
 
+- **(i) on every Tableau-powered surface** — Freshness, Source and Security (with the signed-in user's real JWT attributes). Text lives in `src/lib/provenance.js`.
+- **Why Tableau mode** (presenter dock toggle, or ⌥W) — outlines each Tableau-powered surface in blue with its Tableau capability, and adds a *Why Tableau helps here* paragraph to every (i). Off by default; remembered per browser.
+
 Hierarchy / multi-scope RLS personas are documented in `docs/RLS_PERSONAS.md`.
 
 ## Principles

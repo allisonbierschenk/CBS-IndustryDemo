@@ -1,6 +1,7 @@
 // Engagement scorecard built from a worksheet's summary data in the embedded dashboard (no extra
 // Tableau content). It follows the dashboard's filters, and clicking a row filters the dashboard.
 import { useCallback, useEffect, useState } from 'react';
+import InfoTip from './InfoTip.jsx';
 
 export default function EngagementScorecard({ viz, worksheet, keyField, maxRows = 25, onSelect }) {
   const [state, setState] = useState({ loading: true });
@@ -39,12 +40,13 @@ export default function EngagementScorecard({ viz, worksheet, keyField, maxRows 
 
   if (!viz) return null;
   return (
-    <div className="viz-card scorecard">
+    <div className="viz-card scorecard" data-tableau="Tableau Embedding API">
       <div className="viz-card-head">
         <div>
           <h3>Engagement scorecard</h3>
           <p>From your dashboard’s “{worksheet}” data · select a row to focus the dashboard</p>
         </div>
+        <InfoTip kind="scorecard" extra={{ worksheet }} label="About the scorecard" />
       </div>
       {state.error && <div className="error-msg" style={{ margin: 16 }}>{state.error}</div>}
       {state.loading && !state.rows && <p className="muted" style={{ padding: 16 }}>Reading from Tableau…</p>}

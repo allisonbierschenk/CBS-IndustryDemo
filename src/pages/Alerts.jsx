@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 
 function schedule(s) {
   const iv = [].concat(s.details?.intervals?.interval || []);
@@ -58,7 +59,10 @@ export default function Alerts() {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Alerts & subscriptions' }]} />
       <div className="page-head">
         <div>
-          <h1>Alerts &amp; subscriptions</h1>
+          <div className="title-row">
+            <h1>Alerts &amp; subscriptions</h1>
+            <InfoTip kind="alerts" label="About alerts & subscriptions" />
+          </div>
           <p className="lead">Dashboards emailed to you on a schedule, and the Tableau Pulse metrics you follow.</p>
         </div>
       </div>
@@ -78,7 +82,7 @@ export default function Alerts() {
           </p>
         )}
         {subs.subscriptions?.length > 0 && (
-          <div className="list-card">
+          <div className="list-card" data-tableau="Tableau REST + Pulse API">
             {subs.subscriptions.map((s) => (
               <div className="list-row" key={s.id}>
                 <Icon name="mail" />
@@ -108,7 +112,7 @@ export default function Alerts() {
         {metrics.loading && <p className="muted">Loading…</p>}
         {metrics.error && <div className="error-msg">{metrics.error}</div>}
         {metrics.metrics?.length > 0 && (
-          <div className="list-card">
+          <div className="list-card" data-tableau="Tableau REST + Pulse API">
             {metrics.metrics.map((m) => (
               <div className="list-row" key={m.id}>
                 <Icon name="chart" />

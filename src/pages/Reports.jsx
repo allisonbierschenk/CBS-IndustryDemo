@@ -6,6 +6,7 @@ import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import InfoTip from '../components/InfoTip.jsx';
 
 export default function Reports() {
   const { me } = useSession();
@@ -41,7 +42,10 @@ export default function Reports() {
       <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Reports' }]} />
       <div className="page-head">
         <div>
-          <h1>Reports</h1>
+          <div className="title-row">
+            <h1>Reports</h1>
+            <InfoTip kind="reports" label="About Reports" />
+          </div>
           <p className="lead">Every report available to {me.tenant.shortName}. Star the ones you use most.</p>
         </div>
         {me.features?.authoring && (
@@ -77,7 +81,7 @@ export default function Reports() {
           <h2 className="section-title" style={{ fontSize: 20, marginBottom: 14 }}>
             {workbook}
           </h2>
-          <div className="lib-grid">
+          <div className="lib-grid" data-tableau="Tableau REST API">
             {views.map((v) => (
               <article className="lib-card" key={v.id}>
                 {/* Tableau doesn't render preview images for row-level-secured ("user specific") views, so cards use a tile. */}
