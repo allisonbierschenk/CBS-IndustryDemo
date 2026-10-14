@@ -8,6 +8,7 @@ import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
 import InfoTip from '../components/InfoTip.jsx';
+import PulseAiNote from '../components/PulseAiNote.jsx';
 import PulseMarkup, { direction } from '../components/PulseMarkup.jsx';
 import TrendChart from '../components/TrendChart.jsx';
 
@@ -178,6 +179,7 @@ export default function Agent() {
         </div>
       </div>
 
+      <PulseAiNote />
       <div className="chat">
         <div className="chat-thread" ref={threadRef}>
           {messages.length === 0 && (
