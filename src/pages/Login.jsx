@@ -62,7 +62,10 @@ export default function Login() {
                       {initials(p.name)}
                     </span>
                     <span className="ur-main">
-                      <span className="uc-name">{p.name}</span>
+                      <span className="ur-name-row">
+                        <span className="uc-name">{p.name}</span>
+                        {p.persona && p.persona !== 'Executive' && <span className="persona-chip">{p.persona}</span>}
+                      </span>
                       <span className="ur-meta">
                         <span>{p.title} ·</span>
                         <span className="ur-org">
@@ -72,7 +75,11 @@ export default function Login() {
                           </span>
                         </span>
                       </span>
-                      {p.demoFocus && <span className="uc-focus">{p.demoFocus}</span>}
+                      {p.persona && p.persona !== 'Executive' ? (
+                        <span className="uc-focus">Sees: {p.scope}</span>
+                      ) : (
+                        p.demoFocus && <span className="uc-focus">{p.demoFocus}</span>
+                      )}
                     </span>
                     <span className={`mini-tier ${p.tier}`}>{p.tier}</span>
                     <Icon name="arrowRight" className="ur-go" />

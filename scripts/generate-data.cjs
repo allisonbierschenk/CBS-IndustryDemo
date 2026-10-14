@@ -191,7 +191,19 @@ for (const c of CLIENTS) {
 
 // ── Pulse entitlements (from the Apex user store) ───────────────────────────
 const users = JSON.parse(fs.readFileSync(path.join(ROOT, 'server', 'data', 'users.json'), 'utf8')).users;
-const ent = users.flatMap((u) => (u.attributes['client name'] || []).map((cn) => ({ 'Tableau Username': u.email, 'Client Name': cn, 'Subscription Tier': (u.attributes['subscription tier'] || [''])[0] })));
+const ent = users.flatMap((u) =>
+  (u.attributes['client name'] || []).flatMap((cn) =>
+    (u.attributes['service line'] || ['*']).flatMap((sl) =>
+      (u.attributes['engagement type'] || ['*']).map((et) => ({
+        'Tableau Username': u.email,
+        'Client Name': cn,
+        'Subscription Tier': (u.attributes['subscription tier'] || [''])[0],
+        'Entitled Service Line': sl,
+        'Entitled Engagement Type': et
+      }))
+    )
+  )
+);
 
 // ── Write CSVs ──────────────────────────────────────────────────────────────
 function toCsv(rows) {

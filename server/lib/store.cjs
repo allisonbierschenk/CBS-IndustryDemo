@@ -33,8 +33,31 @@ function canAccessView(tenant, viewKey) {
   return (view.requires || []).every((r) => ent.has(r));
 }
 
-function publicUser(user) {
-  return { id: user.id, name: user.name, title: user.title, email: user.email, attributes: user.attributes };
+// A user's data scope, from their JWT user attributes (the same values Tableau's RLS evaluates).
+function scopeFor(user) {
+  const a = user.attributes || {};
+  const list = (k) => (Array.isArray(a[k]) ? a[k] : a[k] ? [a[k]] : null);
+  const scope = { clients: list('client name') || [], serviceLines: list('service line'), engagementTypes: list('engagement type') };
+  const parts = [scope.clients.join(' + ')];
+  if (scope.serviceLines) parts.push(`${scope.serviceLines.join(', ')} service line`);
+  if (scope.engagementTypes) parts.push(scope.engagementTypes.join(', '));
+  scope.label = parts.join(' · ');
+  return scope;
 }
 
-module.exports = { users, tenants, content, findUserById, tenantFor, entitlementsFor, canAccessView, publicUser };
+/** The tenant's engagements narrowed to what this user's scope can see (portal UX; Tableau RLS enforces the data). */
+function engagementsFor(user, tenant) {
+  const sc = scopeFor(user);
+  return tenant.engagements.filter(
+    (e) =>
+      (!sc.serviceLines || sc.serviceLines.includes(e.serviceLine)) &&
+      (!sc.engagementTypes || sc.engagementTypes.includes(e.dataValue || e.name)) &&
+      (!e.client || sc.clients.includes(e.client))
+  );
+}
+
+function publicUser(user) {
+  return { id: user.id, name: user.name, title: user.title, email: user.email, persona: user.persona, attributes: user.attributes };
+}
+
+module.exports = { users, tenants, content, findUserById, tenantFor, entitlementsFor, canAccessView, publicUser, scopeFor, engagementsFor };

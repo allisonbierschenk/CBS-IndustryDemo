@@ -87,6 +87,11 @@ export default function ValueIntelligence() {
             <span className="fact-pill">
               Active engagements <b>{t.engagements.length}</b>
             </span>
+            {(me.scope?.serviceLines || me.scope?.engagementTypes || me.scope?.clients?.length > 1) && (
+              <span className="fact-pill" title="Your data access, enforced by Tableau row-level security">
+                Your access <b>{me.scope.label}</b>
+              </span>
+            )}
           </div>
         </div>
         <div className="account-actions">

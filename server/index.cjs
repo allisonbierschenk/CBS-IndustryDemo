@@ -137,6 +137,8 @@ function personaSummary(u) {
   return {
     userId: u.id,
     email: u.email,
+    persona: u.persona || 'Executive',
+    scope: store.scopeFor(u).label,
     name: u.name,
     title: u.title,
     clientName: t.clientName,
@@ -208,7 +210,8 @@ app.get('/api/me', (req, res) => {
   res.json({
     authenticated: true,
     user: store.publicUser(user),
-    tenant,
+    tenant: { ...tenant, engagements: store.engagementsFor(user, tenant) },
+    scope: store.scopeFor(user),
     relationship: { clientSince: tenant.clientSince, monthsOfHistory: Math.max(1, monthsBetween(tenant.clientSince)) },
     entitlements: [...ent],
     views,

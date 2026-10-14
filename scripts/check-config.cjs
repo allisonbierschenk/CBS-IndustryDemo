@@ -24,14 +24,17 @@ const ttl = Number(process.env.JWT_TTL_SECONDS || 300);
 check(ttl > 0 && ttl <= 600, `JWT_TTL_SECONDS = ${ttl}`, 'JWT_TTL_SECONDS must be 1–600 (Tableau max is 10 minutes)');
 
 console.log('\nUser store');
-const clientNames = new Set(tenants.map((t) => t.clientName));
+const clientNames = new Set(tenants.flatMap((t) => t.clientNames || [t.clientName]));
 for (const u of users) {
   const t = tenants.find((x) => x.id === u.tenantId);
   const values = u.attributes?.[claim];
   check(t, `${u.id} → tenant ${u.tenantId}`, `${u.id}: unknown tenant ${u.tenantId}`);
   check(/^[^@\s]+@[^@\s]+\.[a-z]+$/i.test(u.email), `${u.id} email / JWT sub ${u.email}`, `${u.id}: email is not a valid address (${u.email})`);
   check(Array.isArray(values) && values.length && values.every((v) => clientNames.has(v)), `${u.id} '${claim}' = ${JSON.stringify(values)}`, `${u.id}: '${claim}' attribute missing or doesn't match a tenant clientName`);
-  if (t && values) check(values.includes(t.clientName), `${u.id} attribute matches its tenant`, `${u.id}: attribute ${JSON.stringify(values)} ≠ tenant ${t.clientName}`);
+  if (t && values) {
+    const allowed = t.clientNames || [t.clientName];
+    check(values.every((v) => allowed.includes(v)), `${u.id} attribute matches its tenant`, `${u.id}: attribute ${JSON.stringify(values)} not within tenant ${JSON.stringify(allowed)}`);
+  }
   const tier = u.attributes?.['subscription tier'];
   if (t) check(Array.isArray(tier) && tier.length === 1 && tier[0].toLowerCase() === t.tier, `${u.id} 'subscription tier' = ${JSON.stringify(tier)}`, `${u.id}: 'subscription tier' ${JSON.stringify(tier)} should be ["${t.tier[0].toUpperCase() + t.tier.slice(1)}"] to match the tenant`);
 }

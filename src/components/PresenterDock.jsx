@@ -52,7 +52,7 @@ export default function PresenterDock() {
         e.preventDefault();
         setOpen((o) => !o);
       }
-      const m = /^Digit([1-5])$/.exec(e.code);
+      const m = /^Digit([1-9])$/.exec(e.code);
       if (m && personas[Number(m[1]) - 1]) {
         e.preventDefault();
         go(personas[Number(m[1]) - 1]);
@@ -94,7 +94,7 @@ function SwitchTab({ personas, currentId, onPick }) {
     <>
       <p className="muted" style={{ fontSize: 12.5, margin: '0 0 12px' }}>
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
-        with the new user's email as <span className="code-inline">sub</span>. Shortcut: <b>⌥1–⌥5</b>.
+        with the new user's email as <span className="code-inline">sub</span>. Shortcut: <b>⌥1–⌥{personas.length || 5}</b>.
       </p>
       {personas.map((p, i) => (
         <button key={p.userId} className="persona" aria-current={p.userId === currentId} onClick={() => onPick(p)}>
@@ -102,7 +102,7 @@ function SwitchTab({ personas, currentId, onPick }) {
           <span>
             <b>{p.clientName}</b>
             <span>
-              {p.name} · {p.email}
+              {p.name} · {p.persona || 'Executive'}
             </span>
           </span>
           <span style={{ display: 'grid', gap: 6, justifyItems: 'end' }}>

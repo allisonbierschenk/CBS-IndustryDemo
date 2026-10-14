@@ -1,5 +1,5 @@
 {
-  "_readme": "Customer (tenant) profiles. Qualitative context only — no metric values live here; all KPIs and charts come from the embedded Tableau dashboards. 'features' drive server-side entitlements ('transportation' = Vantage's Transportation Optimization & Savings page); tier 'premium' grants 'benchmarks'. 'dataValue' is the engagement name as it appears in the Tableau data when it differs from the display name.",
+  "_readme": "Customer (tenant) profiles. Qualitative context only — no metric values live here; all KPIs and charts come from the embedded Tableau dashboards. 'features' drive server-side entitlements ('transportation' = Vantage's Transportation Optimization & Savings page); tier 'premium' grants 'benchmarks'. 'dataValue' is the engagement name as it appears in the Tableau data when it differs from the display name. 'clientNames' (optional) lists every [Client Name] a consolidated/portfolio tenant spans; each engagement's 'serviceLine' mirrors [Service Line] in the data.",
   "tenants": [
     {
       "id": "northstar",
@@ -17,17 +17,20 @@
         {
           "name": "Operational Transformation",
           "icon": "truck",
-          "description": "Overhauling freight and distribution operations across the Northeast network."
+          "description": "Overhauling freight and distribution operations across the Northeast network.",
+          "serviceLine": "Operations"
         },
         {
           "name": "Process Optimization",
           "icon": "flow",
-          "description": "Streamlining warehouse and fulfillment processes to reduce cycle time and cost."
+          "description": "Streamlining warehouse and fulfillment processes to reduce cycle time and cost.",
+          "serviceLine": "Operations"
         },
         {
           "name": "Technology Modernization",
           "icon": "chip",
-          "description": "Modernizing logistics technology — TMS, WMS and carrier integrations."
+          "description": "Modernizing logistics technology — TMS, WMS and carrier integrations.",
+          "serviceLine": "Technology"
         }
       ],
       "presenterNotes": {
@@ -56,22 +59,26 @@
         {
           "name": "Digital Transformation",
           "icon": "rocket",
-          "description": "Enterprise-wide technology and digital transformation program."
+          "description": "Enterprise-wide technology and digital transformation program.",
+          "serviceLine": "Technology"
         },
         {
           "name": "Agile Transformation",
           "icon": "sprint",
-          "description": "Transitioning engineering teams to agile delivery practices."
+          "description": "Transitioning engineering teams to agile delivery practices.",
+          "serviceLine": "Technology"
         },
         {
           "name": "Change Management",
           "icon": "people",
-          "description": "Supporting organizational adoption of new technologies and processes."
+          "description": "Supporting organizational adoption of new technologies and processes.",
+          "serviceLine": "People & Org"
         },
         {
           "name": "Talent & Workforce Strategy",
           "icon": "users",
-          "description": "Aligning workforce capabilities with the transformation roadmap."
+          "description": "Aligning workforce capabilities with the transformation roadmap.",
+          "serviceLine": "People & Org"
         }
       ],
       "presenterNotes": {
@@ -99,17 +106,20 @@
         {
           "name": "ERP Implementation",
           "icon": "erp",
-          "description": "Enterprise resource planning implementation across clinical and administrative operations."
+          "description": "Enterprise resource planning implementation across clinical and administrative operations.",
+          "serviceLine": "Technology"
         },
         {
           "name": "Compliance & Risk",
           "icon": "shield",
-          "description": "Strengthening regulatory compliance, governance and operational risk management."
+          "description": "Strengthening regulatory compliance, governance and operational risk management.",
+          "serviceLine": "Risk & Compliance"
         },
         {
           "name": "Process Optimization",
           "icon": "flow",
-          "description": "Improving clinical and administrative efficiency."
+          "description": "Improving clinical and administrative efficiency.",
+          "serviceLine": "Operations"
         }
       ],
       "presenterNotes": {
@@ -142,22 +152,26 @@
           "description": "Improving supply chain efficiency and transportation operations — freight cost, routing, carriers and invoicing.",
           "dataValue": "Supply Chain Optimization",
           "analytics": "transportation",
-          "analyticsLabel": "Transportation Optimization & Savings"
+          "analyticsLabel": "Transportation Optimization & Savings",
+          "serviceLine": "Operations"
         },
         {
           "name": "Digital Manufacturing",
           "icon": "factory",
-          "description": "Digitizing warehouse, fleet and distribution-center operations."
+          "description": "Digitizing warehouse, fleet and distribution-center operations.",
+          "serviceLine": "Technology"
         },
         {
           "name": "Operational Excellence",
           "icon": "target",
-          "description": "Lean, continuous-improvement practices across terminals, warehouses and fleet."
+          "description": "Lean, continuous-improvement practices across terminals, warehouses and fleet.",
+          "serviceLine": "Operations"
         },
         {
           "name": "Change Management",
           "icon": "people",
-          "description": "Supporting driver, warehouse and operations teams through new processes."
+          "description": "Supporting driver, warehouse and operations teams through new processes.",
+          "serviceLine": "People & Org"
         }
       ],
       "presenterNotes": {
@@ -187,17 +201,20 @@
         {
           "name": "ESG & Sustainability",
           "icon": "leaf",
-          "description": "Developing sustainability strategy and responding to new regulatory requirements."
+          "description": "Developing sustainability strategy and responding to new regulatory requirements.",
+          "serviceLine": "Risk & Compliance"
         },
         {
           "name": "Operational Excellence",
           "icon": "target",
-          "description": "Improving efficiency across extraction, processing and operational workflows."
+          "description": "Improving efficiency across extraction, processing and operational workflows.",
+          "serviceLine": "Operations"
         },
         {
           "name": "Technology Enablement",
           "icon": "bolt",
-          "description": "Modernizing field operations and supporting technology adoption."
+          "description": "Modernizing field operations and supporting technology adoption.",
+          "serviceLine": "Technology"
         }
       ],
       "presenterNotes": {
@@ -207,6 +224,82 @@
           "Focus on milestones, on-time delivery and the developing value trend."
         ],
         "message": "Meaningful analytics from the very first months of a relationship."
+      }
+    },
+    {
+      "id": "west-portfolio",
+      "clientName": "West Region Portfolio",
+      "clientNames": [
+        "Crestline Partners",
+        "Helix Industries"
+      ],
+      "shortName": "West Portfolio",
+      "monogram": "WP",
+      "color": "#3B4A45",
+      "industry": "Multiple industries",
+      "region": "West",
+      "tier": "premium",
+      "demoFocus": "Consolidated view across two clients · one login, combined KPIs",
+      "clientSince": "2025-01-01",
+      "features": [],
+      "engagements": [
+        {
+          "name": "Digital Transformation",
+          "icon": "rocket",
+          "description": "Enterprise-wide technology and digital transformation program.",
+          "serviceLine": "Technology",
+          "client": "Crestline Partners"
+        },
+        {
+          "name": "Agile Transformation",
+          "icon": "sprint",
+          "description": "Transitioning engineering teams to agile delivery practices.",
+          "serviceLine": "Technology",
+          "client": "Crestline Partners"
+        },
+        {
+          "name": "Change Management",
+          "icon": "people",
+          "description": "Supporting organizational adoption of new technologies and processes.",
+          "serviceLine": "People & Org",
+          "client": "Crestline Partners"
+        },
+        {
+          "name": "Talent & Workforce Strategy",
+          "icon": "users",
+          "description": "Aligning workforce capabilities with the transformation roadmap.",
+          "serviceLine": "People & Org",
+          "client": "Crestline Partners"
+        },
+        {
+          "name": "ESG & Sustainability",
+          "icon": "leaf",
+          "description": "Developing sustainability strategy and responding to new regulatory requirements.",
+          "serviceLine": "Risk & Compliance",
+          "client": "Helix Industries"
+        },
+        {
+          "name": "Operational Excellence",
+          "icon": "target",
+          "description": "Improving efficiency across extraction, processing and operational workflows.",
+          "serviceLine": "Operations",
+          "client": "Helix Industries"
+        },
+        {
+          "name": "Technology Enablement",
+          "icon": "bolt",
+          "description": "Modernizing field operations and supporting technology adoption.",
+          "serviceLine": "Technology",
+          "client": "Helix Industries"
+        }
+      ],
+      "presenterNotes": {
+        "story": "A consolidated persona: one user whose access spans two clients. Same dashboards, combined data, still nothing from clients outside the portfolio.",
+        "scenes": [
+          "The JWT carries client name = [Crestline Partners, Helix Industries]; USERATTRIBUTEINCLUDES matches either.",
+          "Filter by Engagement Type to compare across the two clients; Meridian, Northstar and Vantage never appear."
+        ],
+        "message": "Consolidated reporting across accounts, governed by the same row-level security."
       }
     }
   ]

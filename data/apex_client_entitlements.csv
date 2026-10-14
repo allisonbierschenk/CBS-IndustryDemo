@@ -1,6 +1,10 @@
-Tableau Username,Client Name,Subscription Tier
-dana.whitfield@northstar.com,Northstar Enterprises,Standard
-priya.raman@crestline.com,Crestline Partners,Premium
-marcus.bell@meridian.com,Meridian Solutions,Standard
-elena.ortiz@vantage.com,Vantage Group,Premium
-jordan.hayes@helix.com,Helix Industries,Standard
+Tableau Username,Client Name,Subscription Tier,Entitled Service Line,Entitled Engagement Type
+dana.whitfield@northstar.com,Northstar Enterprises,Standard,*,*
+priya.raman@crestline.com,Crestline Partners,Premium,*,*
+marcus.bell@meridian.com,Meridian Solutions,Standard,*,*
+elena.ortiz@vantage.com,Vantage Group,Premium,*,*
+jordan.hayes@helix.com,Helix Industries,Standard,*,*
+sam.patel@northstar.com,Northstar Enterprises,Standard,Operations,*
+maya.chen@crestline.com,Crestline Partners,Premium,*,Digital Transformation
+alex.morgan@apexconsulting.com,Crestline Partners,Premium,*,*
+alex.morgan@apexconsulting.com,Helix Industries,Premium,*,*
