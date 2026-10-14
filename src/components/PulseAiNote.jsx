@@ -12,12 +12,12 @@ const POINTS = [
   {
     icon: 'shield',
     title: 'Built-in AI, on the Einstein Trust Layer',
-    text: 'Pulse’s AI is built into Tableau and runs on the Einstein Trust Layer. It explains insights Tableau has already computed — it never analyzes your raw data.'
+    text: 'Pulse’s AI is built into Tableau and runs on the Einstein Trust Layer — trusted AI that doesn’t compromise data security or privacy. It describes insights Tableau has already computed; it never analyzes your raw data.'
   },
   {
     icon: 'check',
     title: 'LLM included: no tokens, no unknown costs',
-    text: 'The LLM comes with the Tableau license and is unmetered, so pricing stays predictable however many questions you ask.'
+    text: 'Pulse’s AI is included with Tableau+ and unmetered, so pricing stays predictable however many questions you ask.'
   }
 ];
 
