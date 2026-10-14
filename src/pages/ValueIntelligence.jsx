@@ -101,9 +101,6 @@ export default function ValueIntelligence() {
               Industry <b>{t.industry}</b>
             </span>
             <span className="fact-pill">
-              Region <b>{t.region}</b>
-            </span>
-            <span className="fact-pill">
               Client since <b>{formatMonth(t.clientSince)}</b>
             </span>
             <span className="fact-pill">
