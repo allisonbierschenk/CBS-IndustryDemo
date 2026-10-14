@@ -312,11 +312,11 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
 
   // ── Share a selection to Slack (demo: recorded, not posted) ───────────────
   app.post('/api/actions/slack', requireUser, (req, res) => {
-    const { channel, message, link, worksheet, view, rows } = req.body || {};
+    const { channel, message, worksheet, view, rows } = req.body || {};
     if (!store.slackChannelsFor(req.tenant).includes(channel)) return res.status(400).json({ error: 'Choose a channel' });
     if (!String(message || '').trim()) return res.status(400).json({ error: 'Write a message' });
     const n = Array.isArray(rows) ? rows.length : 0;
-    console.log(`→ [demo Slack] ${req.user.email} → ${channel}: "${String(message).slice(0, 200)}" (${worksheet}, ${n} rows) ${link || ''}`);
+    console.log(`→ [demo Slack] ${req.user.email} → ${channel}: "${String(message).slice(0, 200)}" (${worksheet}, ${n} rows)`);
     activity.record(req.user, req.tenant, 'slack-share', { channel, view: String(view || '').slice(0, 80), worksheet: String(worksheet || '').slice(0, 80), rows: n });
     res.json({ ok: true, channel, demo: true });
   });

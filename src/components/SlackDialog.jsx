@@ -1,5 +1,5 @@
-// Share a mark selection to Slack — demo: the portal composes the message and a signed link back to
-// this view, and the server records it, but nothing is posted to a real Slack workspace.
+// Share a mark selection to Slack — demo: the portal composes the message with the selected rows and the
+// server records it, but nothing is posted to a real Slack workspace.
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
@@ -10,13 +10,9 @@ export default function SlackDialog({ selection, what, title, onClose }) {
   const channels = me.features?.slackChannels || [];
   const [channel, setChannel] = useState(channels[0] || '');
   const [message, setMessage] = useState(`Take a look at ${what} on ${title}.`);
-  const [link, setLink] = useState(null);
   const [state, setState] = useState({ kind: 'editing' });
 
   useEffect(() => {
-    api('/api/links', { method: 'POST', body: { path: window.location.pathname + window.location.search } })
-      .then((d) => setLink(d.url))
-      .catch(() => setLink(null));
     const onKey = (e) => e.key === 'Escape' && onClose();
     document.addEventListener('keydown', onKey);
     return () => document.removeEventListener('keydown', onKey);
@@ -28,7 +24,7 @@ export default function SlackDialog({ selection, what, title, onClose }) {
     e.preventDefault();
     setState({ kind: 'sending' });
     try {
-      const r = await api('/api/actions/slack', { method: 'POST', body: { channel, message, link, worksheet: selection.worksheet, view: title, rows: selection.rows.slice(0, 25) } });
+      const r = await api('/api/actions/slack', { method: 'POST', body: { channel, message, worksheet: selection.worksheet, view: title, rows: selection.rows.slice(0, 25) } });
       setState({ kind: 'sent', channel: r.channel });
     } catch (err) {
       setState({ kind: 'error', message: err.message });
@@ -90,13 +86,6 @@ export default function SlackDialog({ selection, what, title, onClose }) {
                     <div key={i}>{Object.entries(r).map(([k, v]) => `${k}: ${v}`).join(' · ')}</div>
                   ))}
                   {selection.count > rows.length && <div className="muted">+{selection.count - rows.length} more</div>}
-                  {link ? (
-                    <a className="slack-link" href={link} target="_blank" rel="noreferrer" title={link}>
-                      Open in Apex portal →
-                    </a>
-                  ) : (
-                    <span className="slack-link">Creating link…</span>
-                  )}
                 </div>
               </div>
             </div>
