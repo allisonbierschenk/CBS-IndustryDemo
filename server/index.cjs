@@ -138,6 +138,7 @@ function personaSummary(u) {
   const t = store.tenantFor(u);
   return {
     userId: u.id,
+    tenantId: u.tenantId,
     email: u.email,
     persona: u.persona || 'Executive',
     scope: store.scopeFor(u).label,
