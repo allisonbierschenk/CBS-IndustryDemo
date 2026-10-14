@@ -649,7 +649,7 @@ textarea.input { resize: vertical; min-height: 110px; }
 .co-head { display: grid; grid-template-columns: auto 1fr auto; align-items: center; gap: 12px; padding: 0 12px 4px; }
 .co-logo { display: block; flex: none; }
 .co-title { display: grid; line-height: 1.25; }
-.co-title .ur-company { font-size: 14.5px; }
+.co-title .ur-company { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
 .co-industry { font-size: 12px; color: var(--muted); }
 .user-row {
   display: grid; grid-template-columns: 1fr auto; align-items: center; gap: 14px; width: 100%; text-align: left;
@@ -658,7 +658,7 @@ textarea.input { resize: vertical; min-height: 110px; }
 }
 .user-row:hover, .user-row:focus-visible { background: var(--sage-2); }
 .ur-main { display: grid; gap: 1px; min-width: 0; }
-.uc-name { font-size: 15px; font-weight: 800; letter-spacing: -.01em; color: var(--ink); }
+.uc-name { font-size: 14.5px; font-weight: 700; color: var(--ink-2); }
 .ur-name-row { display: flex; align-items: center; gap: 8px; }
 .persona-chip { font-size: 10.5px; font-weight: 800; letter-spacing: .04em; text-transform: uppercase; padding: 2px 8px; border-radius: 99px; background: var(--sage-2); border: 1px solid var(--line); color: var(--ink-2); }
 .ur-meta { font-size: 12.5px; color: var(--muted); overflow-wrap: anywhere; }
