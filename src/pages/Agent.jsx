@@ -73,8 +73,10 @@ export default function Agent() {
   const threadRef = useRef(null);
   const lastRef = useRef(null);
   const [params, setParams] = useSearchParams();
-  // Which data source's metrics to ask: 'all' or a source label (e.g. "Transportation"). ?source= sets it.
-  const [source, setSource] = useState(() => params.get('source') || 'all');
+  // Which data source's metrics to ask (e.g. "Transportation"); ?source= sets it, else the first source.
+  const [picked, setPicked] = useState(() => params.get('source'));
+  const sourceLabels = (prep.sources || []).map((s) => s.label);
+  const source = sourceLabels.includes(picked) ? picked : sourceLabels[0] || null;
 
   useEffect(() => {
     api('/api/agent/context')
@@ -91,7 +93,7 @@ export default function Agent() {
     thread.scrollTo({ top, behavior: 'smooth' });
   }, [messages, loading]);
 
-  const send = async (text) => {
+  const send = async (text, src = source) => {
     const question = text.trim();
     if (!question || loading) return;
     setMessages((m) => [...m, { role: 'user', text: question }]);
@@ -99,7 +101,7 @@ export default function Agent() {
     setInput('');
     setLoading(true);
     try {
-      const d = await api('/api/agent/chat', { method: 'POST', body: { question, conversationId, source } });
+      const d = await api('/api/agent/chat', { method: 'POST', body: { question, conversationId, source: src } });
       setConversationId(d.conversationId);
       setMessages((m) => [...m, { role: 'assistant', content: d.content, insightCards: d.insightCards || [], source: d.source, metricCount: d.metricCount }]);
       setFollowups((d.followups || []).slice(0, 3));
@@ -110,16 +112,20 @@ export default function Agent() {
     }
   };
 
-  // A question handed over from elsewhere in the portal (e.g. "Needs attention" on Home): /agent?q=…
+  // A question handed over from elsewhere in the portal (e.g. "Needs attention" on Home): /agent?q=…[&source=…]
+  // Sent once the metrics are loaded. Without ?source, use the source whose metric names the question mentions.
   const handedOff = useRef(false);
   useEffect(() => {
     const q = params.get('q');
-    if (!q || handedOff.current) return;
+    if (!q || handedOff.current || !prep.metrics) return;
     handedOff.current = true;
+    const named = prep.metrics.find((m) => q.toLowerCase().includes(m.name.toLowerCase()))?.source;
+    const src = sourceLabels.includes(params.get('source')) ? params.get('source') : named || sourceLabels[0];
+    setPicked(src);
     setParams({}, { replace: true });
-    send(q);
+    send(q, src);
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [prep.metrics]);
 
   const reset = () => {
     setMessages([]);
@@ -129,14 +135,14 @@ export default function Agent() {
 
   const pickSource = (s) => {
     if (s === source) return;
-    setSource(s);
+    setPicked(s);
     reset(); // each data source is its own conversation
   };
 
-  const multiSource = prep.sources?.length > 1;
-  const inScope = (prep.metrics || []).filter((m) => source === 'all' || m.source === source);
-  const suggested = source === 'all' ? prep.suggested || [] : prep.suggestedBySource?.[source] || [];
-  const sourceLabel = source === 'all' ? 'all your metrics' : `${source} metrics`;
+  const multiSource = sourceLabels.length > 1;
+  const inScope = (prep.metrics || []).filter((m) => m.source === source);
+  const suggested = prep.suggestedBySource?.[source] || [];
+  const sourceLabel = multiSource ? `${source} metrics` : 'your engagements';
 
   return (
     <div className="container">
@@ -147,9 +153,6 @@ export default function Agent() {
           <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your Tableau Pulse metrics.</p>
           {multiSource && (
             <div className="seg source-seg" role="radiogroup" aria-label="Data source">
-              <button role="radio" aria-checked={source === 'all'} onClick={() => pickSource('all')}>
-                All metrics <span>{prep.metrics.length}</span>
-              </button>
               {prep.sources.map((s) => (
                 <button key={s.label} role="radio" aria-checked={source === s.label} onClick={() => pickSource(s.label)}>
                   {s.label} <span>{s.count}</span>
@@ -193,7 +196,7 @@ export default function Agent() {
               )}
               {prep.metrics && (
                 <>
-                  <div className="kicker">Metrics in scope{source !== 'all' ? ` · ${source}` : ''}</div>
+                  <div className="kicker">Metrics in scope{multiSource ? ` · ${source}` : ''}</div>
                   <div className="metric-pills">
                     {inScope.map((m) => (
                       <span key={m.metricId} className="metric-pill" title={m.source}>
@@ -231,7 +234,7 @@ export default function Agent() {
               <div key={i} ref={ref} style={{ scrollMarginTop: 12 }}>
                 {multiSource && m.source && (
                   <div className="answer-source">
-                    From {m.source === 'all' ? 'all your' : m.source} Pulse metrics{m.metricCount ? ` · ${m.metricCount}` : ''}
+                    From {m.source} Pulse metrics{m.metricCount ? ` · ${m.metricCount}` : ''}
                   </div>
                 )}
                 <Answer msg={m} />
