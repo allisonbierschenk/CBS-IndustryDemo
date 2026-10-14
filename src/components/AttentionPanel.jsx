@@ -12,6 +12,20 @@ export default function AttentionPanel() {
   const [state, setState] = useState({ loading: true });
   const [expanded, setExpanded] = useState(false);
 
+  // Pulse's suggested follow-ups that mention this topic become the agenda; otherwise sensible defaults.
+  const agendaFor = (name, fallback) => {
+    const own = (state.followups || []).filter((q) => q.toLowerCase().includes(name.toLowerCase()));
+    return own.length ? own : fallback;
+  };
+  const contactAbout = (topic, opening, facts, agenda) => {
+    track('selection-action', { action: 'attention-contact', metric: topic });
+    const when = new Date(state.generatedAt).toLocaleDateString([], { dateStyle: 'medium' });
+    contact(
+      'Schedule a review',
+      [`${opening} Tableau Pulse flagged it in my portal's Needs attention summary on ${when}.`, `\nWhat Pulse shows:\n${facts.filter(Boolean).map((l) => `• ${l}`).join('\n')}`, `\nWhat I'd like to cover:\n${agenda.map((q) => `• ${q}`).join('\n')}`].join('\n')
+    );
+  };
+
   const load = useCallback(async (refresh = false) => {
     setState((s) => ({ ...s, loading: true, error: null }));
     try {
@@ -65,45 +79,38 @@ export default function AttentionPanel() {
           <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={() => setExpanded((x) => !x)} aria-expanded={expanded}>
             {expanded ? 'Show less' : 'Read the full summary'}
           </button>
-          {state.metrics?.length > 0 && (
+          {(state.metrics?.length > 0 || state.onTrack?.length > 0) && (
             <div className="att-actions">
               <div className="kicker">Take action</div>
-              {state.metrics.slice(0, 5).map((m) => {
-                const agentQ = m.noData ? `Why is there no current data for ${m.name}?` : `What is driving the latest change in ${m.name}?`;
-                const discuss = () => {
-                  track('selection-action', { action: 'attention-contact', metric: m.name });
-                  const agenda = (state.followups || []).filter((q) => q.toLowerCase().includes(m.name.toLowerCase()));
-                  contact(
-                    'Schedule a review',
-                    [
-                      `I'd like to discuss ${m.name} (${m.source}). Tableau Pulse flagged it in my portal's Needs attention summary on ${new Date(state.generatedAt).toLocaleDateString([], { dateStyle: 'medium' })}.`,
-                      m.details?.length ? `\nWhat Pulse flagged:\n${m.details.map((l) => `• ${l}`).join('\n')}` : '\nPulse has no data for this metric in the current period yet.',
-                      `\nWhat I'd like to cover:\n${(agenda.length ? agenda : [`What is driving the change in ${m.name}?`, 'What should we do about it, and by when?']).map((q) => `• ${q}`).join('\n')}`
-                    ].join('\n')
-                  );
-                };
-                return (
-                  <div className={`att-row${m.sentiment === 'negative' ? ' is-negative' : ''}${m.noData ? ' is-nodata' : ''}`} key={m.metricId}>
-                    <div className="att-what">
-                      <b>{m.name}</b>
-                      <span title={m.headline}>{m.headline}</span>
-                    </div>
-                    <div className="att-btns">
-                      <Link className="att-icon" to={`/agent?q=${encodeURIComponent(agentQ)}&source=${encodeURIComponent(m.source)}`} title="Ask the Agent" aria-label={`Ask the Agent about ${m.name}`}>
-                        <Icon name="agent" />
-                      </Link>
-                      {m.dashboard && (
-                        <Link className="att-icon" to={m.dashboard.to} title={`Open ${m.dashboard.title}`} aria-label={`Open ${m.dashboard.title}`}>
-                          <Icon name="dashboard" />
-                        </Link>
-                      )}
-                      <button className="att-icon is-dark" onClick={discuss} title="Contact Apex about this" aria-label={`Contact Apex about ${m.name}`}>
-                        <Icon name="mail" />
-                      </button>
-                    </div>
-                  </div>
-                );
-              })}
+              {state.metrics.slice(0, 5).map((m) => (
+                <ActionRow
+                  key={m.metricId}
+                  title={m.name}
+                  status="Off track"
+                  issue={m.issue}
+                  expectation={m.expectation}
+                  drivers={m.drivers}
+                  ask={m.ask}
+                  source={m.source}
+                  dashboard={m.dashboard}
+                  onContact={() =>
+                    contactAbout(
+                      m.name,
+                      `I'd like to discuss ${m.name} (${m.source}).`,
+                      [m.issue, m.expectation, ...(m.drivers || []).map((d) => `Driven by ${d}`)],
+                      agendaFor(m.name, [`What is driving the change in ${m.name}?`, 'What should we do about it, and by when?'])
+                    )
+                  }
+                />
+              ))}
+              {state.onTrack?.length > 0 && (
+                <p className="att-ontrack">
+                  <Icon name="check" size={14} />
+                  <span>
+                    <b>On track:</b> {state.onTrack.map((o) => `${o.name} (${o.note})`).join(' · ')}
+                  </span>
+                </p>
+              )}
             </div>
           )}
           {state.followups?.length > 0 && (
@@ -119,5 +126,43 @@ export default function AttentionPanel() {
         </>
       )}
     </section>
+  );
+}
+
+function ActionRow({ title, status, issue, expectation, drivers = [], ask, source, dashboard, onContact }) {
+  return (
+    <div className="att-row is-negative">
+      <div className="att-what">
+        <div className="att-title">
+          <b>{title}</b>
+          <span className="att-status">{status}</span>
+        </div>
+        <dl className="att-facts">
+          <dt>Issue</dt>
+          <dd>{issue}</dd>
+          <dt>Expected</dt>
+          <dd>{expectation}</dd>
+          {drivers.length > 0 && (
+            <>
+              <dt>Driven by</dt>
+              <dd>{drivers.join(' · ')}</dd>
+            </>
+          )}
+        </dl>
+      </div>
+      <div className="att-btns">
+        <Link className="att-icon" to={`/agent?q=${encodeURIComponent(ask)}${source ? `&source=${encodeURIComponent(source)}` : ''}`} title="Ask the Agent" aria-label={`Ask the Agent about ${title}`}>
+          <Icon name="agent" />
+        </Link>
+        {dashboard && (
+          <Link className="att-icon" to={dashboard.to} title={`Open ${dashboard.title}`} aria-label={`Open ${dashboard.title}`}>
+            <Icon name="dashboard" />
+          </Link>
+        )}
+        <button className="att-icon is-dark" onClick={onContact} title="Contact Apex about this" aria-label={`Contact Apex about ${title}`}>
+          <Icon name="mail" />
+        </button>
+      </div>
+    </div>
   );
 }
