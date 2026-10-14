@@ -156,6 +156,7 @@ export default function Agent() {
             <InfoTip kind="agent" extra={{ source }} label="About the Agent" />
           </div>
           <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your Tableau Pulse metrics.</p>
+          <PulseAiNote />
           {multiSource && (
             <div className="seg source-seg" role="radiogroup" aria-label="Data source">
               {prep.sources.map((s) => (
@@ -179,7 +180,6 @@ export default function Agent() {
         </div>
       </div>
 
-      <PulseAiNote />
       <div className="chat">
         <div className="chat-thread" ref={threadRef}>
           {messages.length === 0 && (

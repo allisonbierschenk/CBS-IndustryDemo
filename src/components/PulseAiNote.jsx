@@ -1,5 +1,6 @@
 // How the Agent's AI works, stated on the page: an LLM writes the words, Pulse computes the facts
 // deterministically, and there are no tokens or unknown costs (Pulse AI is included in the license, unmetered).
+// Kept to one quiet line under the page intro; each point's detail is its hover text (full story in the (i)).
 import Icon from './Icon.jsx';
 
 const POINTS = [
@@ -10,7 +11,7 @@ const POINTS = [
   },
   {
     icon: 'agent',
-    title: 'The LLM writes the words, not the numbers',
+    title: 'LLM writes the words, not the numbers',
     text: 'Pulse’s language model only phrases those insights. It never analyzes your data, so it can’t invent a figure.'
   },
   {
@@ -22,16 +23,13 @@ const POINTS = [
 
 export default function PulseAiNote() {
   return (
-    <div className="ai-note" role="note" aria-label="How the Agent's AI works">
+    <ul className="ai-note" aria-label="How the Agent's AI works">
       {POINTS.map((p) => (
-        <div key={p.title}>
+        <li key={p.title} title={p.text}>
           <Icon name={p.icon} />
-          <span>
-            <b>{p.title}</b>
-            {p.text}
-          </span>
-        </div>
+          {p.title}
+        </li>
       ))}
-    </div>
+    </ul>
   );
 }
