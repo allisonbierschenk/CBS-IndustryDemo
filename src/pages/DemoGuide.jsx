@@ -122,7 +122,8 @@ const SCENES = [
     tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
       ['What does “where you stand among peers” mean?', 'Apex compares this client’s engagement results with anonymized companies in the same industry. The percentile is the share they outperform: 70th = better results than 70 out of 100 peers. 50th is the peer median.'],
-      ['Why would the client care?', 'Their own dashboard says whether they hit their targets; it can’t say whether those targets were ambitious. Peers answer “is 89% value realization good?”, give leadership the comparison boards ask for, and point to where investment would pay off most.'],
+      ['Why would the client care?', 'Hitting their own target doesn’t mean the result is good — 89% value realization sounds fine unless peers get 95%. Benchmarks justify the consulting spend to the CFO (“top quartile in our industry”), show where the next dollar pays off most, and warn when competitors are pulling ahead.'],
+      ['Why can Apex charge for it?', 'No single client can see how its peers perform — Apex can, across all its clients, anonymized. Every gap the benchmark shows is a reason for the next engagement.'],
       ['What changed when they upgraded?', 'The portal marked the session Premium on the server; the next Tableau token carries subscription tier = Premium, so the tile and the Benchmarks page unlock — no new dashboards, no reload of data.'],
       ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same source of truth and security.'],
       ['Where does the next step come from?', 'It’s rule-based on the percentile: below the median, above it, or top quartile — no AI involved. The plan request carries the numbers so Apex starts with the facts.'],
@@ -294,15 +295,22 @@ export default function DemoGuide() {
               </div>
               <div>
                 <b>Why the client cares</b>
-                <span>Hitting your own targets doesn’t tell you if they were good targets. Peers do — and that’s the comparison executives and boards ask for.</span>
+                <span>
+                  <em>Is our result good?</em> 89% vs an 85% target sounds fine — unless peers get 95%. <em>Is the spend worth it?</em> “Top quartile in our industry” answers the CFO.{' '}
+                  <em>Where next?</em> The biggest gap to peers is the biggest upside.
+                </span>
               </div>
               <div>
                 <b>What they do with it</b>
                 <span>Find the engagement furthest from the top quartile, set a goal, and plan it with Apex.</span>
               </div>
               <div>
+                <b>Why Apex can charge for it</b>
+                <span>No client can build this alone — only Apex sees results across many clients. And every gap it shows is a reason for the next engagement.</span>
+              </div>
+              <div className="explain-say">
                 <b>Say it like this</b>
-                <span>“Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you.”</span>
+                <span>“Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you — and where Apex can help you close the gap.”</span>
               </div>
             </div>
           </section>

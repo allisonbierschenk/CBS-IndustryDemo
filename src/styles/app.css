@@ -1089,3 +1089,6 @@ textarea.input { resize: vertical; min-height: 110px; }
 .explain-grid b { display: block; font-size: 14px; color: var(--ink); margin-bottom: 3px; }
 .explain-grid span { font-size: 12.5px; line-height: 1.5; color: var(--ink-2); }
 @media (max-width: 1000px) { .persona-grid, .explain-grid { grid-template-columns: 1fr 1fr; } }
+.explain-grid em { font-style: normal; font-weight: 700; color: var(--ink); }
+.explain-say { grid-column: 1 / -1; padding-top: 12px; border-top: 1px solid var(--line); }
+.explain-say span { font-size: 14px; font-weight: 600; color: var(--ink); }
