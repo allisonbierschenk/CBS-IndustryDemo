@@ -119,10 +119,18 @@ const SCENES = [
     do: 'Switch to Dana Whitfield (⌥1, Standard). The benchmarks tile is blurred: click What’s included, then Confirm upgrade. Open Industry Benchmarks, click an engagement under Where you stand, set a goal and choose Plan the improvement with Apex.',
     say: 'Monetize your expertise — clients upgrade themselves, right inside the experience.',
     money: 'Self-serve upsell — a Standard client becomes Premium in one click ($5/month in this demo) — and every benchmark gap becomes an advisory conversation.',
+    beats: [
+      ['Against the plan', '“Dana’s dashboard says value realization is behind plan. Useful — but is that bad, or is everyone struggling?”'],
+      ['Against peers', '“Benchmarks answer that: Northstar is behind about 70% of comparable logistics companies. Companies like hers are getting more from similar programs — so better is achievable.”'],
+      ['Why it matters', '“Now Dana knows where she’s losing ground, which engagement to fix first, and what to tell her CFO.”'],
+      ['Where Apex comes in', '“And only Apex can show her what the top performers do differently — that’s the next engagement.”']
+    ],
+    beatsNote: 'Read Dana’s live percentile from the Benchmarks headline after upgrading (about the 30th today).',
     tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
+      ['Are the peers their competitors?', 'Not necessarily — they’re comparable, anonymized companies in the same industry (e.g. Apex’s other logistics clients). Some may be competitors, but no one can tell who: only aggregate results are shown. The point is what good looks like for a company like yours.'],
       ['What does “where you stand among peers” mean?', 'Apex compares this client’s engagement results with anonymized companies in the same industry. The percentile is the share they outperform: 70th = better results than 70 out of 100 peers. 50th is the peer median.'],
-      ['Why would the client care?', 'Hitting their own target doesn’t mean the result is good — 89% value realization sounds fine unless peers get 95%. Benchmarks justify the consulting spend to the CFO (“top quartile in our industry”), show where the next dollar pays off most, and warn when competitors are pulling ahead.'],
+      ['Why would the client care?', 'Hitting their own target doesn’t mean the result is good — 89% value realization sounds fine unless peers get 95%. Benchmarks justify the consulting spend to the CFO (“top quartile in our industry”), and show where the next dollar pays off most — because they reveal what’s achievable for a company like theirs.'],
       ['Why can Apex charge for it?', 'No single client can see how its peers perform — Apex can, across all its clients, anonymized. Every gap the benchmark shows is a reason for the next engagement.'],
       ['What changed when they upgraded?', 'The portal marked the session Premium on the server; the next Tableau token carries subscription tier = Premium, so the tile and the Benchmarks page unlock — no new dashboards, no reload of data.'],
       ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same source of truth and security.'],
@@ -265,6 +273,20 @@ export default function DemoGuide() {
                     <span>$</span>
                     {s.money}
                   </p>
+                  {s.beats && (
+                    <div className="scene-beats">
+                      <div className="kicker">Benchmarking talk track</div>
+                      <ol>
+                        {s.beats.map(([t, line]) => (
+                          <li key={t}>
+                            <b>{t}</b>
+                            <span>{line}</span>
+                          </li>
+                        ))}
+                      </ol>
+                      {s.beatsNote && <small>{s.beatsNote}</small>}
+                    </div>
+                  )}
                   <div className="scene-tech">
                     {s.tech.map((k) => (
                       <Chip key={k} k={k} />
