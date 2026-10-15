@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
 import InfoTip from './InfoTip.jsx';
+import UpgradeButton from './UpgradeButton.jsx';
 
 export default function PremiumPanel({ me }) {
   const contact = useContact();
@@ -34,14 +35,12 @@ export default function PremiumPanel({ me }) {
           <Icon name="arrowRight" />
         </Link>
       ) : (
-        <button
-          className="btn btn-dark"
-          onClick={() =>
-            contact('Premium subscription', `We'd like to learn more about adding Industry Performance Benchmarks for ${t.clientName}.`)
-          }
-        >
-          Ask about Premium
-        </button>
+        <div style={{ display: 'flex', gap: 8 }}>
+          <button className="btn btn-ghost" onClick={() => contact('Premium subscription', `We'd like to learn more about adding Industry Performance Benchmarks for ${t.clientName}.`)}>
+            Ask about Premium
+          </button>
+          <UpgradeButton className="btn btn-dark" label="Upgrade to Premium" />
+        </div>
       )}
     </div>
   );

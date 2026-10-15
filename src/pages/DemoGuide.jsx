@@ -95,16 +95,16 @@ const SCENES = [
   },
   {
     n: 6,
-    title: 'Introduce premium intelligence',
-    where: 'Industry Benchmarks',
-    do: 'As Elena (Premium), open Industry Benchmarks. Then switch to Dana Whitfield (⌥1, Standard): the benchmarks tile is blurred with “Unlock — $5/month”.',
-    say: 'Monetize your expertise with premium insights inside the client experience.',
-    money: 'A paid Premium tier ($5/month in this demo) plus advisory upsell from “Book a benchmark review”.',
-    tech: ['vds', 'rls', 'portal'],
+    title: 'Upgrade to premium — live',
+    where: 'Value Intelligence → Industry Benchmarks',
+    do: 'Switch to Dana Whitfield (⌥1, Standard). The benchmarks tile is blurred: click What’s included, then Confirm upgrade. The tile unlocks; open Industry Benchmarks.',
+    say: 'Monetize your expertise — clients upgrade themselves, right inside the experience.',
+    money: 'Self-serve upsell: a Standard client becomes a paying Premium client in one click ($5/month in this demo).',
+    tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
-      ['Is that a Tableau dashboard?', 'No — it’s Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same single source of truth and security.'],
-      ['How is Premium enforced?', 'The Benchmarks page is checked on the server — Standard clients get no data at all. The blurred tile on the dashboard is the upsell moment.'],
-      ['What else could be Premium?', 'Build your own report (Reports → Build) — Tableau web authoring on the governed data source.']
+      ['What changed when they upgraded?', 'The portal marked the session Premium on the server; the next Tableau token carries subscription tier = Premium, so the tile and the Benchmarks page unlock — no new dashboards, no reload of data.'],
+      ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same source of truth and security.'],
+      ['How do I reset the demo?', 'Sign out or switch users — the upgrade lives only in that session.']
     ]
   },
   {

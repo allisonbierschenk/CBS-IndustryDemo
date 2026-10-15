@@ -1,14 +1,12 @@
 // Premium upsell drawn over the benchmarks tile inside the embedded dashboard (Standard clients only).
 // Cosmetic: the real Premium enforcement is the server-gated /benchmarks page.
-import { Link } from 'react-router-dom';
-import { useContact } from '../context/ContactContext.jsx';
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from './Icon.jsx';
 import InfoTip from './InfoTip.jsx';
+import UpgradeButton from './UpgradeButton.jsx';
 
 export default function BenchmarkLock({ compact = false }) {
   const { me } = useSession();
-  const contact = useContact();
   const price = me.features?.benchmarks?.price;
   return (
     <div className={`bench-lock${compact ? ' is-compact' : ''}`}>
@@ -26,15 +24,8 @@ export default function BenchmarkLock({ compact = false }) {
         </div>
       )}
       <div className="bench-lock-actions">
-        <button
-          className="btn btn-lime btn-sm"
-          onClick={() => contact('Premium subscription', `We'd like to upgrade ${me.tenant.clientName} to Premium${price ? ` (${price})` : ''} to unlock Industry Performance Benchmarks.`)}
-        >
-          Upgrade
-        </button>
-        <Link className="btn btn-ghost-light btn-sm" to="/benchmarks">
-          What’s included
-        </Link>
+        <UpgradeButton />
+        <UpgradeButton className="btn btn-ghost-light btn-sm" label="What’s included" intent="learn" />
       </div>
     </div>
   );

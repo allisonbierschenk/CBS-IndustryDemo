@@ -1024,3 +1024,13 @@ textarea.input { resize: vertical; min-height: 110px; }
 .bench-lock-title { display: flex; align-items: center; gap: 8px; }
 .bench-lock .info-btn { background: transparent; border-color: rgba(255, 255, 255, .6); color: #fff; box-shadow: none; }
 .bench-lock .info-btn:hover, .bench-lock .info-btn.is-open { background: var(--tableau-blue); border-color: var(--tableau-blue); }
+
+/* Demo checkout */
+.upgrade-modal { width: min(520px, 100%); }
+.upgrade-plan { display: flex; align-items: center; justify-content: space-between; padding: 14px 16px; border-radius: 16px; background: var(--ink); color: #fff; margin-top: 16px; }
+.upgrade-pitch { margin: 0 0 14px; font-size: 14px; color: var(--ink-2); }
+.upgrade-price b { font-size: 26px; color: var(--lime); letter-spacing: -.02em; }
+.upgrade-list { list-style: none; margin: 0; padding: 0; display: grid; gap: 12px; }
+.upgrade-list li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 13px; color: var(--muted); }
+.upgrade-list li svg { width: 18px; height: 18px; color: var(--ink); margin-top: 1px; }
+.upgrade-list b { display: block; font-size: 14px; color: var(--ink); }

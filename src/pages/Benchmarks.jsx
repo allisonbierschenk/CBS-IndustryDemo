@@ -24,12 +24,14 @@ const monthLabel = (m) => new Date(`${m}-01T00:00:00Z`).toLocaleDateString('en-U
 export default function Benchmarks() {
   const { me } = useSession();
   const [state, setState] = useState({ loading: true });
+  const premium = me.entitlements.includes('benchmarks');
 
   useEffect(() => {
+    setState({ loading: true });
     api('/api/benchmarks')
       .then((d) => setState({ data: d }))
       .catch((e) => setState({ error: e.message, locked: e.status === 403 }));
-  }, []);
+  }, [premium]);
 
   return (
     <div className="container">

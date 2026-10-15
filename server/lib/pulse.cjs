@@ -211,8 +211,10 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
   }
 
   const resetContext = (user) => contexts.delete(user.id);
+  /** Drop the cached Tableau session so the next call signs in with the user's current attributes. */
+  const forgetSession = (user) => sessions.delete(user.email);
 
-  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds, vdsMetadata };
+  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds, vdsMetadata, forgetSession };
 }
 
 /** Vega-Lite spec → [{date, value}] for the trend chart (drops forecast/projection points). */

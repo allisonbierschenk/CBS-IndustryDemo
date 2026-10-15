@@ -74,9 +74,21 @@ app.use((req, res, next) => {
 });
 
 // ── Session helpers ─────────────────────────────────────────────────────────
+// Demo upgrade: a Standard client can "buy" Premium during the demo. It lives only in this portal session
+// (signed cookie), so signing out or switching users resets it. While upgraded, the tenant is treated as
+// Premium and the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+function withUpgrade(user, s) {
+  if (!user || !s?.upgraded) return user;
+  return { ...user, attributes: { ...user.attributes, 'subscription tier': ['Premium'] }, upgradedInSession: true };
+}
+function tenantForSession(user) {
+  const t = store.tenantFor(user);
+  return t && user?.upgradedInSession ? { ...t, tier: 'premium', upgradedInSession: true } : t;
+}
+
 function currentUser(req) {
   const s = jar.read(req, SESSION_COOKIE);
-  return s ? store.findUserById(s.uid) : null;
+  return s ? withUpgrade(store.findUserById(s.uid), s) : null;
 }
 
 function startSession(res, user) {
@@ -86,7 +98,7 @@ function startSession(res, user) {
 
 function requireUser(req, res, next) {
   const user = currentUser(req);
-  const tenant = store.tenantFor(user);
+  const tenant = tenantForSession(user);
   if (!user || !tenant) return res.status(401).json({ error: 'Not signed in' });
   req.user = user;
   req.tenant = tenant;
@@ -175,6 +187,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
   if (!user) return res.status(404).json({ error: 'Unknown user' });
 
   startSession(res, user);
+  pulse.forgetSession(user); // a fresh sign-in never inherits an earlier session's (e.g. upgraded) attributes
   console.log(`→ signed in ${user.id} (${user.email})`);
   activity.record(user, store.tenantFor(user), 'sign-in', {});
   features.warmAttention(user); // start the (slow) Pulse brief now so Home doesn't wait for it
@@ -190,7 +203,20 @@ app.post('/api/auth/login', throttle, (req, res) => {
 });
 
 app.post('/api/auth/logout', (req, res) => {
+  const user = currentUser(req);
+  if (user) pulse.forgetSession(user); // next Tableau session uses the stored (non-upgraded) attributes
   jar.clear(res, SESSION_COOKIE);
+  res.json({ ok: true });
+});
+
+// Demo checkout: upgrade this session to Premium (reset by signing out / switching users).
+app.post('/api/upgrade', requireUser, (req, res) => {
+  if (req.tenant.tier === 'premium') return res.json({ ok: true, already: true });
+  const s = jar.read(req, SESSION_COOKIE);
+  jar.write(res, SESSION_COOKIE, { ...s, upgraded: true }, SESSION_TTL_MS);
+  pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
+  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price: store.content.benchmarks?.price || '' });
+  console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium for this session`);
   res.json({ ok: true });
 });
 
@@ -198,7 +224,7 @@ app.post('/api/auth/logout', (req, res) => {
 // "Who's signed in?" — answers 200 either way so a signed-out check doesn't log a red 401 in the console.
 app.get('/api/me', (req, res) => {
   const user = currentUser(req);
-  const tenant = store.tenantFor(user);
+  const tenant = tenantForSession(user);
   if (!user || !tenant) return res.json({ authenticated: false });
   const ent = store.entitlementsFor(tenant);
 
