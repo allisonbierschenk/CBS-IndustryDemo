@@ -15,6 +15,13 @@ const TECH = {
   portal: { label: 'Portal entitlements', color: '#2a312e', note: 'Apex’s app decides what a client’s subscription includes — enforced on the server, not hidden in the UI.' }
 };
 
+const MONEY = [
+  ['Premium analytics tier', 'Benchmarks and build-your-own reports, sold per client ($5/month in this demo).'],
+  ['Advisory upsell', 'Insights surface the next engagement — “Book a benchmark review”, Contact Apex.'],
+  ['Retention & expansion', 'Live proof of value replaces the quarterly deck at renewal time.'],
+  ['Scale without cost', 'One governed app for every client; no new build per customer.']
+];
+
 const SCENES = [
   {
     n: 1,
@@ -22,6 +29,7 @@ const SCENES = [
     where: 'Login → Home',
     do: 'Sign in as Elena Ortiz (Vantage Group). Point to Needs attention, then open Value Intelligence.',
     say: 'Show your clients the measurable value of your services every time they log in.',
+    money: 'Proof of value at every login is what wins renewals and expansions.',
     tech: ['jwt', 'rls', 'pulse', 'embed'],
     ask: [
       ['Do clients need a Tableau login?', 'No. The portal signs a short-lived JWT for the user (email as the username, 10-minute expiry); Tableau trusts it through a Connected App. The secret never leaves the server.'],
@@ -36,6 +44,7 @@ const SCENES = [
     where: 'Value Intelligence → Transportation',
     do: 'Use the filter bar, click a scorecard row, then select Supply Chain Optimization on a chart and follow “Explore Transportation”.',
     say: 'Connect high-level business outcomes to the initiatives driving them.',
+    money: 'Engagement-level ROI shows Apex where to sell the next engagement.',
     tech: ['embed', 'rls'],
     ask: [
       ['Are those filters Tableau’s?', 'Yes — the portal’s filter bar drives the dashboard’s own Tableau filters through the Embedding API, and only lists values the user is allowed to see.'],
@@ -49,6 +58,7 @@ const SCENES = [
     where: 'Transportation Optimization & Savings',
     do: 'Filter by Carrier or Savings & Optimization Initiative. Select a few marks and choose Explain with Pulse.',
     say: 'Don’t just report value delivered — let clients explore how it was created.',
+    money: 'Savings the client can verify justify extending the program — and its fees.',
     tech: ['embed', 'pulse'],
     ask: [
       ['What did Explain with Pulse just do?', 'Asked Pulse about the selected marks using only the Transportation metrics the user follows, and showed the answer beside the dashboard.'],
@@ -62,6 +72,7 @@ const SCENES = [
     where: 'Transportation → invoice detail',
     do: 'Select Outstanding in Invoice Status Breakdown to drill into the invoice and shipment records, or search an invoice number.',
     say: 'Move from an insight to the detailed transactions behind it.',
+    money: 'Transaction-level transparency builds the trust that keeps clients paying.',
     tech: ['embed', 'rls'],
     ask: [
       ['How does the drill-down work?', 'With actions built into the Tableau workbook — no extra portal code. The invoice search above it applies a Tableau filter through the Embedding API.'],
@@ -74,6 +85,7 @@ const SCENES = [
     where: 'Agent',
     do: 'Pick Transportation, ask “What is driving Freight Cost?”, then a follow-up chip.',
     say: 'Answers in plain language — from the same governed metrics as the dashboard.',
+    money: 'An AI analyst for every client, with Pulse AI included in Tableau+ — no per-question cost eating Apex’s margin.',
     tech: ['pulse', 'rls'],
     ask: [
       ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed; it never analyzes raw data, so insights are deterministic.'],
@@ -87,6 +99,7 @@ const SCENES = [
     where: 'Industry Benchmarks',
     do: 'As Elena (Premium), open Industry Benchmarks. Then switch to Dana Whitfield (⌥1, Standard): the benchmarks tile is blurred with “Unlock — $5/month”.',
     say: 'Monetize your expertise with premium insights inside the client experience.',
+    money: 'A paid Premium tier ($5/month in this demo) plus advisory upsell from “Book a benchmark review”.',
     tech: ['vds', 'rls', 'portal'],
     ask: [
       ['Is that a Tableau dashboard?', 'No — it’s Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same single source of truth and security.'],
@@ -100,6 +113,7 @@ const SCENES = [
     where: 'Presenter dock (⌥P)',
     do: 'Switch users: Sam Patel (Operations only), Maya Chen (one engagement), Alex Morgan (two clients combined).',
     say: 'One application, many clients — each sees only their own data.',
+    money: 'Every new client is new revenue on the same app — not a new build.',
     tech: ['rls', 'jwt'],
     ask: [
       ['How is each client isolated?', 'Each user’s JWT carries client name, service line and engagement type; filters on the published data source apply them everywhere — dashboards, Pulse, the Agent and feeds.'],
@@ -141,11 +155,23 @@ export default function DemoGuide() {
         <main className="container guide">
           <section className="guide-hero">
             <div className="kicker">Presenter guide · 5–7 minutes</div>
-            <h1>Share live proof of value with your clients</h1>
+            <h1>Share live proof of value — and get paid for it</h1>
             <p className="lead">
-              Apex Consulting (Tableau’s customer) embeds Tableau in its client portal so clients like Vantage and Northstar see the value Apex delivers — and can
-              prove it themselves.
+              Apex Consulting (Tableau’s customer) embeds Tableau in its client portal so clients like Vantage and Northstar see the value Apex delivers — and Apex
+              turns that data into revenue.
             </p>
+          </section>
+
+          <section className="guide-money" aria-label="How Apex makes money">
+            <div className="kicker">The story: how Apex makes money with Tableau Embedded</div>
+            <div className="money-grid">
+              {MONEY.map(([t, d]) => (
+                <div key={t}>
+                  <b>{t}</b>
+                  <span>{d}</span>
+                </div>
+              ))}
+            </div>
           </section>
 
           <section className="guide-legend" aria-label="Tableau technology key">
@@ -173,6 +199,10 @@ export default function DemoGuide() {
                     <b>Do</b> {s.do}
                   </p>
                   <p className="scene-say">“{s.say}”</p>
+                  <p className="scene-money">
+                    <span>$</span>
+                    {s.money}
+                  </p>
                   <div className="scene-tech">
                     {s.tech.map((k) => (
                       <Chip key={k} k={k} />
@@ -216,7 +246,7 @@ export default function DemoGuide() {
             <div className="close-grid">
               <div>
                 <b>For Apex</b>
-                <span>Proof of value, trust and renewals — plus premium analytics revenue.</span>
+                <span>A new revenue line — premium analytics and advisory upsell — plus stronger renewals.</span>
               </div>
               <div>
                 <b>For their clients</b>

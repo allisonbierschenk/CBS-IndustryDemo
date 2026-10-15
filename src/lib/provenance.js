@@ -92,6 +92,14 @@ export function provenance(key, me, extra = {}) {
         security: `${RLS(me, ['client name', 'service line', 'engagement type'])} Premium access is checked on the server before any data is returned.`,
         why: 'This page isn’t a Tableau dashboard at all — it’s Apex’s own design, fed by the same governed data source through VizQL Data Service. So a custom, on-brand experience still uses the single source of truth and the same row-level security as every Tableau view, and Apex can package it as a paid Premium tier.'
       };
+    case 'premium':
+      return {
+        tag: 'Data monetization',
+        freshness: 'Checked on every request, so what a client can open always matches their current plan in Apex’s system.',
+        source: 'Premium content (Industry Benchmarks, build-your-own reports) uses the same published data source as every other view — nothing extra to build or copy.',
+        security: `Entitlements are enforced on the server: content outside a client’s subscription never gets a token or data. Your subscription tier (${[].concat(me.user.attributes?.['subscription tier'] || []).join(', ') || 'none'}) also travels in your sign-in token, so Tableau can act on it too.`,
+        why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project, and Pulse AI is included with Tableau+ and unmetered, so the margin on every upgrade stays predictable.'
+      };
     case 'alerts':
       return {
         tag: 'Tableau Pulse + REST',

@@ -4,6 +4,7 @@
 import { Link } from 'react-router-dom';
 import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
+import InfoTip from './InfoTip.jsx';
 
 export default function PremiumPanel({ me }) {
   const contact = useContact();
@@ -17,7 +18,10 @@ export default function PremiumPanel({ me }) {
         <Icon name={premium ? 'star' : 'lock'} />
       </div>
       <div className="bench-copy">
-        <h3>{premium ? 'Included in your Premium subscription' : 'Available with Premium'}</h3>
+        <div className="title-row" style={{ gap: 8 }}>
+          <h3>{premium ? 'Included in your Premium subscription' : 'Available with Premium'}</h3>
+          <InfoTip kind="premium" label="Why Tableau for Premium analytics" />
+        </div>
         <p>
           {premium
             ? `Your Industry Performance Benchmarks panel compares ${t.shortName}'s results with an anonymized ${peers}.`

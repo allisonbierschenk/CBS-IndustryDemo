@@ -4,6 +4,7 @@ import { Link } from 'react-router-dom';
 import { useContact } from '../context/ContactContext.jsx';
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from './Icon.jsx';
+import InfoTip from './InfoTip.jsx';
 
 export default function BenchmarkLock({ compact = false }) {
   const { me } = useSession();
@@ -14,7 +15,10 @@ export default function BenchmarkLock({ compact = false }) {
       <span className="bench-lock-ic">
         <Icon name="lock" />
       </span>
-      <b>Unlock Industry Benchmarks</b>
+      <div className="bench-lock-title">
+        <b>Unlock Industry Benchmarks</b>
+        <InfoTip kind="premium" label="Why Tableau for Premium analytics" />
+      </div>
       <p>See how {me.tenant.shortName} ranks against anonymized {me.tenant.industry.toLowerCase()} peers.</p>
       {price && (
         <div className="bench-lock-price">
