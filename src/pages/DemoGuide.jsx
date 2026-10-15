@@ -144,14 +144,6 @@ export default function DemoGuide() {
               Apex Consulting (Tableau’s customer) embeds Tableau in its client portal so clients like Vantage and Northstar see the value Apex delivers — and can
               prove it themselves.
             </p>
-            <div className="guide-prep">
-              <span>
-                <b>Before you start:</b> run the portal ~3 minutes early so every client’s Pulse summary is ready.
-              </span>
-              <span>
-                <b>Shortcuts:</b> ⌥P presenter dock · ⌥1–⌥8 switch user
-              </span>
-            </div>
           </section>
 
           <section className="guide-legend" aria-label="Tableau technology key">
