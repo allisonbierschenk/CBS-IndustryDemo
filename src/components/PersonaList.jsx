@@ -13,9 +13,8 @@ export function byCompany(personas) {
   return [...groups.values()];
 }
 
-// compact: single column (presenter dock). shortcuts: show ⌥1–⌥9 next to each user.
-export default function PersonaList({ personas, onPick, currentId, compact = false, shortcuts = false }) {
-  const index = new Map(personas.map((p, i) => [p.userId, i + 1]));
+// compact: single column (presenter dock).
+export default function PersonaList({ personas, onPick, currentId, compact = false }) {
   return (
     <div className={`user-list${compact ? ' is-compact' : ''}`}>
       {byCompany(personas).map((c) => (
@@ -41,7 +40,7 @@ export default function PersonaList({ personas, onPick, currentId, compact = fal
                   {p.persona && p.persona !== 'Executive' ? ` · Sees: ${p.scope}` : p.demoFocus ? ` · ${p.demoFocus}` : ''}
                 </span>
               </span>
-              {shortcuts && index.get(p.userId) <= 9 ? <kbd className="ur-kbd">⌥{index.get(p.userId)}</kbd> : <Icon name="arrowRight" className="ur-go" />}
+              <Icon name="arrowRight" className="ur-go" />
             </button>
           ))}
         </section>

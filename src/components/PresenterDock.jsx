@@ -68,7 +68,7 @@ export default function PresenterDock() {
     <>
       <button className="dock-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
         <CompanyLogo tenantId={t.id} color={t.color} size={30} />
-        Switch user · {t.shortName} <kbd>⌥P</kbd>
+        Switch user · {t.shortName}
       </button>
       <section className={`dock${open ? ' open' : ''}`} aria-label="Presenter controls">
         <div className="dock-head">
@@ -101,9 +101,9 @@ function SwitchTab({ personas, currentId, onPick }) {
     <>
       <p className="muted" style={{ fontSize: 12.5, margin: '0 0 8px' }}>
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
-        with the new user's email as <span className="code-inline">sub</span>. Shortcut: <b>⌥1–⌥{Math.min(personas.length, 9) || 5}</b>.
+        with the new user's email as <span className="code-inline">sub</span>.
       </p>
-      <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact shortcuts />
+      <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact />
     </>
   );
 }
