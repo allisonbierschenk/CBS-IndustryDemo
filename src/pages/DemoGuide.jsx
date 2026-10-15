@@ -97,13 +97,14 @@ const SCENES = [
     n: 6,
     title: 'Upgrade to premium — live',
     where: 'Value Intelligence → Industry Benchmarks',
-    do: 'Switch to Dana Whitfield (⌥1, Standard). The benchmarks tile is blurred: click What’s included, then Confirm upgrade. The tile unlocks; open Industry Benchmarks.',
+    do: 'Switch to Dana Whitfield (⌥1, Standard). The benchmarks tile is blurred: click What’s included, then Confirm upgrade. Open Industry Benchmarks, click an engagement under Where you stand, set a goal and choose Plan the improvement with Apex.',
     say: 'Monetize your expertise — clients upgrade themselves, right inside the experience.',
-    money: 'Self-serve upsell: a Standard client becomes a paying Premium client in one click ($5/month in this demo).',
+    money: 'Self-serve upsell — a Standard client becomes Premium in one click ($5/month in this demo) — and every benchmark gap becomes an advisory conversation.',
     tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
       ['What changed when they upgraded?', 'The portal marked the session Premium on the server; the next Tableau token carries subscription tier = Premium, so the tile and the Benchmarks page unlock — no new dashboards, no reload of data.'],
       ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same source of truth and security.'],
+      ['Where does the next step come from?', 'It’s rule-based on the percentile: below the median, above it, or top quartile — no AI involved. The plan request carries the numbers so Apex starts with the facts.'],
       ['How do I reset the demo?', 'Sign out or switch users — the upgrade lives only in that session.']
     ]
   },

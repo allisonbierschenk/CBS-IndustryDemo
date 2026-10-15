@@ -1031,3 +1031,31 @@ textarea.input { resize: vertical; min-height: 110px; }
 .upgrade-list li { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; font-size: 13px; color: var(--muted); }
 .upgrade-list li svg { width: 18px; height: 18px; color: var(--ink); margin-top: 1px; }
 .upgrade-list b { display: block; font-size: 14px; color: var(--ink); }
+
+/* Benchmarks: act on an engagement */
+.track-row { width: 100%; border: 0; background: none; font: inherit; text-align: left; padding: 4px 6px; margin: 0 -6px; border-radius: 12px; cursor: pointer; transition: background .15s; }
+.track-row:hover, .track-row:focus-visible { background: rgba(255, 255, 255, .06); }
+.track-goal { position: absolute; top: 3px; bottom: 3px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, .7); }
+.track-goal::after { content: 'goal'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
+.bm-actions .insight-body { display: grid; gap: 10px; align-content: start; }
+.bma-stats { display: grid; grid-template-columns: repeat(3, 1fr); gap: 10px; }
+.bma-stats > div { padding: 12px; border-radius: 14px; background: var(--ink); color: #fff; display: grid; gap: 2px; }
+.bma-stats b { font-size: 22px; letter-spacing: -.02em; }
+.bma-stats span { font-size: 11px; color: rgba(255, 255, 255, .6); }
+.bma-next { display: grid; gap: 2px; padding: 12px 14px; border-radius: 14px; border-left: 4px solid; background: var(--page); font-size: 13px; }
+.bma-next.is-down { border-color: var(--bad); }
+.bma-next.is-up { border-color: #1f8a5b; }
+.bma-next b { font-size: 14px; color: var(--ink); }
+.bma-next span { color: var(--ink-2); }
+.bma-section { margin-top: 6px; font-size: 11px; font-weight: 800; letter-spacing: .12em; text-transform: uppercase; color: var(--faint); }
+.bma-action { display: grid; grid-template-columns: 22px 1fr; gap: 12px; align-items: start; width: 100%; padding: 12px 14px; border-radius: 14px; border: 1px solid var(--line); background: var(--surface); font: inherit; font-size: 12.5px; color: var(--muted); text-align: left; text-decoration: none; cursor: pointer; transition: border-color .15s, background .15s; }
+.bma-action:hover { border-color: var(--ink); }
+.bma-action > svg { width: 18px; height: 18px; color: var(--ink); margin-top: 1px; }
+.bma-action b { display: block; font-size: 14px; color: var(--ink); margin-bottom: 1px; }
+.bma-action.is-primary { background: var(--ink); border-color: var(--ink); color: rgba(255, 255, 255, .7); }
+.bma-action.is-primary b, .bma-action.is-primary > svg { color: var(--lime); }
+.bma-goal { cursor: default; }
+.bma-goal-row { display: flex; align-items: center; gap: 8px; margin: 6px 0 4px; }
+.bma-goal-row input { flex: 1; accent-color: var(--ink); }
+.bma-goal-row em { font-style: normal; font-weight: 800; color: var(--ink); min-width: 38px; }
+.bma-goal small { font-size: 11px; color: var(--faint); }
