@@ -128,7 +128,6 @@ const SCENES = [
     beatsNote: 'Read Dana’s live percentile from the Benchmarks headline after upgrading (about the 30th today).',
     tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
-      ['Are the peers their competitors?', 'Not necessarily — they’re comparable, anonymized companies in the same industry (e.g. Apex’s other logistics clients). Some may be competitors, but no one can tell who: only aggregate results are shown. The point is what good looks like for a company like yours.'],
       ['What does “where you stand among peers” mean?', 'Apex compares this client’s engagement results with anonymized companies in the same industry. The percentile is the share they outperform: 70th = better results than 70 out of 100 peers. 50th is the peer median.'],
       ['Why would the client care?', 'Hitting their own target doesn’t mean the result is good — 89% value realization sounds fine unless peers get 95%. Benchmarks justify the consulting spend to the CFO (“top quartile in our industry”), and show where the next dollar pays off most — because they reveal what’s achievable for a company like theirs.'],
       ['Why can Apex charge for it?', 'No single client can see how its peers perform — Apex can, across all its clients, anonymized. Every gap the benchmark shows is a reason for the next engagement.'],
