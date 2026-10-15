@@ -633,12 +633,16 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   const ownList = (user) => (loadOwn()[user.id] || []).map((x) => (typeof x === 'string' ? { metricId: x } : x));
   const ownIds = (user) => new Set(ownList(user).map((x) => x.metricId));
   const ownEntry = (user, id) => ownList(user).find((x) => x.metricId === id) || null;
+  // Read (ownList re-loads the file) before assigning — `ownMetrics[user.id] = …ownList()` would write into the
+  // object loadOwn just replaced, and the change would be lost.
   const rememberOwn = (user, entry) => {
-    ownMetrics[user.id] = [...ownList(user).filter((x) => x.metricId !== entry.metricId), entry];
+    const next = [...ownList(user).filter((x) => x.metricId !== entry.metricId), entry];
+    ownMetrics[user.id] = next;
     saveOwn();
   };
   const forgetOwn = (user, id) => {
-    ownMetrics[user.id] = ownList(user).filter((x) => x.metricId !== id);
+    const next = ownList(user).filter((x) => x.metricId !== id);
+    ownMetrics[user.id] = next;
     saveOwn();
   };
   function isOwnGoalMetric(m, user) {
