@@ -618,9 +618,19 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   } catch {
     /* none yet */
   }
-  const saveOwn = () => require('fs').writeFile(OWN_FILE, JSON.stringify(ownMetrics, null, 1), () => {});
-  const clientDefinitionIds = () => new Set(Object.values(ownMetrics).flat().map((x) => x?.definitionId).filter(Boolean));
-  const ownList = (user) => (ownMetrics[user.id] || []).map((x) => (typeof x === 'string' ? { metricId: x } : x));
+  // Re-read before every use: more than one portal process (dev server + another instance) can share this file,
+  // and a stale in-memory copy would otherwise write deleted metrics back.
+  const loadOwn = () => {
+    try {
+      ownMetrics = JSON.parse(require('fs').readFileSync(OWN_FILE, 'utf8'));
+    } catch {
+      /* keep what we have */
+    }
+    return ownMetrics;
+  };
+  const saveOwn = () => require('fs').writeFileSync(OWN_FILE, JSON.stringify(ownMetrics, null, 1));
+  const clientDefinitionIds = () => new Set(Object.values(loadOwn()).flat().map((x) => x?.definitionId).filter(Boolean));
+  const ownList = (user) => (loadOwn()[user.id] || []).map((x) => (typeof x === 'string' ? { metricId: x } : x));
   const ownIds = (user) => new Set(ownList(user).map((x) => x.metricId));
   const ownEntry = (user, id) => ownList(user).find((x) => x.metricId === id) || null;
   const rememberOwn = (user, entry) => {
@@ -638,8 +648,10 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   async function deleteOwnMetric(user, metricId) {
     const entry = ownEntry(user, metricId);
     if (!entry) throw Object.assign(new Error('Only metrics you created with a goal can be deleted.'), { status: 403 });
-    if (entry.definitionId) await pulse.request(user, 'DELETE', `/pulse/definitions/${encodeURIComponent(entry.definitionId)}`);
-    else await pulse.request(user, 'DELETE', `/pulse/metrics/${encodeURIComponent(metricId)}`);
+    const path = entry.definitionId ? `/pulse/definitions/${encodeURIComponent(entry.definitionId)}` : `/pulse/metrics/${encodeURIComponent(metricId)}`;
+    await pulse.request(user, 'DELETE', path).catch((e) => {
+      if (e.status !== 404) throw e; // already gone in Tableau — just forget it
+    });
     forgetOwn(user, metricId);
     definitionsCache = null;
   }
