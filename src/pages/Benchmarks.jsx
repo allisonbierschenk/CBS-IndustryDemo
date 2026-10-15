@@ -148,7 +148,9 @@ function BenchmarkBoard({ data, me }) {
       {goalMetrics?.length > 0 && (
         <section className="bm-panel bm-goals" aria-labelledby="bm-goals-title">
           <div className="bm-panel-head">
-            <h3 id="bm-goals-title">Your goals</h3>
+            <h3 id="bm-goals-title" className="title-row">
+              Your goals <InfoTip kind="goals" label="About your goals" />
+            </h3>
             <span>Updated live · set a goal by selecting an engagement</span>
           </div>
           <div className="goal-cards">
@@ -293,8 +295,8 @@ const fmtValue = (m, v) => {
 /** One Pulse goal metric: current value (Pulse BAN), the goal, progress, status and Pulse's own sentence. */
 function GoalCard({ m, onDelete }) {
   const pct = m.value == null ? 0 : Math.max(0, Math.min(1, m.upIsGood ? m.value / m.goal.value : m.goal.value / m.value));
-  // Lead with what the goal is about: "Change Management engagement benchmark", not the metric's name.
-  const title = m.percentile ? `${m.scope ? `${m.scope} engagement` : 'Overall'} benchmark` : m.scope ? `${m.name} · ${m.scope}` : m.name;
+  // Lead with what the goal is about: "Change Management Engagement Benchmark", not the metric's name.
+  const title = m.percentile ? `${m.scope ? `${m.scope} Engagement` : 'Overall'} Benchmark` : m.scope ? `${m.name} · ${m.scope}` : m.name;
   return (
     <div className={`goal-card${m.onTrack === false ? ' is-behind' : m.onTrack ? ' is-on' : ''}`}>
       <div className="goal-card-head">

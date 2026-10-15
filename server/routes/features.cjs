@@ -411,7 +411,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         .filter((m) => defName.has(m.definition_id))
         .map((m) => ({
           id: m.id,
-          name: defName.get(m.definition_id),
+          name: ownEntry(req.user, m.id)?.label || defName.get(m.definition_id),
           detail: filterLabel(m),
           goal: m.goals?.target ? { ...m.goals.target, display: formatGoal(defById.get(m.definition_id), m.goals.target.value) } : null,
           own: isOwnGoalMetric(m, req.user),
@@ -419,9 +419,10 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           via: direct.has(m.id) ? 'you' : 'group',
           canUnfollow: direct.has(m.id)
         }));
-      // Followable: each definition's default (unfiltered) metric that the user doesn't already follow.
+      // Followable: each definition's default (unfiltered) metric that the user doesn't already follow —
+      // never another client's personal goal definitions.
       const followable = await Promise.all(
-        defs.map(async (d) => {
+        defs.filter((d) => !clientDefinitionIds().has(d.metadata.id)).map(async (d) => {
           const { metrics = [] } = await pulse.request(req.user, 'GET', `/pulse/definitions/${d.metadata.id}/metrics`).catch(() => ({}));
           const m = metrics.find((x) => x.is_default) || metrics.find((x) => !(x.specification?.filters || []).length);
           return m && !followedIds.has(m.id) ? { id: m.id, name: d.metadata.name, following: false, canFollow: true } : null;
@@ -445,93 +446,120 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     return Number(v).toLocaleString('en-US');
   }
 
+  // ── Client-created Pulse metrics (Premium) ────────────────────────────────
+  // What a client can set a goal on comes from the data source itself (config goals.measures, offered only if
+  // the field exists — VizQL Data Service read-metadata), not from existing Pulse content.
+  const goalsCfg = cfg.goals || { measures: [] };
+  const FMT = { PERCENT: 'NUMBER_FORMAT_TYPE_PERCENT', CURRENCY: 'NUMBER_FORMAT_TYPE_CURRENCY', NUMBER: 'NUMBER_FORMAT_TYPE_NUMBER' };
+  const unitOf = (m) => (m.format === 'PERCENT' ? 'percent' : m.format === 'CURRENCY' ? 'currency' : 'number');
+  async function goalCatalog(user) {
+    const luid = await pulse.resolveDatasource(user, goalsCfg.datasource);
+    const r = await pulse.vdsMetadata(user, luid);
+    if (!r.ok) throw Object.assign(new Error(/VIZQL_DATA_API_ACCESS/.test(r.text) ? 'Your Tableau account needs API Access on this data source.' : `Tableau returned HTTP ${r.status}`), { status: r.status });
+    const fields = JSON.parse(r.text).data || [];
+    const byCaption = new Map(fields.map((f) => [f.fieldCaption, f]));
+    const time = byCaption.get(goalsCfg.timeField);
+    if (!time) throw new Error(`The data source has no "${goalsCfg.timeField}" field.`);
+    const measures = goalsCfg.measures.filter((m) => byCaption.get(m.field)?.fieldRole === 'MEASURE').map((m) => ({ ...m, fieldName: byCaption.get(m.field).fieldName }));
+    return { luid, timeFieldName: time.fieldName, measures };
+  }
+
   app.get('/api/metrics/definitions', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Creating your own metrics with goals is part of Premium.' });
     try {
-      const scope = agentScope(req.tenant);
-      const dsIds = new Map();
-      for (const ds of scope.datasources) dsIds.set(await pulse.resolveDatasource(req.user, ds.name), ds.label);
-      const defs = await definitionsOn(req.user, new Set(dsIds.keys()));
-      res.json({
-        definitions: defs
-          .map((d) => ({
-            id: d.metadata.id,
-            name: d.metadata.name,
-            source: dsIds.get(d.specification?.datasource?.id),
-            unit: isPercent(d) ? 'percent' : /CURRENCY/.test(d.representation_options?.type || '') ? 'currency' : 'number',
-            upIsGood: d.representation_options?.sentiment_type !== 'SENTIMENT_TYPE_DOWN_IS_GOOD'
-          }))
-          .sort((a, b) => a.name.localeCompare(b.name))
-      });
+      const { measures } = await goalCatalog(req.user);
+      res.json({ definitions: measures.map((m) => ({ id: m.field, name: m.label, source: 'Value Intelligence', unit: unitOf(m), upIsGood: !m.downIsGood })) });
     } catch (e) {
       fail(res, e);
     }
   });
 
+  // Creates a brand-new Pulse metric definition for this client's goal (POST /pulse/definitions), the client's
+  // metric on it (metrics:getOrCreate, filtered to their client + optional engagement), the goal (PATCH) and the
+  // follow (POST subscriptions). Recorded as the client's own, so Delete / Reset remove exactly this — never shared content.
+  const DEF_TYPE = 'application/vnd.tableau.metricqueryservice.v1.CreateDefinitionRequest+json';
   app.post('/api/metrics/create', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Creating your own metrics with goals is part of Premium.' });
+    // measure: data source field caption (definitionId / definitionName accepted as aliases).
     // engagementType: optional extra filter (e.g. a benchmark goal for one engagement).
     // raw: goal is already in the metric's own units (e.g. 0.75 for the 75th percentile).
-    const { definitionId, definitionName, goal, goalName, engagementType, raw } = req.body || {};
+    const { measure, definitionId, definitionName, goal, goalName, engagementType, raw } = req.body || {};
+    const value = Number(goal);
+    if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
+    let definitionIdCreated = null;
     try {
-      const scope = agentScope(req.tenant);
-      const dsIds = new Set();
-      for (const ds of scope.datasources) dsIds.add(await pulse.resolveDatasource(req.user, ds.name));
-      const def = (await definitionsOn(req.user, dsIds)).find((d) => d.metadata.id === definitionId || (definitionName && d.metadata.name === definitionName));
-      const value = Number(goal);
-      if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
-      if (!def) {
-        // The Pulse definition is gone (e.g. deleted in Tableau). Benchmark goals keep working: the portal stores
-        // the goal and tracks it from the same governed data (VizQL Data Service as the user) — no Tableau work.
-        if (definitionName === BENCHMARK_DEF && engagementType) {
-          console.warn(`[metrics/create] no Pulse definition "${BENCHMARK_DEF}" — storing a portal-tracked benchmark goal`);
-          const g = savePortalGoal(req.user, { engagement: String(engagementType), value: raw ? value : value / 100, name: String(goalName || 'Benchmark goal').trim().slice(0, 20) });
-          activity.record(req.user, req.tenant, 'pulse-metric', { metric: `${engagementType} benchmark`, goal: `${Math.round(g.value * 100)}th`, created: true, portal: true });
-          return res.json({ ok: true, metricId: g.id, name: BENCHMARK_DEF, goal: `${Math.round(g.value * 100)}th`, created: true, portal: true });
-        }
-        if (definitionName) console.warn(`[metrics/create] no Pulse definition named "${definitionName}" on the agent data sources`);
-        return res.status(400).json({ error: definitionName ? `“${definitionName}” isn’t set up in Tableau right now, so a goal can’t be created for it.` : 'Pick one of your metrics.' });
-      }
-      // Start from the definition's default metric (period + comparison), scoped to this client.
-      const { metrics = [] } = await pulse.request(req.user, 'GET', `/pulse/definitions/${def.metadata.id}/metrics`);
-      const base = metrics.find((m) => m.is_default) || metrics.find((m) => !(m.specification?.filters || []).length) || metrics[0];
+      const cat = await goalCatalog(req.user);
+      const m = cat.measures.find((x) => x.field === (measure || definitionId || definitionName));
+      if (!m) return res.status(400).json({ error: 'Pick one of your metrics.' });
+      const engagement = engagementType ? String(engagementType) : null;
+      // Scoped to this client (and engagement) in the definition itself: it's theirs, and Pulse rejects a second
+      // definition identical to an existing one (HTTP 409 — verified on this site).
       const clients = store.scopeFor(req.user).clients;
-      const specification = {
-        measurement_period: base?.specification?.measurement_period || { granularity: 'GRANULARITY_BY_YEAR', range: 'RANGE_CURRENT_PARTIAL' },
-        comparison: base?.specification?.comparison || { comparison: 'TIME_COMPARISON_PREVIOUS_PERIOD' },
-        filters: [
-          { field: 'Client Name', operator: 'OPERATOR_EQUAL', categorical_values: clients.map((c) => ({ string_value: c })) },
-          ...(engagementType ? [{ field: 'Engagement Type', operator: 'OPERATOR_EQUAL', categorical_values: [{ string_value: String(engagementType) }] }] : [])
-        ]
-      };
-      // Never write a goal onto a metric that already existed in Tableau (the demo's shared metrics).
-      // getOrCreate matches on filters only (comparison and include_null are ignored — verified on this site),
-      // so if it hands back a metric this portal didn't create for this user, refuse rather than edit it.
-      const created = await pulse.request(req.user, 'POST', '/pulse/metrics:getOrCreate', { definition_id: def.metadata.id, specification });
-      if (created.is_metric_created) rememberOwn(req.user, created.metric.id); // only portal-created metrics are editable / deletable here
-      if (!ownIds(req.user).has(created.metric.id)) return res.status(409).json({ error: 'This metric is already shared with your team, so a personal goal can’t be added to it. Pick a specific engagement instead.' });
-      const metric = created.metric;
+      const filters = [
+        { field: 'Client Name', operator: 'OPERATOR_EQUAL', categorical_values: clients.map((c) => ({ string_value: c })) },
+        ...(engagement ? [{ field: 'Engagement Type', operator: 'OPERATOR_EQUAL', categorical_values: [{ string_value: engagement }] }] : [])
+      ];
+      const label = m.percentile ? `${engagement ? `${engagement} Engagement` : 'Overall'} Benchmark` : `${m.label}${engagement ? ` · ${engagement}` : ''}`;
+      const def = await pulse.request(
+        req.user,
+        'POST',
+        '/pulse/definitions',
+        {
+          name: `${label} · ${req.tenant.clientName}`,
+          description: `${req.user.name}'s goal metric, created in the Apex client portal.`,
+          specification: {
+            datasource: { id: cat.luid },
+            basic_specification: { measure: { field: m.fieldName, aggregation: `AGGREGATION_${m.aggregation}` }, time_dimension: { field: cat.timeFieldName }, filters },
+            is_running_total: false,
+            temporality: 'TEMPORALITY_OVER_TIME'
+          },
+          extension_options: { allowed_dimensions: goalsCfg.dimensions, allowed_granularities: ['GRANULARITY_BY_MONTH', 'GRANULARITY_BY_QUARTER', 'GRANULARITY_BY_YEAR'], offset_from_today: 0 },
+          representation_options: {
+            type: FMT[m.format] || FMT.NUMBER,
+            number_units: { singular_noun: '', plural_noun: '' },
+            sentiment_type: m.downIsGood ? 'SENTIMENT_TYPE_DOWN_IS_GOOD' : 'SENTIMENT_TYPE_UP_IS_GOOD',
+            ...(m.format === 'CURRENCY' ? { currency_code: 'CURRENCY_CODE_USD' } : {})
+          },
+          insights_options: { show_insights: true, settings: [] },
+          comparisons: { comparisons: [{ compare_config: { comparison: 'TIME_COMPARISON_PREVIOUS_PERIOD' }, index: 0 }] }
+        },
+        { types: { contentType: DEF_TYPE, accept: DEF_TYPE.replace('Request', 'Response') } }
+      );
+      definitionIdCreated = def.definition?.metadata?.id || def.metadata?.id;
+      if (!definitionIdCreated) throw new Error('Tableau did not return the new metric definition.');
+      const { metric } = await pulse.request(req.user, 'POST', '/pulse/metrics:getOrCreate', {
+        definition_id: definitionIdCreated,
+        specification: { measurement_period: { granularity: 'GRANULARITY_BY_YEAR', range: 'RANGE_CURRENT_PARTIAL' }, comparison: { comparison: 'TIME_COMPARISON_PREVIOUS_PERIOD' }, filters }
+      });
       // Pulse rejects goal names longer than ~20 characters (HTTP 400; verified on this site — 20 OK, 25 rejected).
-      const target = { name: String(goalName || 'Our goal').trim().slice(0, 20) || 'Our goal', value: !raw && isPercent(def) ? value / 100 : value };
+      const target = { name: String(goalName || 'Our goal').trim().slice(0, 20) || 'Our goal', value: !raw && m.format === 'PERCENT' ? value / 100 : value };
       await pulse.request(req.user, 'PATCH', `/pulse/metrics/${metric.id}`, { metric_id: metric.id, specification: metric.specification, goals: { target } });
       const me = await pulse.me(req.user);
-      // Follow it (skip if already following).
-      const subs = await pulse.request(req.user, 'GET', `/pulse/subscriptions?user_id=${me.userId}&metric_id=${encodeURIComponent(metric.id)}`);
-      if (!(subs.subscriptions || []).some((s) => s.follower?.user_id === me.userId)) {
-        await pulse.request(req.user, 'POST', '/pulse/subscriptions', { metric_id: metric.id, follower: { user_id: me.userId } });
-      }
+      await pulse.request(req.user, 'POST', '/pulse/subscriptions', { metric_id: metric.id, follower: { user_id: me.userId } });
+      rememberOwn(req.user, { metricId: metric.id, definitionId: definitionIdCreated, label, field: m.field, percentile: Boolean(m.percentile) });
+      definitionsCache = null;
       pulse.resetContext(req.user);
       attentionCache.delete(attentionKey(req.user));
       saveAttention();
-      activity.record(req.user, req.tenant, 'pulse-metric', { metric: def.metadata.name, goal: formatGoal(def, target.value), created: Boolean(created.is_metric_created) });
-      res.json({ ok: true, metricId: metric.id, name: def.metadata.name, goal: formatGoal(def, target.value), created: Boolean(created.is_metric_created) });
+      const shown = formatGoal({ representation_options: { type: FMT[m.format] } }, target.value);
+      activity.record(req.user, req.tenant, 'pulse-metric', { metric: label, goal: shown, created: true });
+      res.json({ ok: true, metricId: metric.id, definitionId: definitionIdCreated, name: label, goal: shown, created: true });
     } catch (e) {
+      // Don't leave a half-made definition behind.
+      if (definitionIdCreated) await pulse.request(req.user, 'DELETE', `/pulse/definitions/${definitionIdCreated}`).catch(() => {});
       fail(res, e);
     }
   });
 
   // The client's goal metrics, live from Pulse: each followed metric with a goal, its current value from the
   // Pulse BAN insight (POST /pulse/insights/ban), and progress to the goal. Premium.
+  // Pulse's sentence, made client-facing: drop the " · <client>" suffix of the definition name; percentiles as "68th percentile".
+  const ordinalOf = (n) => `${n}${[11, 12, 13].includes(n % 100) ? 'th' : ['th', 'st', 'nd', 'rd'][n % 10] || 'th'}`;
+  function clientSentence(text, tenant, percentile) {
+    let t = text.split(` · ${tenant.clientName}`).join('');
+    if (percentile) t = t.replace(/\bwas (0?\.\d+|1(?:\.0+)?)\b/, (_, v) => `was at the ${ordinalOf(Math.round(Number(v) * 100))} percentile`);
+    return t;
+  }
   const BAN_TYPE = 'application/vnd.tableau.pulse.insightsservice.v1.GenerateInsightBundleBANRequest+json';
   app.get('/api/metrics/goals', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
@@ -554,12 +582,13 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           const upIsGood = c.item.metric.representation_options?.sentiment_type !== 'SENTIMENT_TYPE_DOWN_IS_GOOD';
           const value = f.target_period_value?.raw ?? null;
           const filters = (c.item.metric.metric_specification?.filters || []).filter((x) => x.field !== 'Client Name');
+          const own = ownEntry(req.user, c.item.metadata.metric_id) || {};
           return {
             metricId: c.item.metadata.metric_id,
-            name: c.item.metadata.name,
+            name: own.label || c.item.metadata.name,
             scope: filters.map((x) => (x.values || x.categorical_values?.map((v) => v.string_value) || []).join(', ')).join(' · '),
             source: c.source,
-            percentile: /Benchmark Percentile/i.test(c.item.metadata.name),
+            percentile: own.percentile ?? /Benchmark Percentile/i.test(c.item.metadata.name),
             unit: isPercent(c.item.metric) ? 'percent' : /CURRENCY/.test(c.item.metric.representation_options?.type || '') ? 'currency' : 'number',
             goal: c.goal,
             goalDisplay: formatGoal(c.item.metric, c.goal.value),
@@ -568,80 +597,15 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
             period: f.target_time_period?.label ?? null,
             upIsGood,
             onTrack: value == null ? null : upIsGood ? value >= c.goal.value : value <= c.goal.value,
-            sentence: ins?.result?.markup ? String(ins.result.markup).replace(/<[^>]+>/g, '') : null
+            sentence: ins?.result?.markup ? clientSentence(String(ins.result.markup).replace(/<[^>]+>/g, ''), req.tenant, own.percentile) : null
           };
         })
       );
-      res.json({ goals: [...goals, ...(await portalGoalCards(req.user))] });
+      res.json({ goals });
     } catch (e) {
       fail(res, e);
     }
   });
-
-  // ── Portal-tracked benchmark goals (fallback when the Pulse definition is missing) ──
-  // Stored per user in data/portal-goals.json; the current value is the year-to-date average Benchmark
-  // Percentile for that engagement (same aggregation as the Pulse definition), queried as the user.
-  const BENCHMARK_DEF = 'Benchmark Percentile';
-  const GOALS_FILE = require('path').join(__dirname, '..', '..', 'data', 'portal-goals.json');
-  let portalGoals = {};
-  try {
-    portalGoals = JSON.parse(require('fs').readFileSync(GOALS_FILE, 'utf8'));
-  } catch {
-    /* none yet */
-  }
-  const savePortalGoals = () => require('fs').writeFile(GOALS_FILE, JSON.stringify(portalGoals, null, 1), () => {});
-  const portalGoalsFor = (user) => portalGoals[user.id] || [];
-  function savePortalGoal(user, { engagement, value, name }) {
-    const g = { id: `portal-${engagement.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, engagement, value, name };
-    portalGoals[user.id] = [...portalGoalsFor(user).filter((x) => x.id !== g.id), g]; // one goal per engagement
-    savePortalGoals();
-    return g;
-  }
-  function forgetPortalGoal(user, id) {
-    const before = portalGoalsFor(user).length;
-    portalGoals[user.id] = portalGoalsFor(user).filter((x) => x.id !== id);
-    savePortalGoals();
-    return portalGoals[user.id].length < before;
-  }
-  async function portalGoalCards(user) {
-    const list = portalGoalsFor(user);
-    if (!list.length) return [];
-    const luid = await pulse.resolveDatasource(user, cfg.benchmarks?.datasource || cfg.authoring.datasources[0].name);
-    const r = await pulse.vds(user, luid, [
-      { fieldCaption: 'Engagement Type', fieldAlias: 'Engagement' },
-      { fieldCaption: 'Date', function: 'TRUNC_MONTH', fieldAlias: 'Month' },
-      { fieldCaption: BENCHMARK_DEF, function: 'SUM', fieldAlias: 'Sum' },
-      { fieldCaption: BENCHMARK_DEF, function: 'COUNT', fieldAlias: 'N' }
-    ]);
-    const rows = r.ok ? JSON.parse(r.text).data || [] : [];
-    const now = new Date();
-    const year = String(now.getFullYear());
-    const cutoff = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`;
-    return list.map((g) => {
-      const ytd = rows.filter((x) => x.Engagement === g.engagement && String(x.Month).slice(0, 4) === year && String(x.Month).slice(0, 7) <= cutoff);
-      const n = ytd.reduce((a, x) => a + Number(x.N || 0), 0);
-      const value = n ? ytd.reduce((a, x) => a + Number(x.Sum || 0), 0) / n : null;
-      const nth = (v) => `${Math.round(v * 100)}th`;
-      const gap = value == null ? null : Math.round((g.value - value) * 100);
-      return {
-        metricId: g.id,
-        name: BENCHMARK_DEF,
-        scope: g.engagement,
-        source: 'Value Intelligence',
-        percentile: true,
-        unit: 'number',
-        goal: { name: g.name, value: g.value },
-        goalDisplay: nth(g.value),
-        value,
-        valueDisplay: value == null ? null : nth(value),
-        period: year,
-        upIsGood: true,
-        onTrack: value == null ? null : value >= g.value,
-        sentence: value == null ? null : `${g.engagement} is at the ${nth(value)} percentile so far in ${year}${gap > 0 ? ` — ${gap} points short of your ${nth(g.value)} goal` : `, at or above your ${nth(g.value)} goal`}.`,
-        portal: true
-      };
-    });
-  }
 
   // ── Delete a client's own goal metric (demo clean-up) ─────────────────────
   // Safeguard: only metrics this portal actually created for this user (getOrCreate returned
@@ -655,33 +619,33 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     /* none yet */
   }
   const saveOwn = () => require('fs').writeFile(OWN_FILE, JSON.stringify(ownMetrics, null, 1), () => {});
-  const ownIds = (user) => new Set(ownMetrics[user.id] || []);
-  const rememberOwn = (user, id) => {
-    ownMetrics[user.id] = [...new Set([...(ownMetrics[user.id] || []), id])];
+  const clientDefinitionIds = () => new Set(Object.values(ownMetrics).flat().map((x) => x?.definitionId).filter(Boolean));
+  const ownList = (user) => (ownMetrics[user.id] || []).map((x) => (typeof x === 'string' ? { metricId: x } : x));
+  const ownIds = (user) => new Set(ownList(user).map((x) => x.metricId));
+  const ownEntry = (user, id) => ownList(user).find((x) => x.metricId === id) || null;
+  const rememberOwn = (user, entry) => {
+    ownMetrics[user.id] = [...ownList(user).filter((x) => x.metricId !== entry.metricId), entry];
     saveOwn();
   };
   const forgetOwn = (user, id) => {
-    ownMetrics[user.id] = (ownMetrics[user.id] || []).filter((x) => x !== id);
+    ownMetrics[user.id] = ownList(user).filter((x) => x.metricId !== id);
     saveOwn();
   };
   function isOwnGoalMetric(m, user) {
     return Boolean(m && !m.is_default && ownIds(user).has(m.id));
   }
+  // Deletes the client's own Pulse definition (which removes its metric and follows); legacy entries delete the metric.
   async function deleteOwnMetric(user, metricId) {
-    const { metric } = await pulse.request(user, 'GET', `/pulse/metrics/${encodeURIComponent(metricId)}`);
-    if (!isOwnGoalMetric(metric, user)) throw Object.assign(new Error('Only metrics you created with a goal can be deleted.'), { status: 403 });
-    await pulse.request(user, 'DELETE', `/pulse/metrics/${encodeURIComponent(metricId)}`);
+    const entry = ownEntry(user, metricId);
+    if (!entry) throw Object.assign(new Error('Only metrics you created with a goal can be deleted.'), { status: 403 });
+    if (entry.definitionId) await pulse.request(user, 'DELETE', `/pulse/definitions/${encodeURIComponent(entry.definitionId)}`);
+    else await pulse.request(user, 'DELETE', `/pulse/metrics/${encodeURIComponent(metricId)}`);
     forgetOwn(user, metricId);
-    return metric;
+    definitionsCache = null;
   }
   app.delete('/api/metrics/:metricId', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
     try {
-      if (req.params.metricId.startsWith('portal-')) {
-        if (!forgetPortalGoal(req.user, req.params.metricId)) return res.status(404).json({ error: 'Goal not found.' });
-        activity.record(req.user, req.tenant, 'pulse-metric', { metricId: req.params.metricId, deleted: true });
-        return res.json({ ok: true });
-      }
       await deleteOwnMetric(req.user, req.params.metricId);
       pulse.resetContext(req.user);
       attentionCache.delete(attentionKey(req.user));
@@ -707,13 +671,10 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           )
         )
       );
-      const local = portalGoalsFor(req.user).length;
-      portalGoals[req.user.id] = [];
-      savePortalGoals();
       pulse.resetContext(req.user);
       attentionCache.delete(attentionKey(req.user));
       saveAttention();
-      const deleted = results.filter(Boolean).length + local;
+      const deleted = results.filter(Boolean).length;
       activity.record(req.user, req.tenant, 'pulse-metric', { reset: true, deleted });
       res.json({ ok: true, deleted, failed: results.filter((x) => !x).length });
     } catch (e) {

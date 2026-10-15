@@ -213,5 +213,89 @@
       "worksheet": "Industry Performance Benchmarks"
     },
     "datasource": "Apex Consulting - Client Value Intelligence"
+  },
+  "goals": {
+    "_comment": "Premium: clients create their OWN Tableau Pulse metric with a goal — the portal creates a brand-new Pulse metric definition on this data source (POST /api/-/pulse/definitions) from the field below, then the client's metric on it (metrics:getOrCreate, filtered to their client + optional engagement), sets the goal (PATCH metric goals) and follows it (POST subscriptions). No dependency on existing Pulse content. 'field' / 'timeField' are data source field captions (resolved to field names with VizQL Data Service read-metadata); a measure is offered only if the data source has it.",
+    "datasource": "Apex Consulting - Client Value Intelligence",
+    "timeField": "Adjusted Date",
+    "dimensions": [
+      "Client Name",
+      "Subscription Tier",
+      "Engagement Type",
+      "Service Line",
+      "Industry Vertical",
+      "Region",
+      "Engagement Status"
+    ],
+    "measures": [
+      {
+        "field": "Benchmark Percentile",
+        "label": "Benchmark Percentile",
+        "aggregation": "AVERAGE",
+        "format": "NUMBER",
+        "percentile": true
+      },
+      {
+        "field": "Value Realization Rate",
+        "label": "Value Realization Rate",
+        "aggregation": "AVERAGE",
+        "format": "PERCENT"
+      },
+      {
+        "field": "On-Time Milestone Rate",
+        "label": "On-Time Milestone Rate",
+        "aggregation": "AVERAGE",
+        "format": "PERCENT"
+      },
+      {
+        "field": "Hours vs Plan",
+        "label": "Hours Delivered vs. Plan (%)",
+        "aggregation": "AVERAGE",
+        "format": "PERCENT"
+      },
+      {
+        "field": "Engagement Health",
+        "label": "Engagement Health",
+        "aggregation": "AVERAGE",
+        "format": "NUMBER"
+      },
+      {
+        "field": "Cycle Time Reduction",
+        "label": "Cycle Time Reduction",
+        "aggregation": "AVERAGE",
+        "format": "NUMBER"
+      },
+      {
+        "field": "Productivity Improvement",
+        "label": "Productivity Improvement",
+        "aggregation": "AVERAGE",
+        "format": "NUMBER"
+      },
+      {
+        "field": "Business Value Delivered",
+        "label": "Business Value Delivered",
+        "aggregation": "SUM",
+        "format": "CURRENCY"
+      },
+      {
+        "field": "Net Business Value",
+        "label": "Net Business Value",
+        "aggregation": "SUM",
+        "format": "CURRENCY"
+      },
+      {
+        "field": "Operational Cost Savings",
+        "label": "Operational Cost Savings",
+        "aggregation": "SUM",
+        "format": "CURRENCY"
+      },
+      {
+        "field": "Consulting Investment",
+        "label": "Consulting Investment",
+        "aggregation": "SUM",
+        "format": "CURRENCY",
+        "downIsGood": true
+      }
+    ]
   }
 }

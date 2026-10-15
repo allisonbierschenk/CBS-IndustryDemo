@@ -12,6 +12,7 @@ const TECH = {
   jwt: { label: 'Connected App JWT', color: '#7a4fd6', note: 'Signed on the server per user and single-use; Tableau validates it, then keeps the user signed in with its own browser cookie (~2 hours).' },
   rls: { label: 'Data security', color: '#1f8a5b', note: 'Row-level security: user attributes in the JWT and a filter on the published data source decide which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
+  pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
   author: { label: 'Web authoring', color: '#c0398a', note: 'Tableau’s editor embedded on the governed data source.' },
@@ -98,14 +99,21 @@ const FEATURES = [
   })),
   F('goals', 'money', 'Your own metric with a goal (Premium)', (p) => ({
     title: 'Set your own goal in Pulse',
-    where: 'Account menu → Alerts & subscriptions',
-    do: `${p.plan === 'standard' ? 'After upgrading, go' : 'Go'} to Alerts & subscriptions → Create your own metric: pick Value Realization Rate, enter a goal (e.g. 92%) and click Create & follow. Then show Needs attention: “Expected” is now ${p.first}’s goal.`,
+    where: 'Industry Benchmarks (or Account menu → Alerts & subscriptions)',
+    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks, click an engagement’s point on the chart → Set a goal, drag to the 75th percentile and click Set goal & follow. A “Your goals” card appears with the live value from Pulse — hover its (i) to show the Pulse REST API calls. (Or: Alerts & subscriptions → Create your own metric, pick any KPI, e.g. Value Realization Rate at 92%.) Then show Needs attention: “Expected” is now ${p.first}’s goal. Clean up with the card’s ✕ or Presenter → Reset demo goals.`,
     say: 'Set the target once — Pulse tells you every week whether you’re on track to hit it.',
     money: 'A Premium feature: client-set goals give Apex a standing reason for the next check-in — and a clear way to prove it delivered.',
-    tech: ['pulse', 'rls'],
+    tech: ['pulseApi', 'pulse', 'rls'],
+    beats: [
+      ['The ask', `“${p.first} doesn’t just want to see the number — they want a target, and to know if they’re on track.”`],
+      ['The click', '“One click, and it’s a real Tableau Pulse metric with their goal — Pulse tracks it from now on.”'],
+      ['Under the hood', '“That was the Pulse REST API: the portal built a new metric definition straight from the data source, scoped it to this client, saved the goal and followed it — no analyst, no new dashboard.”']
+    ],
     ask: [
-      ['What just happened in Tableau?', 'The portal created a Pulse metric for this client only (the KPI filtered to their company), saved the goal on that metric, and followed it for the user — all through Tableau’s Pulse REST API, as the user.'],
-      ['Does the goal affect other clients?', 'No — the goal lives on this client’s own metric, not on the shared definition.'],
+      ['What just happened in Tableau?', 'Four Pulse REST API calls, as the user: POST /pulse/definitions (a new metric definition from the data source field, scoped to this client and engagement), POST /pulse/metrics:getOrCreate (their metric), PATCH /pulse/metrics/{id} (the goal) and POST /pulse/subscriptions (the follow). The card value is POST /pulse/insights/ban.'],
+      ['Does it depend on metrics someone already built in Pulse?', 'No — it’s created from the published data source itself, so any KPI on the data source can become a client’s goal.'],
+      ['Does the goal affect other clients?', 'No — the definition and metric are this client’s own, and other clients never see them. Shared metrics are never edited.'],
+      ['How do I clean up after a demo?', 'The ✕ on the goal card, Delete in Alerts & subscriptions, or Presenter → Reset demo goals — each deletes only metrics this client created in the portal, in Tableau too.'],
       ['What does Pulse do with the goal?', 'It tracks progress to the goal; Pulse also offers Goal and Threshold Breakdown and Pace to Goal insights (Pace to Goal needs Tableau+ with Forecast on).']
     ]
   })),
@@ -401,7 +409,7 @@ const ABOUT = {
   "hood": "The secure token behind the sign-in.",
   "attention": "Pulse flags the metrics going the wrong way.",
   "attentionAct": "One click to ask why, open the dashboard or email Apex.",
-  "goals": "Premium: the client creates their own Pulse metric, sets a goal and follows it.",
+  "goals": "Premium: the client sets a goal on any KPI — the portal creates a real Pulse metric for them through the Pulse REST API, sets the goal and follows it.",
   "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
   "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
   "selectionAgent": "Select data on a chart, ask the chat about it.",

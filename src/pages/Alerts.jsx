@@ -226,7 +226,9 @@ function CreateMetricForm({ onCreated }) {
       <div className="cm-head">
         <Icon name="target" />
         <div>
-          <b>Create your own metric</b>
+          <b className="title-row">
+            Create your own metric <InfoTip kind="goals" label="About your own metrics" />
+          </b>
           <span>Pick a KPI and set your goal. We track your progress, and you follow it automatically.</span>
         </div>
       </div>

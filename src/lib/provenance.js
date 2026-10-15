@@ -96,17 +96,25 @@ export function provenance(key, me, extra = {}) {
       return {
         tag: 'Data monetization',
         freshness: 'Checked on every request, so what a client can open always matches their current plan in Apex’s system.',
-        source: 'Premium content — Industry Benchmarks, your own Pulse metrics with goals, and build-your-own reports — uses the same published data source and Pulse definitions as everything else; nothing extra to build or copy.',
+        source: 'Premium content — Industry Benchmarks, your own Pulse metrics with goals, and build-your-own reports — uses the same published data source as everything else; clients’ own goal metrics are created on it through the Pulse REST API. Nothing extra to build or copy.',
         security: `Entitlements are enforced on the server: content outside a client’s subscription never gets a token or data. Your subscription tier (${[].concat(me.user.attributes?.['subscription tier'] || []).join(', ') || 'none'}) also travels in your sign-in token, so Tableau can act on it too.`,
         why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project.'
+      };
+    case 'goals':
+      return {
+        tag: 'Pulse REST API',
+        freshness: 'Live: each goal card is the current value from Tableau Pulse, computed when the page opens.',
+        source: `A Tableau Pulse metric the client created themselves, on the published data source “${VI_SOURCE}”. Setting a goal calls the Pulse REST API as the user: create a metric definition from the data source field (POST /pulse/definitions), create their metric on it (POST /pulse/metrics:getOrCreate), save the goal (PATCH /pulse/metrics/{id}) and follow it (POST /pulse/subscriptions). The card value comes from POST /pulse/insights/ban.`,
+        security: `${RLS(me, ['client name', 'service line', 'engagement type'])} The new definition and metric are scoped to this client, and only metrics this client created here can be changed or deleted from the portal — shared metrics are never touched.`,
+        why: 'Tableau Pulse has a full REST API, so “set your own goal” is a product feature, not a services project: the portal creates a real Pulse metric straight from the governed data source in a couple of seconds — no analyst, no new dashboard, no dependency on existing content. The goal lives in Tableau, so Pulse tracks progress to it, “Needs attention” measures against it, and the client follows it like any other metric. Deleting the goal removes the metric from Tableau too. Apex sells it as part of Premium.'
       };
     case 'alerts':
       return {
         tag: 'Tableau Pulse + REST',
         freshness: 'Live from Tableau: subscriptions and follows are stored in Tableau, not in the portal.',
-        source: 'Tableau REST API (email subscriptions) and the Pulse API (metric follows).',
+        source: 'Tableau REST API (email subscriptions) and the Pulse REST API (metric follows; Premium clients’ own metrics with goals).',
         security: 'Each email and Pulse digest is rendered as you, so it only ever shows your data.',
-        why: 'Email subscriptions and Pulse follows are Tableau features the portal simply manages, so there’s no separate scheduling system to run. Every delivery is rendered as you, so even a forwarded email only ever contains your data. Premium clients can also create their own Pulse metric with a goal here — Tableau stores the goal on their metric only, and they follow it automatically.'
+        why: 'Email subscriptions and Pulse follows are Tableau features the portal simply manages, so there’s no separate scheduling system to run. Every delivery is rendered as you, so even a forwarded email only ever contains your data. Premium clients can also create their own Pulse metric with a goal here — the portal builds it through the Pulse REST API straight from the data source, stores the goal on their metric only, and follows it for them.'
       };
     default:
       return null;
