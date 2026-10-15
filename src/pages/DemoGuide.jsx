@@ -29,8 +29,7 @@ const PLAN = { premium: { icon: 'star', label: 'Premium' }, standard: { icon: 's
 const GROUPS = [
   { key: 'ai', label: 'AI', icon: 'agent', note: 'Pulse insights and the Agent' },
   { key: 'bi', label: 'Traditional BI', icon: 'dashboard', note: 'Dashboards, drill-down, delivery' },
-  { key: 'money', label: 'Data monetization', icon: 'star', note: 'Premium tier and upsell' },
-  { key: 'platform', label: 'Security & platform', icon: 'shield', note: 'Sign-in and data security always run' }
+  { key: 'money', label: 'Data monetization', icon: 'star', note: 'Premium tier and upsell' }
 ];
 
 // story = what they represent; focus = what to point at on Value Intelligence.
@@ -51,7 +50,7 @@ const onlyElena = (p) => (p.transport ? null : 'Elena only (Transportation)');
 const onlyStandard = (p) => (p.plan === 'standard' ? null : 'Standard clients');
 const onlyPremium = (p) => (p.plan === 'premium' ? null : 'Premium clients');
 
-// Feature library in script order. group: 'core' (always, not an option) | 'ai' | 'bi' | 'money' | 'platform'.
+// Feature library in script order. group: 'core' (in every script, not an option) | 'ai' | 'bi' | 'money'.
 // unavailable(p) → null, or the reason this persona can't show it.
 const FEATURES = [
   // ── Always ──────────────────────────────────────────────────────────────
@@ -67,7 +66,7 @@ const FEATURES = [
       ['What happens to the token after sign-in?', 'Tableau validates it once, then sets its own session cookie in the browser that lasts about 2 hours. The token is single-use — the portal mints a fresh one for every embed.']
     ]
   })),
-  F('hood', 'platform', 'Under the hood: JWT claims', () => ({
+  F('hood', 'core', null, () => ({
     title: 'Under the hood',
     where: 'Presenter dock → Under the hood',
     do: 'Show the JWT the portal just signed: sub = the user’s email, plus client name, service line and engagement type. Open it in jwt.io.',
@@ -349,8 +348,8 @@ const FEATURES = [
     tech: ['portal'],
     ask: [['Is this Tableau data?', 'No — the portal’s own log. Tableau-side usage is in Tableau Cloud’s Admin Insights.']]
   }), (p) => (p.id === 'alex' ? null : 'Alex only')),
-  // ── Security & platform ─────────────────────────────────────────────────
-  F('info', 'platform', '(i) Why Tableau popovers', () => ({
+  // ── In every script ─────────────────────────────────────────────────────
+  F('info', 'core', null, () => ({
     title: 'Why Tableau, on every surface',
     where: 'Any (i)',
     do: 'Hover an (i): freshness, source, data security — and why Tableau helps there.',
@@ -391,7 +390,7 @@ const benchmarkAsk = [
 
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build', 'info'];
+const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>
@@ -403,7 +402,8 @@ const Chip = ({ k }) => (
 export default function DemoGuide() {
   const [params, setParams] = useSearchParams();
   const persona = PERSONAS.find((x) => x.id === params.get('p')) || PERSONAS[0];
-  // Selected features (default: the recommended set). Sign-in and the data security switch always run.
+  // Selected features (default: the recommended set). Sign-in, under the hood, the (i) popovers and the data
+  // security switch are in every script.
   const selected = new Set(params.has('f') ? params.get('f').split(',').filter(Boolean) : RECOMMENDED);
   const save = (p, set) => setParams({ p, f: [...set].join(',') }, { replace: true });
   const toggle = (id) => {
