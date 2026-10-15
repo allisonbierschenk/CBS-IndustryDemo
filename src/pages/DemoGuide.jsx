@@ -6,7 +6,7 @@ import Icon from '../components/Icon.jsx';
 
 const TECH = {
   embed: { label: 'Embedding API v3', color: '#2f5fe0', note: 'Tableau dashboards inside the portal; the portal drives filters, reads selections and data, exports.' },
-  jwt: { label: 'Connected App JWT', color: '#7a4fd6', note: 'Signed on the server per user; Tableau trusts it — no second login.' },
+  jwt: { label: 'Connected App JWT', color: '#7a4fd6', note: 'Signed on the server per user and single-use; Tableau validates it, then keeps the user signed in with its own browser cookie (~2 hours).' },
   rls: { label: 'Row-level security', color: '#1f8a5b', note: 'User attributes in the JWT; a filter on the published data source decides which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
@@ -25,6 +25,7 @@ const SCENES = [
     tech: ['jwt', 'rls', 'pulse', 'embed'],
     ask: [
       ['Do clients need a Tableau login?', 'No. The portal signs a short-lived JWT for the user (email as the username, 10-minute expiry); Tableau trusts it through a Connected App. The secret never leaves the server.'],
+      ['What happens to the token after sign-in?', 'Tableau validates the JWT once, then sets its own session cookie in the browser that lasts about 2 hours. The token itself is single-use — each one has a unique ID, so it can’t be replayed — and the portal mints a fresh one for every embed.'],
       ['Where do the KPI tiles come from?', 'Tableau Pulse metrics on the published data source — one governed definition each, so tiles, charts, the Agent and feeds agree.'],
       ['What is Needs attention?', 'A Pulse Insight Brief over the metrics the user follows. Numbers and drivers come from Pulse’s insights platform; the Issue / Expected rows use only those facts.']
     ]
