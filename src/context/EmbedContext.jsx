@@ -5,6 +5,7 @@
 // in the DOM (moving an iframe reloads it).
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
 import EmbedPlaceholder from '../components/EmbedPlaceholder.jsx';
+import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 import { useSession } from './SessionContext.jsx';
 
@@ -84,6 +85,10 @@ export function PersistentEmbeds({ containerRef }) {
 
 function PersistentEmbed({ viewKey, view, slot, containerRef, handlers, onReady, onHeight }) {
   const boxRef = useRef(null);
+  const { me } = useSession();
+  // Standard clients: lock the Premium benchmarks tile inside this dashboard.
+  const lock = me.features?.benchmarks?.cover;
+  const cover = lock && lock.view === viewKey && !me.entitlements.includes('benchmarks') ? { worksheet: lock.worksheet, render: () => <BenchmarkLock /> } : undefined;
   const [rect, setRect] = useState(null);
 
   // Track the slot's position within the page container.
@@ -136,6 +141,7 @@ function PersistentEmbed({ viewKey, view, slot, containerRef, handlers, onReady,
         height={view.height}
         onMarkSelection={(e) => handlers.current[viewKey]?.onMarkSelection?.(e)}
         onFirstInteractive={(e, viz) => onReady(viz)}
+        cover={cover}
       />
     </div>
   );

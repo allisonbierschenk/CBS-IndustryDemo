@@ -84,6 +84,14 @@ export function provenance(key, me, extra = {}) {
         security: RLS(me, ['client name', 'service line', 'engagement type']),
         why: 'The spreadsheet gets a live query against the same governed data source as the dashboard, under the same row-level security — not an exported file that goes stale or a second copy someone has to keep in sync.'
       };
+    case 'benchmarks':
+      return {
+        tag: 'VizQL Data Service',
+        freshness: 'Live: queried from Tableau each time the page opens.',
+        source: `Benchmark Percentile, Benchmark Target and KPI targets from the published data source “${VI_SOURCE}”, queried with VizQL Data Service as you and drawn by the portal (d3).`,
+        security: `${RLS(me, ['client name', 'service line', 'engagement type'])} Premium access is checked on the server before any data is returned.`,
+        why: 'This page isn’t a Tableau dashboard at all — it’s Apex’s own design, fed by the same governed data source through VizQL Data Service. So a custom, on-brand experience still uses the single source of truth and the same row-level security as every Tableau view, and Apex can package it as a paid Premium tier.'
+      };
     case 'alerts':
       return {
         tag: 'Tableau Pulse + REST',

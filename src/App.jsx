@@ -4,6 +4,7 @@ import Layout from './components/Layout.jsx';
 import { RequireAuth, RequireView } from './components/RouteGuards.jsx';
 import Activity from './pages/Activity.jsx';
 import Agent from './pages/Agent.jsx';
+import Benchmarks from './pages/Benchmarks.jsx';
 import DemoGuide from './pages/DemoGuide.jsx';
 import Alerts from './pages/Alerts.jsx';
 import Feeds from './pages/Feeds.jsx';
@@ -74,7 +75,7 @@ export default function App() {
           }
         />
         {/* Benchmarks live inside the Value Intelligence dashboard */}
-        <Route path="benchmarks" element={<Navigate to={{ pathname: '/dashboards', hash: '#benchmarks' }} replace />} />
+        <Route path="benchmarks" element={<Benchmarks />} />
         <Route path="reports" element={<Reports />} />
         <Route path="reports/new" element={me?.features?.authoring ? <ReportBuilder /> : <Navigate to="/reports" replace />} />
         <Route path="reports/:viewId" element={<ReportView />} />

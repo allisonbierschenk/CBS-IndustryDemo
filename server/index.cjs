@@ -229,7 +229,8 @@ app.get('/api/me', (req, res) => {
       scorecard: store.content.scorecard || null,
       authoring: (store.content.authoring?.requires || []).every((r) => ent.has(r)),
       activityLog: (user.roles || []).includes('activity'),
-      slackChannels: store.slackChannelsFor(tenant)
+      slackChannels: store.slackChannelsFor(tenant),
+      benchmarks: { price: store.content.benchmarks?.price || null, cover: store.content.benchmarks?.cover || null }
     }
   });
 });

@@ -196,9 +196,23 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
     }
   }
 
+  /** VizQL Data Service field list for a data source, as the user. Returns { ok, status, text }. */
+  async function vdsMetadata(user, datasourceLuid) {
+    for (let attempt = 0; attempt < 2; attempt++) {
+      const s = attempt === 0 ? await session(user) : await signIn(user);
+      const res = await fetch(`${server}/api/v1/vizql-data-service/read-metadata`, {
+        method: 'POST',
+        headers: { 'X-Tableau-Auth': s.token, 'Content-Type': 'application/json', Accept: 'application/json' },
+        body: JSON.stringify({ datasource: { datasourceLuid } })
+      });
+      if (res.status === 401 && attempt === 0) continue;
+      return { ok: res.ok, status: res.status, text: await res.text() };
+    }
+  }
+
   const resetContext = (user) => contexts.delete(user.id);
 
-  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds };
+  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds, vdsMetadata };
 }
 
 /** Vega-Lite spec → [{date, value}] for the trend chart (drops forecast/projection points). */

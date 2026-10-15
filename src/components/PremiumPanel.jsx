@@ -1,10 +1,11 @@
 // Industry Performance Benchmarks status card.
 //  • Premium: points to the benchmarks panel inside the Value Intelligence dashboard.
 //  • Standard: explains what's included with Premium and opens a pre-filled request to the Apex team.
+import { Link } from 'react-router-dom';
 import { useContact } from '../context/ContactContext.jsx';
 import Icon from './Icon.jsx';
 
-export default function PremiumPanel({ me, onViewBenchmarks }) {
+export default function PremiumPanel({ me }) {
   const contact = useContact();
   const premium = me.entitlements.includes('benchmarks');
   const t = me.tenant;
@@ -24,10 +25,10 @@ export default function PremiumPanel({ me, onViewBenchmarks }) {
         </p>
       </div>
       {premium ? (
-        <button className="btn btn-dark" onClick={onViewBenchmarks}>
-          Go to benchmarks
+        <Link className="btn btn-dark" to="/benchmarks">
+          Open Industry Benchmarks
           <Icon name="arrowRight" />
-        </button>
+        </Link>
       ) : (
         <button
           className="btn btn-dark"

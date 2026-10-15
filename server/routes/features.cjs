@@ -449,6 +449,42 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     }
   });
 
+  // ── Premium Industry Benchmarks (custom d3 page) ──────────────────────────
+  // Queried with VizQL Data Service as the user, so row-level security applies; Premium is enforced here.
+  app.get('/api/benchmarks', requireUser, async (req, res) => {
+    const bc = cfg.benchmarks || {};
+    if (!(bc.requires || ['benchmarks']).every((r) => ent(req.tenant).has(r))) {
+      return res.status(403).json({ error: 'Industry Benchmarks are part of Premium.', price: bc.price || null });
+    }
+    try {
+      const luid = await pulse.resolveDatasource(req.user, bc.datasource || cfg.authoring.datasources[0].name);
+      const q = async (fields) => {
+        const r = await pulse.vds(req.user, luid, fields);
+        if (!r.ok) throw Object.assign(new Error(/VIZQL_DATA_API_ACCESS/.test(r.text) ? 'Your Tableau account needs API Access on this data source.' : `Tableau returned HTTP ${r.status}`), { status: r.status });
+        return JSON.parse(r.text).data || [];
+      };
+      const month = { fieldCaption: 'Date', function: 'TRUNC_MONTH', fieldAlias: 'Month' };
+      const avg = (f, alias) => ({ fieldCaption: f, function: 'AVG', fieldAlias: alias });
+      const [byEngagement, kpis, vertical] = await Promise.all([
+        q([{ fieldCaption: 'Engagement Type', fieldAlias: 'Engagement' }, month, avg('Benchmark Percentile', 'Percentile'), avg('Benchmark Target', 'Target'), { fieldCaption: 'Business Value Delivered', function: 'SUM', fieldAlias: 'Value' }]),
+        q([month, avg('Value Realization Rate', 'VRR'), avg('Value Realization Target', 'VRR Target'), avg('Engagement Health', 'Health'), avg('Engagement Health Target', 'Health Target'), avg('Cycle Time Reduction', 'Cycle'), avg('Cycle Time Target', 'Cycle Target'), avg('Benchmark Percentile', 'Percentile')]),
+        q([{ fieldCaption: 'Industry Vertical', fieldAlias: 'Vertical' }])
+      ]);
+      // Synthetic data runs past today; only use months that have happened.
+      const now = new Date();
+      const cutoff = `${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+      const inPast = (r) => String(r.Month).slice(0, 7) <= cutoff;
+      activity.record(req.user, req.tenant, 'report-view', { view: 'Industry Benchmarks' });
+      res.json({
+        vertical: vertical.map((v) => v.Vertical).filter(Boolean),
+        engagements: byEngagement.filter(inPast).map((r) => ({ engagement: r.Engagement, month: String(r.Month).slice(0, 7), percentile: r.Percentile, target: r.Target, value: r.Value })),
+        kpis: kpis.filter(inPast).map((r) => ({ month: String(r.Month).slice(0, 7), vrr: r.VRR, vrrTarget: r['VRR Target'], health: r.Health, healthTarget: r['Health Target'], cycle: r.Cycle, cycleTarget: r['Cycle Target'], percentile: r.Percentile })).sort((a, b) => a.month.localeCompare(b.month))
+      });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
   // ── Share a selection to Slack (demo: recorded, not posted) ───────────────
   app.post('/api/actions/slack', requireUser, (req, res) => {
     const { channel, message, worksheet, view, rows } = req.body || {};

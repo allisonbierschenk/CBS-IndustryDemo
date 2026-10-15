@@ -201,5 +201,17 @@
         ]
       }
     ]
+  },
+  "benchmarks": {
+    "_comment": "Premium Industry Benchmarks. 'cover' blurs the benchmarks tile inside the Value Intelligence dashboard for clients without the 'benchmarks' entitlement (demo upsell — the real enforcement is the server-gated /benchmarks page). The /benchmarks page is a custom (headless) d3 view built from these fields of the published data source, queried with VizQL Data Service as the user (row-level security applies).",
+    "requires": [
+      "benchmarks"
+    ],
+    "price": "$5/month",
+    "cover": {
+      "view": "valueIntelligence",
+      "worksheet": "Industry Performance Benchmarks"
+    },
+    "datasource": "Apex Consulting - Client Value Intelligence"
   }
 }

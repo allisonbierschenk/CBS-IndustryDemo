@@ -84,13 +84,14 @@ const SCENES = [
   {
     n: 6,
     title: 'Introduce premium intelligence',
-    where: 'Value Intelligence → Industry Benchmarks',
-    do: 'Show Elena’s benchmarks (Premium). Switch to Dana Whitfield (⌥1, Standard): benchmarks are locked with an upgrade request.',
+    where: 'Industry Benchmarks',
+    do: 'As Elena (Premium), open Industry Benchmarks. Then switch to Dana Whitfield (⌥1, Standard): the benchmarks tile is blurred with “Unlock — $5/month”.',
     say: 'Monetize your expertise with premium insights inside the client experience.',
-    tech: ['portal', 'jwt', 'author'],
+    tech: ['vds', 'rls', 'portal'],
     ask: [
-      ['How is Premium enforced?', 'On the server: the portal won’t mint a token for content a client’s subscription doesn’t include. The subscription tier also travels in the JWT for Tableau to use.'],
-      ['What else could be Premium?', 'Build your own report (Reports → Build) — Tableau web authoring on the governed data source, with the same security.']
+      ['Is that a Tableau dashboard?', 'No — it’s Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same single source of truth and security.'],
+      ['How is Premium enforced?', 'The Benchmarks page is checked on the server — Standard clients get no data at all. The blurred tile on the dashboard is the upsell moment.'],
+      ['What else could be Premium?', 'Build your own report (Reports → Build) — Tableau web authoring on the governed data source.']
     ]
   },
   {

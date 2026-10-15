@@ -12,7 +12,8 @@ import EmbedPlaceholder, { EmbedLoading } from './EmbedPlaceholder.jsx';
 
 const HOST_PADDING = 8; // matches .viz-host padding
 
-export default function TableauViz({ viewKey, endpoint, authoring = false, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive, events }) {
+// cover: { worksheet, render } — draws render() over that worksheet's zone on the dashboard (e.g. a Premium lock).
+export default function TableauViz({ viewKey, endpoint, authoring = false, width = 1200, height = 900, filters = [], onMarkSelection, onFirstInteractive, events, cover }) {
   const { config } = useSession();
   const hostRef = useRef(null);
   const mountRef = useRef(null);
@@ -26,6 +27,8 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
   const [size, setSize] = useState({ width, height });
   const [available, setAvailable] = useState(null);
   const [attempt, setAttempt] = useState(0); // bump to re-embed with a freshly minted JWT
+  const [coverZone, setCoverZone] = useState(null); // { x, y, width, height } in dashboard pixels
+  const coverSheet = cover?.worksheet;
   const autoRetried = useRef(false);
   const filterKey = JSON.stringify(filters);
 
@@ -90,6 +93,12 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
           viz.setAttribute('height', `${h}px`);
           setSize({ width: w, height: h });
         }
+        // Where a covered worksheet sits on the dashboard (Embedding API: dashboard.objects).
+        if (coverSheet) {
+          const obj = (viz.workbook?.activeSheet?.objects || []).find((o) => o.worksheet?.name === coverSheet || o.name === coverSheet);
+          setCoverZone(obj ? { x: obj.position.x, y: obj.position.y, width: obj.size.width, height: obj.size.height } : null);
+          if (!obj) console.warn(`[cover] worksheet "${coverSheet}" not found on the dashboard`);
+        }
         setPhase({ kind: 'ready' });
         readyRef.current?.(e, viz);
       });
@@ -117,7 +126,7 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
       cancelled = true;
       viz?.remove();
     };
-  }, [viewKey, endpoint, authoring, width, height, filterKey, config?.embeddingLibrary, attempt]);
+  }, [viewKey, endpoint, authoring, coverSheet, width, height, filterKey, config?.embeddingLibrary, attempt]);
 
   const live = phase.kind === 'loading' || phase.kind === 'mounting' || phase.kind === 'ready';
   const scale = available ? Math.min(1, available / size.width) : 1;
@@ -131,10 +140,14 @@ export default function TableauViz({ viewKey, endpoint, authoring = false, width
           title={scale < 1 ? `Scaled to ${Math.round(scale * 100)}% to fit your window` : undefined}
         >
           <EmbedLoading label={phase.label} done={phase.kind === 'ready'} />
-          <div
-            ref={mountRef}
-            style={{ width: size.width, height: size.height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: 'top left' }}
-          />
+          <div style={{ position: 'relative', width: size.width, height: size.height, transform: scale < 1 ? `scale(${scale})` : undefined, transformOrigin: 'top left' }}>
+            <div ref={mountRef} />
+            {cover && coverZone && phase.kind === 'ready' && (
+              <div className="viz-cover" style={{ left: coverZone.x, top: coverZone.y, width: coverZone.width, height: coverZone.height }}>
+                {cover.render()}
+              </div>
+            )}
+          </div>
         </div>
       ) : (
         <>

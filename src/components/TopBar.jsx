@@ -21,9 +21,8 @@ export function Brand({ to = '/' }) {
 export default function TopBar() {
   const { me } = useSession();
   const contact = useContact();
-  const { pathname, hash } = useLocation();
+  const { pathname } = useLocation();
   const onDashboards = pathname === '/dashboards';
-  const onBenchmarks = onDashboards && hash === '#benchmarks';
 
   return (
     <header className="topbar">
@@ -33,15 +32,15 @@ export default function TopBar() {
           <Icon name="agent" className="nav-ic" />
           Agent
         </NavLink>
-        <Link to="/dashboards" aria-current={onDashboards && !onBenchmarks ? 'page' : undefined}>
+        <Link to="/dashboards" aria-current={onDashboards ? 'page' : undefined}>
           Value Intelligence
         </Link>
         {me.views.transportation?.entitled && <NavLink to="/transportation">Transportation</NavLink>}
         <NavLink to="/reports">Reports</NavLink>
-        <Link to={{ pathname: '/dashboards', hash: '#benchmarks' }} aria-current={onBenchmarks ? 'page' : undefined}>
+        <NavLink to="/benchmarks">
           Industry Benchmarks
           {!me.entitlements.includes('benchmarks') && <Icon name="lock" className="lock" />}
-        </Link>
+        </NavLink>
       </nav>
       <div className="topbar-right">
         <button className="btn btn-dark btn-sm" onClick={() => contact()}>
