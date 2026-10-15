@@ -11,7 +11,7 @@ import { useContact } from '../context/ContactContext.jsx';
 import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
-import SelectionInsight from '../components/SelectionInsight.jsx';
+import SelectionActions from '../components/SelectionActions.jsx';
 import InfoTip from '../components/InfoTip.jsx';
 
 const COLORS = ['#e6f264', '#7ad7f0', '#f2a65a', '#c39bff', '#6fe3b0', '#ff8fa3'];
@@ -92,8 +92,8 @@ function BenchmarkBoard({ data, me }) {
   const yearAgo = kpis[Math.max(0, kpis.length - 13)];
   const overall = latest ? pct(latest.percentile) : null;
   const delta = latest && yearAgo ? pct(latest.percentile) - pct(yearAgo.percentile) : null;
-  const [picked, setPicked] = useState(null); // engagement name whose action panel is open
-  const [explain, setExplain] = useState(null); // engagement being explained by Pulse
+  const [selected, setSelected] = useState(null); // engagement selected on a chart → the shared action bar
+  const [picked, setPicked] = useState(null); // engagement whose goal / plan panel is open
   const goalsKey = `apex.benchGoals.${me.user.id}`;
   const [goals, setGoals] = useState(() => {
     try {
@@ -113,7 +113,6 @@ function BenchmarkBoard({ data, me }) {
       }),
     [goalsKey]
   );
-  const closeExplain = useCallback(() => setExplain(null), []);
   const leader = [...series].sort((a, b) => b.last.v - a.last.v)[0];
   const laggard = [...series].sort((a, b) => a.last.v - b.last.v)[0];
 
@@ -153,7 +152,7 @@ function BenchmarkBoard({ data, me }) {
           <h3>Percentile over time</h3>
           <span>Share of anonymized peers each engagement outperforms · click a line to act on it</span>
         </div>
-        <TrendChart series={series} target={(data.engagements[0]?.target ?? 0.5) * 100} onPick={(s) => setPicked(s.name)} />
+        <TrendChart series={series} target={(data.engagements[0]?.target ?? 0.5) * 100} onPick={(s) => setSelected(s.name)} />
       </section>
 
       <section className="bm-panel bm-track">
@@ -161,7 +160,7 @@ function BenchmarkBoard({ data, me }) {
           <h3>Where you stand</h3>
           <span>Select an engagement to act on it · dot size = business value delivered</span>
         </div>
-        <StandingTrack series={series} goals={goals} onPick={(s) => setPicked(s.name)} />
+        <StandingTrack series={series} goals={goals} onPick={(s) => setSelected(s.name)} />
       </section>
 
       <section className="bm-panel bm-bullets">
@@ -185,27 +184,36 @@ function BenchmarkBoard({ data, me }) {
             vertical={data.vertical?.[0]}
             goal={goals[picked]}
             onGoal={(v) => saveGoal(picked, v)}
-            onExplain={() => {
-              setExplain(picked);
-              setPicked(null);
-            }}
             onClose={() => setPicked(null)}
           />,
           document.body
         )}
-      {explain &&
-        createPortal(
-          <SelectionInsight
-            question={`How is ${explain} performing, and what is driving it?`}
-            source="Value Intelligence"
-            what={explain}
-            worksheet="Industry Benchmarks"
-            onClose={closeExplain}
-          />,
-          document.body
-        )}
+      {/* Same actions as a selection on the dashboards, plus the benchmark-specific goal / plan panel. */}
+      {!picked && (
+        <SelectionActions
+          title="Industry Benchmarks"
+          pulseSource="Value Intelligence"
+          selection={selected ? benchmarkSelection(series.find((x) => x.name === selected)) : null}
+          onClear={() => setSelected(null)}
+          actions={[{ label: 'Set a goal / plan', icon: 'target', onClick: () => setPicked(selected) }]}
+        />
+      )}
     </div>
   );
+}
+
+/** An engagement as a selection for the shared action bar (rows = its monthly benchmark history). */
+function benchmarkSelection(s) {
+  if (!s) return null;
+  return {
+    worksheet: 'Industry Benchmarks',
+    count: 1,
+    columns: ['Engagement', 'Month', 'Benchmark Percentile'],
+    rows: s.pts.map((p) => ({ Engagement: s.name, Month: monthLabel(p.month), 'Benchmark Percentile': ordinal(Math.round(p.v)) })),
+    dimensions: [s.name],
+    measure: null,
+    question: `How is ${s.name} performing against peers, and what is driving it?`
+  };
 }
 
 /** Deterministic next step from where the engagement sits on the peer distribution. */
@@ -216,7 +224,7 @@ function nextStep(v, change) {
 }
 
 /** Action panel for one engagement: its numbers, a recommended next step, and things to do about it. */
-function BenchmarkActions({ s, me, vertical, goal, onGoal, onExplain, onClose }) {
+function BenchmarkActions({ s, me, vertical, goal, onGoal, onClose }) {
   const contact = useContact();
   const [draft, setDraft] = useState(goal ?? Math.min(100, Math.max(75, Math.ceil(s.last.v / 5) * 5 + 5)));
   useEffect(() => {
@@ -296,19 +304,6 @@ function BenchmarkActions({ s, me, vertical, goal, onGoal, onExplain, onClose })
         </div>
 
         <div className="bma-section">Take action</div>
-        <button
-          className="bma-action is-pulse"
-          onClick={() => {
-            track('selection-action', { action: 'benchmark-explain', engagement: s.name });
-            onExplain();
-          }}
-        >
-          <Icon name="spark" />
-          <span>
-            <b>Explain with Pulse</b>
-            What’s driving {s.name} — from your Pulse metrics
-          </span>
-        </button>
         <button className="bma-action is-primary" onClick={plan}>
           <Icon name="calendar" />
           <span>

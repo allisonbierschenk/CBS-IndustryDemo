@@ -317,7 +317,7 @@ const FEATURES = [
   F('benchmarkAct', 'money', 'Act on a benchmark (goal, plan)', () => ({
     title: 'Turn a gap into a plan',
     where: 'Industry Benchmarks → Where you stand',
-    do: 'Click an engagement (or its line in the trend chart): Explain with Pulse, set a goal, or choose Plan the improvement with Apex.',
+    do: 'Click an engagement (or its line in the trend chart): the same action bar as the dashboards appears — Explain with Pulse, Schedule with Apex, Share to Slack — plus Set a goal / plan.',
     say: 'Know where you stand — and what to do next.',
     money: 'Every benchmark gap becomes an advisory conversation.',
     tech: ['portal'],

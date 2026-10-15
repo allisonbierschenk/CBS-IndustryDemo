@@ -1,6 +1,7 @@
-// Act on a mark selection in an embedded dashboard: ask the Agent about it, share it to Slack (demo),
-// schedule time with Apex about it, or download the selected rows. Listens to the viz's
-// 'markselectionchanged' event; the bar hides when nothing is selected.
+// Act on a selection: Explain with Pulse, ask the Agent, share to Slack (demo), schedule with Apex (the client's
+// account manager), or download the selected rows. On embedded dashboards it listens to the viz's
+// 'markselectionchanged' event; custom pages (e.g. Industry Benchmarks) pass their own `selection` instead.
+// The bar hides when nothing is selected.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { track } from '../lib/api.js';
@@ -21,10 +22,14 @@ export function describeSelection(sel) {
 
 // pulseSource: a Pulse data source label (e.g. "Transportation"). When set, questions about the selection
 // use only that source's metrics, and "Explain with Pulse" answers right beside the dashboard.
-export default function SelectionActions({ viz, title, ignoreWorksheets = [], extra, onDismissExtra, pulseSource }) {
+// selection / onClear: a page-controlled selection { worksheet, count, columns, rows, dimensions, measure, question? }.
+// actions: extra page-specific buttons [{ label, icon, onClick }].
+export default function SelectionActions({ viz, title, ignoreWorksheets = [], extra, onDismissExtra, pulseSource, selection, onClear, actions = [] }) {
   const navigate = useNavigate();
   const contact = useContact();
-  const [sel, setSel] = useState(null);
+  const [marks, setMarks] = useState(null);
+  const controlled = selection !== undefined;
+  const sel = controlled ? selection : marks;
   const [slack, setSlack] = useState(false);
   const [insight, setInsight] = useState(null); // { question, what, worksheet }
   const worksheetRef = useRef(null);
@@ -38,7 +43,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
       try {
         const s = await selectionSummary(e);
         worksheetRef.current = e.detail.worksheet;
-        setSel(s.count ? s : null);
+        setMarks(s.count ? s : null);
       } catch (err) {
         console.warn('[selection] could not read marks:', err);
       }
@@ -51,7 +56,8 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
   const closeInsight = useCallback(() => setInsight(null), []);
 
   const clear = () => {
-    setSel(null);
+    if (controlled) return onClear?.();
+    setMarks(null);
     worksheetRef.current?.clearSelectedMarksAsync?.().catch(() => {});
   };
 
@@ -59,6 +65,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
   if (drawer || (!sel && !extra)) return drawer || null; // the drawer replaces the bar while open
   const what = describeSelection(sel);
   const question = () => {
+    if (sel.question) return sel.question;
     const subject = sel.dimensions.join(' and ') || 'the selected items';
     return sel.measure ? `What is driving ${sel.measure} for ${subject}?` : `What should I know about ${subject}?`;
   };
@@ -76,7 +83,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
   const schedule = () => {
     track('selection-action', { action: 'schedule', worksheet: sel.worksheet });
     const lines = sel.rows.slice(0, 10).map((r) => `• ${Object.values(r).join(' · ')}`);
-    contact('Schedule a review', `I'd like to set up time to review ${what} (from “${sel.worksheet}” on ${title}).\n\n${lines.join('\n')}`);
+    contact('Schedule a review', `I'd like to set up time to review ${what} (from “${sel.worksheet}”${title && title !== sel.worksheet ? ` on ${title}` : ''}).\n\n${lines.join('\n')}`);
   };
 
   const download = () => {
@@ -122,6 +129,12 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
                 <Icon name="download" />
                 Download rows
               </button>
+              {actions.map((a) => (
+                <button key={a.label} className="btn btn-sel btn-sm" onClick={a.onClick}>
+                  {a.icon && <Icon name={a.icon} />}
+                  {a.label}
+                </button>
+              ))}
               {extra && (
                 <Link className="btn btn-sel btn-sm" to={extra.to}>
                   {extra.label}
