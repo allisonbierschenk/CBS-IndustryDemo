@@ -11,6 +11,7 @@ import { useContact } from '../context/ContactContext.jsx';
 import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
+import SelectionInsight from '../components/SelectionInsight.jsx';
 import InfoTip from '../components/InfoTip.jsx';
 
 const COLORS = ['#e6f264', '#7ad7f0', '#f2a65a', '#c39bff', '#6fe3b0', '#ff8fa3'];
@@ -92,6 +93,7 @@ function BenchmarkBoard({ data, me }) {
   const overall = latest ? pct(latest.percentile) : null;
   const delta = latest && yearAgo ? pct(latest.percentile) - pct(yearAgo.percentile) : null;
   const [picked, setPicked] = useState(null); // engagement name whose action panel is open
+  const [explain, setExplain] = useState(null); // engagement being explained by Pulse
   const goalsKey = `apex.benchGoals.${me.user.id}`;
   const [goals, setGoals] = useState(() => {
     try {
@@ -111,6 +113,7 @@ function BenchmarkBoard({ data, me }) {
       }),
     [goalsKey]
   );
+  const closeExplain = useCallback(() => setExplain(null), []);
   const leader = [...series].sort((a, b) => b.last.v - a.last.v)[0];
   const laggard = [...series].sort((a, b) => a.last.v - b.last.v)[0];
 
@@ -148,9 +151,9 @@ function BenchmarkBoard({ data, me }) {
       <section className="bm-panel bm-trend">
         <div className="bm-panel-head">
           <h3>Percentile over time</h3>
-          <span>Share of anonymized peers each engagement outperforms · dashed line = peer median</span>
+          <span>Share of anonymized peers each engagement outperforms · click a line to act on it</span>
         </div>
-        <TrendChart series={series} target={(data.engagements[0]?.target ?? 0.5) * 100} />
+        <TrendChart series={series} target={(data.engagements[0]?.target ?? 0.5) * 100} onPick={(s) => setPicked(s.name)} />
       </section>
 
       <section className="bm-panel bm-track">
@@ -176,7 +179,29 @@ function BenchmarkBoard({ data, me }) {
       </section>
       {picked &&
         createPortal(
-          <BenchmarkActions s={series.find((x) => x.name === picked)} me={me} vertical={data.vertical?.[0]} goal={goals[picked]} onGoal={(v) => saveGoal(picked, v)} onClose={() => setPicked(null)} />,
+          <BenchmarkActions
+            s={series.find((x) => x.name === picked)}
+            me={me}
+            vertical={data.vertical?.[0]}
+            goal={goals[picked]}
+            onGoal={(v) => saveGoal(picked, v)}
+            onExplain={() => {
+              setExplain(picked);
+              setPicked(null);
+            }}
+            onClose={() => setPicked(null)}
+          />,
+          document.body
+        )}
+      {explain &&
+        createPortal(
+          <SelectionInsight
+            question={`How is ${explain} performing, and what is driving it?`}
+            source="Value Intelligence"
+            what={explain}
+            worksheet="Industry Benchmarks"
+            onClose={closeExplain}
+          />,
           document.body
         )}
     </div>
@@ -191,7 +216,7 @@ function nextStep(v, change) {
 }
 
 /** Action panel for one engagement: its numbers, a recommended next step, and things to do about it. */
-function BenchmarkActions({ s, me, vertical, goal, onGoal, onClose }) {
+function BenchmarkActions({ s, me, vertical, goal, onGoal, onExplain, onClose }) {
   const contact = useContact();
   const [draft, setDraft] = useState(goal ?? Math.min(100, Math.max(75, Math.ceil(s.last.v / 5) * 5 + 5)));
   useEffect(() => {
@@ -271,6 +296,19 @@ function BenchmarkActions({ s, me, vertical, goal, onGoal, onClose }) {
         </div>
 
         <div className="bma-section">Take action</div>
+        <button
+          className="bma-action is-pulse"
+          onClick={() => {
+            track('selection-action', { action: 'benchmark-explain', engagement: s.name });
+            onExplain();
+          }}
+        >
+          <Icon name="spark" />
+          <span>
+            <b>Explain with Pulse</b>
+            What’s driving {s.name} — from your Pulse metrics
+          </span>
+        </button>
         <button className="bma-action is-primary" onClick={plan}>
           <Icon name="calendar" />
           <span>
@@ -366,7 +404,7 @@ function Gauge({ value }) {
 }
 
 /** Multi-line percentile trend over quartile bands, with a hover crosshair. */
-function TrendChart({ series, target }) {
+function TrendChart({ series, target, onPick }) {
   const ref = useRef(null);
   const [w, setW] = useState(900);
   const [hover, setHover] = useState(null);
@@ -438,10 +476,16 @@ function TrendChart({ series, target }) {
         {series.map((s) => (
           <path key={s.name} className="bm-line" d={line(s.pts)} stroke={s.color} />
         ))}
+        {/* Wide invisible strokes so a line is easy to click. */}
+        {series.map((s) => (
+          <path key={`hit-${s.name}`} className="bm-hit" d={line(s.pts)} onClick={() => onPick?.(s)}>
+            <title>{`Act on ${s.name}`}</title>
+          </path>
+        ))}
         {labels.map(({ s, y: ly }) => (
           <g key={`e-${s.name}`}>
             <circle cx={x(s.last.date)} cy={y(s.last.v)} r="5" fill={s.color} className="bm-pulse" />
-            <text className="bm-end-lbl" x={x(s.last.date) + 12} y={ly + 4} fill={s.color}>
+            <text className="bm-end-lbl" x={x(s.last.date) + 12} y={ly + 4} fill={s.color} onClick={() => onPick?.(s)}>
               {Math.round(s.last.v)} · {s.name}
             </text>
           </g>
