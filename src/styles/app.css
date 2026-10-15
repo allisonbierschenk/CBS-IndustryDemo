@@ -1101,3 +1101,5 @@ textarea.input { resize: vertical; min-height: 110px; }
 .scene-beats li span { color: var(--ink); font-weight: 600; }
 .scene-beats small { display: block; margin-top: 10px; font-size: 11.5px; color: var(--muted); }
 @media (max-width: 760px) { .scene-beats li { grid-template-columns: 22px 1fr; } .scene-beats li span { grid-column: 2; } }
+.sheets-note { margin: 0 0 14px; }
+.sheets-formula { display: block; margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-size: 11.5px; overflow-wrap: anywhere; user-select: all; }

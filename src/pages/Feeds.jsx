@@ -8,6 +8,7 @@ import InfoTip from '../components/InfoTip.jsx';
 export default function Feeds() {
   const [state, setState] = useState({ loading: true });
   const [copied, setCopied] = useState(null);
+  const [sheets, setSheets] = useState(null); // { key, formula, copied }
 
   useEffect(() => {
     api('/api/feeds')
@@ -23,6 +24,22 @@ export default function Feeds() {
     } catch {
       setCopied(null);
     }
+  };
+
+  // One click: copy the IMPORTDATA formula and open a new blank Google Sheet — the user just pastes in A1.
+  // (Google has no link that pre-fills a formula, so a single paste is as automated as Sheets allows.)
+  const openInSheets = async (f) => {
+    const formula = `=IMPORTDATA("${f.url}")`;
+    let ok = false;
+    try {
+      await navigator.clipboard.writeText(formula);
+      ok = true;
+    } catch {
+      ok = false;
+    }
+    window.open('https://sheets.new', '_blank', 'noopener');
+    setSheets({ key: f.key, formula, copied: ok });
+    track('export', { kind: 'feed-sheets', feed: f.key });
   };
 
   return (
@@ -46,12 +63,27 @@ export default function Feeds() {
               <h3>{f.title}</h3>
               <p>{f.fields.join(' · ')}</p>
             </div>
-            <a className="btn btn-ghost btn-sm" href={f.url} target="_blank" rel="noreferrer">
-              <Icon name="download" />
-              Download CSV
-            </a>
+            <div style={{ display: 'flex', gap: 8 }}>
+              <a className="btn btn-ghost btn-sm" href={f.url} target="_blank" rel="noreferrer">
+                <Icon name="download" />
+                Download CSV
+              </a>
+              <button className="btn btn-dark btn-sm sheets-btn" onClick={() => openInSheets(f)}>
+                <Icon name="table" />
+                Open in Google Sheets
+              </button>
+            </div>
           </div>
           <div className="feed-body">
+            {sheets?.key === f.key && (
+              <div className="notice info sheets-note" role="status">
+                <Icon name={sheets.copied ? 'check' : 'info'} />
+                <div>
+                  <b>{sheets.copied ? 'A new Google Sheet is opening — press ⌘V (Ctrl+V) in cell A1.' : 'A new Google Sheet is opening — paste this into cell A1:'}</b>
+                  {sheets.copied ? 'The live formula is on your clipboard. Sheets refreshes it automatically from now on.' : <code className="sheets-formula">{sheets.formula}</code>}
+                </div>
+              </div>
+            )}
             <label className="vm-label" htmlFor={`feed-${f.key}`}>
               Your personal link
             </label>
@@ -77,11 +109,9 @@ export default function Feeds() {
               <div>
                 <b>Google Sheets</b>
                 <ol>
-                  <li>Select cell A1</li>
-                  <li>
-                    Enter <code>=IMPORTDATA(&quot;your link&quot;)</code>
-                  </li>
-                  <li>Sheets refreshes it automatically</li>
+                  <li>Click Open in Google Sheets</li>
+                  <li>Press ⌘V (Ctrl+V) in cell A1</li>
+                  <li>Sheets keeps it up to date automatically</li>
                 </ol>
               </div>
             </div>
