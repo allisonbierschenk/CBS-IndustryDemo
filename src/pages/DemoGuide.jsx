@@ -127,10 +127,10 @@ const FEATURES = [
     title: 'Explain with Pulse',
     where: p.transport ? 'Transportation (or Value Intelligence)' : 'Value Intelligence',
     do: p.transport
-      ? 'Select a few lanes or carriers and choose Explain with Pulse — the answer opens beside the dashboard.'
-      : 'Select a few engagements on a chart and choose Explain with Pulse — the answer opens beside the dashboard.',
-    say: 'Ask why — right next to the data.',
-    money: 'An AI analyst on every dashboard, with no per-question cost to Apex.',
+      ? 'Select a few lanes or carriers → Explain with Pulse → click a follow-up to act.'
+      : 'Select a few engagements on a chart → Explain with Pulse → click a follow-up to act.',
+    say: 'See something on a dashboard? Get the why — and act on it — without leaving the page.',
+    money: 'Every explanation ends in a next step — Continue in the Agent, or a conversation with Apex.',
     tech: ['pulse', 'embed'],
     ask: [['What did it just do?', 'Asked Pulse about the selected marks using only the Pulse metrics the user follows on that dashboard’s data source, and showed the answer beside the dashboard.']]
   })),
@@ -390,6 +390,44 @@ const benchmarkAsk = [
   ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user.']
 ];
 
+// Plain-English: what the audience will see — for presenters who have never seen the portal.
+const ABOUT = {
+  "signin": "Pick a person — you’re in. No password, no Tableau login.",
+  "hood": "The secure token behind the sign-in.",
+  "attention": "Pulse flags the metrics going the wrong way.",
+  "attentionAct": "One click to ask why, open the dashboard or email Apex.",
+  "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
+  "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
+  "selectionAgent": "Select data on a chart, ask the chat about it.",
+  "explain": "Select data on a chart → Pulse explains it → act on it.",
+  "tableauAgent": "Tableau’s AI inside the dashboard (needs a license).",
+  "vi": "The value Apex has delivered to this client.",
+  "early": "Banner for a brand-new client with little history.",
+  "filters": "Dropdowns that filter every chart at once.",
+  "scorecard": "Engagement summary table; click a row to filter.",
+  "engagements": "Click an engagement to jump to it on the dashboard.",
+  "contextNav": "Click Supply Chain → open the Transportation dashboard.",
+  "transportFilters": "Freight cost and savings, filtered by carrier or initiative.",
+  "drill": "Click a bar to see the invoices behind it.",
+  "views": "Save filters as a view that opens by default.",
+  "export": "PDF, PowerPoint, image or the data.",
+  "share": "A secure link and QR code to this exact view.",
+  "subscribe": "Email the dashboard on a schedule.",
+  "actions": "Select data → Slack, meeting with Apex, or download.",
+  "reports": "Every report the client can open, with favorites.",
+  "feeds": "Live data in Google Sheets or Excel.",
+  "alerts": "Manage email subscriptions and followed metrics.",
+  "help": "What each KPI means.",
+  "lock": "Premium chart blurred: “Unlock — $5/month”.",
+  "upgrade": "Upgrade on the spot; the blur lifts. Sign out to reset.",
+  "benchmarks": "How the client compares with similar companies.",
+  "benchmarkAct": "Set a goal or ask Apex for a plan.",
+  "build": "Clients build their own charts in Tableau.",
+  "contact": "Message the client’s Apex account manager.",
+  "activity": "Apex sees what clients do in the portal.",
+  "info": "Blue (i) icons: where the data comes from, why Tableau.",
+  "security": "Switch users: same dashboards, different data."
+};
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
 const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build'];
@@ -420,7 +458,7 @@ export default function DemoGuide() {
   };
   const available = (f) => !f.unavailable?.(persona);
   const included = (f) => available(f) && (f.group === 'core' || selected.has(f.id));
-  const steps = FEATURES.filter(included).map((f) => ({ ...f.build(persona), group: f.group, id: f.id }));
+  const steps = FEATURES.filter(included).map((f) => ({ ...f.build(persona), group: f.group, id: f.id, about: ABOUT[f.id] }));
   const showMoney = OPTIONAL.some((f) => f.group === 'money' && included(f));
   const minutes = Math.max(3, Math.round(steps.length * 0.75));
 
@@ -439,7 +477,18 @@ export default function DemoGuide() {
           <section className="guide-hero">
             <div className="kicker">Presenter guide</div>
             <h1>Share live proof of value — and get paid for it</h1>
-            <p className="lead">Pick who you’ll sign in as and the features you want to show. The script below is built from exactly those.</p>
+            <p className="lead">A step-by-step script for demoing the Apex client portal — even if you’ve never seen it.</p>
+            <ol className="guide-how">
+              <li>
+                <b>Pick a person.</b> Each one is a different client with different data and plan.
+              </li>
+              <li>
+                <b>Tick what you want to show.</b> Each option says what the audience will see.
+              </li>
+              <li>
+                <b>Follow the script.</b> Every step tells you what it is, what to click and what to say.
+              </li>
+            </ol>
           </section>
 
           <section className="guide-personas" aria-label="Who to sign in as">
@@ -506,7 +555,10 @@ export default function DemoGuide() {
                       return (
                         <label key={f.id} className={`fopt${reason ? ' is-off' : ''}`}>
                           <input type="checkbox" checked={on} disabled={Boolean(reason)} onChange={() => toggle(f.id)} />
-                          <span>{f.label}</span>
+                          <span>
+                            {f.label}
+                            <em>{ABOUT[f.id]}</em>
+                          </span>
                           {reason && <small>{reason}</small>}
                         </label>
                       );
@@ -536,6 +588,7 @@ export default function DemoGuide() {
                       </h2>
                       <span className="scene-where">{s.where}</span>
                     </div>
+                    {s.about && <p className="scene-about">{s.about}</p>}
                     <p className="scene-do">
                       <b>Do</b> {s.do}
                     </p>

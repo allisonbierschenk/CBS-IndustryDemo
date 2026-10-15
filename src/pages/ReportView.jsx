@@ -41,7 +41,8 @@ export default function ReportView() {
         </div>
         <TableauViz key={viewId} viewKey={`library:${viewId}`} endpoint={`/api/embed/library/${encodeURIComponent(viewId)}`} onFirstInteractive={(e, v) => setViz(v)} />
       </div>
-      <SelectionActions viz={viz} title={title} />
+      {/* Explain with Pulse uses the Pulse metrics on the report's data source (Transportation workbook vs Value Intelligence). */}
+      <SelectionActions viz={viz} title={title} pulseSource={/Operational Value/i.test(info?.workbook || '') ? 'Transportation' : 'Value Intelligence'} />
     </div>
   );
 }

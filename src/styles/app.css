@@ -1151,3 +1151,11 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .theme-tag.is-platform { background: color-mix(in srgb, #7a4fd6 12%, white); color: #5b37b0; }
 .features-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
 .features-presets { display: flex; gap: 6px; }
+.fopt span em { display: block; font-style: normal; font-size: 11.5px; line-height: 1.4; color: var(--muted); margin-top: 1px; }
+.fopt.is-off span em { color: var(--faint); }
+.fopt { align-items: start; }
+.fopt input { margin-top: 2px; }
+.scene-about { margin: 6px 0 2px; font-size: 13.5px; color: var(--muted); font-style: italic; }
+.guide-how { display: flex; flex-wrap: wrap; gap: 10px 28px; margin: 14px 0 0; padding: 0; list-style: none; counter-reset: how; font-size: 13.5px; color: var(--ink-2); }
+.guide-how li { display: flex; gap: 8px; align-items: baseline; counter-increment: how; }
+.guide-how li::before { content: counter(how); display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 999px; background: var(--ink); color: var(--lime); font-size: 11px; font-weight: 800; }
