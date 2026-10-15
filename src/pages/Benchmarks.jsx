@@ -355,7 +355,9 @@ function GoalDialog({ s, current, onClose, onSaved }) {
       <div className="modal" role="dialog" aria-modal="true" aria-labelledby="goal-title">
         <div className="modal-head">
           <div>
-            <div className="kicker">Your goal</div>
+            <div className="kicker title-row">
+              Your goal <InfoTip kind="goals" label="How your goal is created" />
+            </div>
             <h3 id="goal-title">{s.name}</h3>
           </div>
           <button className="icon-btn" aria-label="Close" onClick={onClose}>

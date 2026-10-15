@@ -73,7 +73,10 @@ const FEATURES = [
     do: 'Show the JWT the portal just signed: sub = the user’s email, plus client name, service line and engagement type. Open it in jwt.io.',
     say: 'This token is all Tableau needs — no passwords, no second login.',
     tech: ['jwt', 'rls'],
-    ask: [['Is the secret exposed?', 'No — the token is signed on the server; only the signed token reaches the browser.']]
+    ask: [
+      ['Is the secret exposed?', 'No — the token is signed on the server; only the signed token reaches the browser.'],
+      ['What is the token allowed to do?', 'Only what its scopes list — e.g. read content, query data (VizQL Data Service), and for Premium goals create, update and delete Pulse metric definitions and metrics through the Pulse REST API. Always as this user, under their permissions and row-level security.']
+    ]
   })),
   // ── AI ──────────────────────────────────────────────────────────────────
   F('attention', 'ai', 'Needs attention', () => ({
@@ -329,10 +332,10 @@ const FEATURES = [
   F('benchmarks', 'money', 'Industry Benchmarks page', (p) => ({
     title: 'Industry Benchmarks',
     where: 'Industry Benchmarks',
-    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time and where each engagement stands. Click an engagement → Explain this or Schedule with Apex.`,
+    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time and where each engagement stands. Click an engagement’s point → Explain this, Schedule with Apex, or Set a goal (creates the client’s own Pulse metric through the Pulse REST API — see “Your own metric with a goal”).`,
     say: 'Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you.',
     money: 'Peer comparison only Apex can provide — sold as a Premium tier.',
-    tech: ['vds', 'rls', 'portal'],
+    tech: ['vds', 'pulseApi', 'rls', 'portal'],
     beats: benchmarkBeats(p),
     ask: benchmarkAsk
   }), (p) => (p.plan === 'premium' || p.plan === 'standard' ? null : 'Premium')),
@@ -400,7 +403,8 @@ function benchmarkBeats(p) {
 const benchmarkAsk = [
   ['What does “where you stand among peers” mean?', 'Apex compares this client’s engagement results with anonymized companies in the same industry. 70th percentile = better results than 70 out of 100 peers; 50th is the median.'],
   ['Why would the client care?', 'Hitting their own target doesn’t mean the result is good — 89% value realization sounds fine unless peers get 95%. Benchmarks justify the spend to the CFO and show where the next dollar pays off most.'],
-  ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user.']
+  ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user.'],
+  ['What does Set a goal do in Tableau?', 'It calls the Pulse REST API as the user: creates a new metric definition from the Benchmark Percentile field, scoped to this client and engagement; creates their metric; saves the goal; and follows it. The “Your goals” card shows Pulse’s live value.']
 ];
 
 // Plain-English: what the audience will see — for presenters who have never seen the portal.
