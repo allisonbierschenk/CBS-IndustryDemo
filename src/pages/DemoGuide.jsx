@@ -83,7 +83,8 @@ const FEATURES = [
     tech: ['pulse', 'rls'],
     ask: [
       ['Where does this come from?', 'A Tableau Pulse Insight Brief over the metrics the user follows. The numbers and drivers come from Pulse’s insights platform; the Issue / Expected rows use only those facts.'],
-      ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed and never analyzes raw data, so insights are deterministic. Included with Tableau+ and unmetered.']
+      ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed and never analyzes raw data, so insights are deterministic. Included with Tableau+ and unmetered.'],
+      ['Can “expected” be a real target?', 'Yes — with Pulse goals. Apex sets goals on the metric definitions and Pulse reports progress and pace to them. Today “expected” is last period’s level, because no goals are set on this site yet.']
     ]
   })),
   F('attentionAct', 'ai', 'Act on an off-track metric', () => ({
@@ -94,6 +95,19 @@ const FEATURES = [
     money: 'Every off-track metric becomes a conversation with Apex — already filled in with the facts.',
     tech: ['pulse'],
     ask: [['Who wrote the Contact Apex message?', 'The portal, from Pulse’s facts for that metric — no generated text.']]
+  })),
+  F('goals', 'ai', 'Pulse goals (talking point)', () => ({
+    title: 'Goals that Pulse tracks for you',
+    where: 'Needs attention / Agent (talking point)',
+    do: 'No click needed yet — say it while Needs attention or the Agent is on screen. It becomes a live demo once goals are set on the Pulse metric definitions.',
+    say: 'Agree a target with Apex once — Pulse tells you every week whether you’re on pace to hit it.',
+    money: 'Goals agreed with Apex become a standing reason for the next check-in.',
+    tech: ['pulse'],
+    ask: [
+      ['Where do goals live?', 'On the Pulse metric definition, set by whoever owns it (here, Apex) — not by the client in the portal.'],
+      ['What does the client get?', 'Goal insights from Pulse: Goal and Threshold Breakdown (progress to goal by breakdown) and Pace to Goal (on track to hit it by period end). Pace to Goal needs Tableau+ with the Forecast insight on.'],
+      ['Is it in this demo yet?', 'Not yet — no goals are set on this site’s definitions. Once Apex sets them, they flow into Needs attention, the Agent and Explain with Pulse with no portal changes.']
+    ]
   })),
   F('agent', 'ai', 'Ask the Agent', (p) => ({
     title: 'Ask the Agent',
@@ -387,6 +401,7 @@ const ABOUT = {
   "hood": "The secure token behind the sign-in.",
   "attention": "Pulse flags the metrics going the wrong way.",
   "attentionAct": "One click to ask why, open the dashboard or email Apex.",
+  "goals": "Pulse tracks progress and pace to goals Apex agrees with the client.",
   "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
   "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
   "selectionAgent": "Select data on a chart, ask the chat about it.",
