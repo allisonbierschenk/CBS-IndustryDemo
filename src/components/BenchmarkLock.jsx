@@ -2,7 +2,6 @@
 // Cosmetic: the real Premium enforcement is the server-gated /benchmarks page.
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from './Icon.jsx';
-import InfoTip from './InfoTip.jsx';
 import UpgradeButton from './UpgradeButton.jsx';
 
 export default function BenchmarkLock({ compact = false }) {
@@ -13,10 +12,7 @@ export default function BenchmarkLock({ compact = false }) {
       <span className="bench-lock-ic">
         <Icon name="lock" />
       </span>
-      <div className="bench-lock-title">
-        <b>Unlock Industry Benchmarks</b>
-        <InfoTip kind="premium" label="Why Tableau for Premium analytics" />
-      </div>
+      <b>Unlock Industry Benchmarks</b>
       <p>See how {me.tenant.shortName} ranks against anonymized {me.tenant.industry.toLowerCase()} peers.</p>
       {price && (
         <div className="bench-lock-price">

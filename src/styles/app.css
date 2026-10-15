@@ -1021,9 +1021,6 @@ textarea.input { resize: vertical; min-height: 110px; }
 .scene-money { display: flex; gap: 8px; align-items: baseline; margin: -4px 0 10px; font-size: 13px; color: #1f6b46; font-weight: 600; }
 .scene-money span { display: inline-grid; place-items: center; width: 18px; height: 18px; flex: none; border-radius: 999px; background: #1f8a5b; color: #fff; font-size: 11px; font-weight: 800; }
 @media (max-width: 900px) { .money-grid { grid-template-columns: 1fr 1fr; } }
-.bench-lock-title { display: flex; align-items: center; gap: 8px; }
-.bench-lock .info-btn { background: transparent; border-color: rgba(255, 255, 255, .6); color: #fff; box-shadow: none; }
-.bench-lock .info-btn:hover, .bench-lock .info-btn.is-open { background: var(--tableau-blue); border-color: var(--tableau-blue); }
 
 /* Demo checkout */
 .upgrade-modal { width: min(520px, 100%); }

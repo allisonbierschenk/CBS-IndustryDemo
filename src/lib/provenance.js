@@ -89,8 +89,8 @@ export function provenance(key, me, extra = {}) {
         tag: 'VizQL Data Service',
         freshness: 'Live: queried from Tableau each time the page opens.',
         source: `Benchmark Percentile, Benchmark Target and KPI targets from the published data source “${VI_SOURCE}”, queried with VizQL Data Service as you and drawn by the portal (d3).`,
-        security: `${RLS(me, ['client name', 'service line', 'engagement type'])} Premium access is checked on the server before any data is returned.`,
-        why: 'This page isn’t a Tableau dashboard at all — it’s Apex’s own design, fed by the same governed data source through VizQL Data Service. So a custom, on-brand experience still uses the single source of truth and the same row-level security as every Tableau view, and Apex can package it as a paid Premium tier.'
+        security: `${RLS(me, ['client name', 'service line', 'engagement type'])} Premium is enforced on the server: clients outside the plan get no data at all, and the subscription tier also travels in the sign-in token.`,
+        why: 'This is how Apex makes money with Tableau: it turns its data and expertise into a paid Premium tier. The page isn’t a Tableau dashboard — it’s Apex’s own design, fed by the same governed data source through VizQL Data Service — so a custom, on-brand product still uses the single source of truth and the same row-level security, with no second analytics stack. One portal serves Standard and Premium clients alike; adding a new paid insight is publishing a view, not a software project; and Pulse AI is included with Tableau+ and unmetered, so the margin on every upgrade stays predictable.''
       };
     case 'premium':
       return {
