@@ -478,7 +478,11 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const dsIds = new Set();
       for (const ds of scope.datasources) dsIds.add(await pulse.resolveDatasource(req.user, ds.name));
       const def = (await definitionsOn(req.user, dsIds)).find((d) => d.metadata.id === definitionId || (definitionName && d.metadata.name === definitionName));
-      if (!def) return res.status(400).json({ error: 'Pick one of your metrics.' });
+      if (!def) {
+        // e.g. the metric definition was deleted in Tableau Pulse — say so rather than blame the user's pick.
+        if (definitionName) console.warn(`[metrics/create] no Pulse definition named "${definitionName}" on the agent data sources`);
+        return res.status(400).json({ error: definitionName ? `“${definitionName}” isn’t set up in Tableau right now, so a goal can’t be created for it.` : 'Pick one of your metrics.' });
+      }
       const value = Number(goal);
       if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
       // Start from the definition's default metric (period + comparison), scoped to this client.
