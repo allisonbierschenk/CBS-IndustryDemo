@@ -1103,3 +1103,51 @@ textarea.input { resize: vertical; min-height: 110px; }
 @media (max-width: 760px) { .scene-beats li { grid-template-columns: 22px 1fr; } .scene-beats li span { grid-column: 2; } }
 .sheets-note { margin: 0 0 14px; }
 .sheets-formula { display: block; margin-top: 6px; padding: 6px 8px; border-radius: 8px; background: var(--surface); border: 1px solid var(--line); font-size: 11.5px; overflow-wrap: anywhere; user-select: all; }
+
+/* Guide: persona picker, theme toggles, generated script */
+button.pcard { font: inherit; text-align: left; cursor: pointer; transition: border-color .15s, box-shadow .15s, transform .15s; }
+button.pcard:hover { border-color: var(--ink-2); transform: translateY(-1px); }
+button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var(--lime); }
+.guide-themes { margin-bottom: 26px; }
+.theme-row { display: flex; flex-wrap: wrap; gap: 10px; align-items: center; margin-top: 10px; }
+.theme-chip { display: inline-grid; grid-template-columns: 20px auto auto; gap: 10px; align-items: center; padding: 10px 14px; border-radius: 14px; border: 1.5px solid var(--line); background: var(--surface); font: inherit; text-align: left; cursor: pointer; }
+.theme-chip > svg { width: 18px; height: 18px; color: var(--muted); }
+.theme-chip b { display: block; font-size: 14px; color: var(--ink); }
+.theme-chip small { font-size: 11.5px; color: var(--muted); }
+.theme-chip.is-on { background: var(--ink); border-color: var(--ink); }
+.theme-chip.is-on b { color: #fff; }
+.theme-chip.is-on small { color: rgba(255, 255, 255, .65); }
+.theme-chip.is-on > svg { color: var(--lime); }
+.theme-chip:disabled { cursor: default; opacity: 1; }
+.theme-chip .theme-lock { width: 13px; height: 13px; color: rgba(255, 255, 255, .5); }
+.script-head { margin-bottom: 12px; }
+.script-head h2 { font-size: 22px; margin-top: 4px; }
+.theme-tag { display: inline-block; margin-left: 10px; vertical-align: middle; padding: 2px 8px; border-radius: 999px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; }
+.theme-tag.is-ai { background: color-mix(in srgb, #e0702f 12%, white); color: #b5541c; }
+.theme-tag.is-bi { background: color-mix(in srgb, #2f5fe0 10%, white); color: #2f5fe0; }
+.theme-tag.is-money { background: color-mix(in srgb, #1f8a5b 12%, white); color: #1f6b46; }
+.guide-legend-fold { margin-top: 26px; }
+.guide-legend-fold summary { cursor: pointer; }
+.guide-features { margin-bottom: 26px; }
+.feature-groups { display: grid; grid-template-columns: repeat(auto-fit, minmax(236px, 1fr)); gap: 12px; margin-top: 10px; align-items: start; }
+.fgroup { padding: 14px; border-radius: 16px; background: var(--surface); border: 1px solid var(--line); display: grid; gap: 4px; }
+.fgroup-head { display: grid; grid-template-columns: 22px 1fr auto; gap: 10px; align-items: center; padding-bottom: 8px; margin-bottom: 4px; border-bottom: 1px solid var(--line); }
+.fgroup-head > svg { width: 19px; height: 19px; }
+.fgroup.is-ai .fgroup-head > svg { color: #e0702f; }
+.fgroup.is-bi .fgroup-head > svg { color: #2f5fe0; }
+.fgroup.is-money .fgroup-head > svg { color: #1f8a5b; }
+.fgroup-head b { display: block; font-size: 14px; }
+.fgroup-head small { font-size: 11.5px; color: var(--muted); }
+.fgroup-all { border: 1px solid var(--line); background: var(--page); border-radius: 999px; padding: 3px 10px; font: inherit; font-size: 11.5px; font-weight: 700; cursor: pointer; }
+.fopt { display: grid; grid-template-columns: 18px 1fr auto; gap: 8px; align-items: center; padding: 6px 4px; border-radius: 8px; font-size: 13px; color: var(--ink); cursor: pointer; }
+.fopt:hover { background: var(--page); }
+.fopt input { width: 16px; height: 16px; accent-color: var(--ink); margin: 0; }
+.fopt.is-off { color: var(--faint); cursor: default; }
+.fopt small { grid-column: 2; font-size: 11px; color: var(--faint); margin-top: -4px; }
+.fopt.is-off { grid-template-columns: 18px 1fr; }
+.fopt-lock { width: 13px; height: 13px; color: var(--faint); }
+@media (max-width: 900px) { .feature-groups { grid-template-columns: 1fr; } }
+.fgroup.is-platform .fgroup-head > svg { color: #7a4fd6; }
+.theme-tag.is-platform { background: color-mix(in srgb, #7a4fd6 12%, white); color: #5b37b0; }
+.features-head { display: flex; justify-content: space-between; align-items: center; gap: 12px; flex-wrap: wrap; }
+.features-presets { display: flex; gap: 6px; }
