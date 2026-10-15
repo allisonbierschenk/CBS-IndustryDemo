@@ -195,7 +195,7 @@ export default function ValueIntelligence() {
       </section>
 
       {/* Select marks in the dashboard → act on them; also carries the contextual deep link. */}
-      <SelectionActions viz={viz} title={vi.title} extra={contextLink} onDismissExtra={() => setContextLink(null)} />
+      <SelectionActions viz={viz} title={vi.title} extra={contextLink} onDismissExtra={() => setContextLink(null)} pulseSource="Value Intelligence" />
     </div>
   );
 }

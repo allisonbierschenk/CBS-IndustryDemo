@@ -123,15 +123,17 @@ const FEATURES = [
     tech: ['embed', 'pulse'],
     ask: [['How is the question built?', 'From the selected marks’ fields and values, read through the Embedding API.']]
   })),
-  F('explain', 'ai', 'Explain with Pulse', () => ({
+  F('explain', 'ai', 'Explain with Pulse', (p) => ({
     title: 'Explain with Pulse',
-    where: 'Transportation',
-    do: 'Select a few lanes or carriers and choose Explain with Pulse — the answer opens beside the dashboard.',
+    where: p.transport ? 'Transportation (or Value Intelligence)' : 'Value Intelligence',
+    do: p.transport
+      ? 'Select a few lanes or carriers and choose Explain with Pulse — the answer opens beside the dashboard.'
+      : 'Select a few engagements on a chart and choose Explain with Pulse — the answer opens beside the dashboard.',
     say: 'Ask why — right next to the data.',
     money: 'An AI analyst on every dashboard, with no per-question cost to Apex.',
     tech: ['pulse', 'embed'],
-    ask: [['What did it just do?', 'Asked Pulse about the selected marks using only the Transportation metrics the user follows.']]
-  }), onlyElena),
+    ask: [['What did it just do?', 'Asked Pulse about the selected marks using only the Pulse metrics the user follows on that dashboard’s data source, and showed the answer beside the dashboard.']]
+  })),
   F('tableauAgent', 'ai', 'Tableau Agent in the dashboard', () => ({
     title: 'Tableau Agent in the dashboard',
     where: 'Dashboard header → Ask Tableau Agent',
