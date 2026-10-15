@@ -1,5 +1,5 @@
-// Presenter guide: pick a persona, then click the features to show (AI features are always included; traditional BI
-// and data monetization are opt-in, one by one or a whole group at a time). The script below is built from exactly
+// Presenter guide: pick a persona, then click the features to show — AI, traditional BI, data monetization and
+// platform features, one by one or a whole group at a time. The script below is built from exactly
 // those features, written for that persona — features a persona can't do are shown disabled with the reason.
 // Each step: what to do, one line to say, the monetization angle, color-coded Tableau tech and "If they ask".
 // The selection lives in the URL (?p=dana&f=vi,upgrade,feeds) so a script can be bookmarked or shared.
@@ -27,7 +27,7 @@ const ROLE = {
 const PLAN = { premium: { icon: 'star', label: 'Premium' }, standard: { icon: 'shield', label: 'Standard' } };
 
 const GROUPS = [
-  { key: 'ai', label: 'AI', icon: 'agent', note: 'Always included' },
+  { key: 'ai', label: 'AI', icon: 'agent', note: 'Pulse insights and the Agent' },
   { key: 'bi', label: 'Traditional BI', icon: 'dashboard', note: 'Dashboards, drill-down, delivery' },
   { key: 'money', label: 'Data monetization', icon: 'star', note: 'Premium tier and upsell' },
   { key: 'platform', label: 'Security & platform', icon: 'shield', note: 'Sign-in and data security always run' }
@@ -51,7 +51,7 @@ const onlyElena = (p) => (p.transport ? null : 'Elena only (Transportation)');
 const onlyStandard = (p) => (p.plan === 'standard' ? null : 'Standard clients');
 const onlyPremium = (p) => (p.plan === 'premium' ? null : 'Premium clients');
 
-// Feature library in script order. group: 'core' (always, not an option) | 'ai' (always included) | 'bi' | 'money'.
+// Feature library in script order. group: 'core' (always, not an option) | 'ai' | 'bi' | 'money' | 'platform'.
 // unavailable(p) → null, or the reason this persona can't show it.
 const FEATURES = [
   // ── Always ──────────────────────────────────────────────────────────────
@@ -75,7 +75,7 @@ const FEATURES = [
     tech: ['jwt', 'rls'],
     ask: [['Is the secret exposed?', 'No — the token is signed on the server; only the signed token reaches the browser.']]
   })),
-  // ── AI (always included) ────────────────────────────────────────────────
+  // ── AI ──────────────────────────────────────────────────────────────────
   F('attention', 'ai', 'Needs attention', () => ({
     title: 'Needs attention',
     where: 'Home',
@@ -389,9 +389,9 @@ const benchmarkAsk = [
   ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user.']
 ];
 
-const OPTIONAL = FEATURES.filter((f) => f.group === 'bi' || f.group === 'money' || f.group === 'platform');
+const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build', 'info'];
+const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build', 'info'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>
@@ -403,7 +403,7 @@ const Chip = ({ k }) => (
 export default function DemoGuide() {
   const [params, setParams] = useSearchParams();
   const persona = PERSONAS.find((x) => x.id === params.get('p')) || PERSONAS[0];
-  // Selected optional features (default: all of them). AI features are always included.
+  // Selected features (default: the recommended set). Sign-in and the data security switch always run.
   const selected = new Set(params.has('f') ? params.get('f').split(',').filter(Boolean) : RECOMMENDED);
   const save = (p, set) => setParams({ p, f: [...set].join(',') }, { replace: true });
   const toggle = (id) => {
@@ -417,7 +417,7 @@ export default function DemoGuide() {
     save(persona.id, next);
   };
   const available = (f) => !f.unavailable?.(persona);
-  const included = (f) => available(f) && (f.group === 'core' || f.group === 'ai' || selected.has(f.id));
+  const included = (f) => available(f) && (f.group === 'core' || selected.has(f.id));
   const steps = FEATURES.filter(included).map((f) => ({ ...f.build(persona), group: f.group, id: f.id }));
   const showMoney = OPTIONAL.some((f) => f.group === 'money' && included(f));
   const minutes = Math.max(3, Math.round(steps.length * 0.75));
@@ -485,7 +485,7 @@ export default function DemoGuide() {
               {GROUPS.map((g) => {
                 const items = FEATURES.filter((f) => f.group === g.key && f.label);
                 const opt = items.filter(available);
-                const allOn = g.key === 'ai' || opt.every((f) => selected.has(f.id));
+                const allOn = opt.length > 0 && opt.every((f) => selected.has(f.id));
                 return (
                   <div key={g.key} className={`fgroup is-${g.key}`}>
                     <div className="fgroup-head">
@@ -494,20 +494,18 @@ export default function DemoGuide() {
                         <b>{g.label}</b>
                         <small>{g.note}</small>
                       </span>
-                      {g.key !== 'ai' && (
-                        <button type="button" className="fgroup-all" onClick={() => setGroup(g.key, !allOn)}>
-                          {allOn ? 'None' : 'All'}
-                        </button>
-                      )}
+                      <button type="button" className="fgroup-all" onClick={() => setGroup(g.key, !allOn)}>
+                        {allOn ? 'None' : 'All'}
+                      </button>
                     </div>
                     {items.map((f) => {
                       const reason = f.unavailable?.(persona);
-                      const on = !reason && (g.key === 'ai' || selected.has(f.id));
+                      const on = !reason && selected.has(f.id);
                       return (
                         <label key={f.id} className={`fopt${reason ? ' is-off' : ''}`}>
-                          <input type="checkbox" checked={on} disabled={Boolean(reason) || g.key === 'ai'} onChange={() => toggle(f.id)} />
+                          <input type="checkbox" checked={on} disabled={Boolean(reason)} onChange={() => toggle(f.id)} />
                           <span>{f.label}</span>
-                          {reason ? <small>{reason}</small> : g.key === 'ai' && <Icon name="lock" className="fopt-lock" />}
+                          {reason && <small>{reason}</small>}
                         </label>
                       );
                     })}
