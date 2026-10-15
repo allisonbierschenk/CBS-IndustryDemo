@@ -1,6 +1,7 @@
 // (i) button that explains a Tableau-powered surface: freshness, source, security and why Tableau helps there. Opens on hover (and on click / keyboard focus for touch and keyboard users);
 // a short close delay lets the pointer move into the popover. Fixed-positioned so overflow:hidden cards can't clip it.
 import { useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import { provenance } from '../lib/provenance.js';
 import { useSession } from '../context/SessionContext.jsx';
 
@@ -74,7 +75,9 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
       >
         i
       </button>
-      {open && (
+      {/* Portaled to <body>: inside a scaled container (the embedded dashboard) position:fixed would be offset. */}
+      {open &&
+        createPortal(
         <div ref={pop} className="info-pop" role="dialog" aria-label={label} onMouseEnter={show} onMouseLeave={hideSoon} style={pos ? { top: pos.top, left: pos.left, width: pos.width } : { visibility: 'hidden' }}>
           <div className="info-tag">{info.tag}</div>
           <h4>Freshness</h4>
@@ -87,8 +90,9 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
             <h4>Why Tableau helps here</h4>
             <p>{info.why}</p>
           </div>
-        </div>
-      )}
+        </div>,
+          document.body
+        )}
     </>
   );
 }
