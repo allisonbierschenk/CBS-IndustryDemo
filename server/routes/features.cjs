@@ -478,13 +478,20 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const dsIds = new Set();
       for (const ds of scope.datasources) dsIds.add(await pulse.resolveDatasource(req.user, ds.name));
       const def = (await definitionsOn(req.user, dsIds)).find((d) => d.metadata.id === definitionId || (definitionName && d.metadata.name === definitionName));
+      const value = Number(goal);
+      if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
       if (!def) {
-        // e.g. the metric definition was deleted in Tableau Pulse — say so rather than blame the user's pick.
+        // The Pulse definition is gone (e.g. deleted in Tableau). Benchmark goals keep working: the portal stores
+        // the goal and tracks it from the same governed data (VizQL Data Service as the user) — no Tableau work.
+        if (definitionName === BENCHMARK_DEF && engagementType) {
+          console.warn(`[metrics/create] no Pulse definition "${BENCHMARK_DEF}" — storing a portal-tracked benchmark goal`);
+          const g = savePortalGoal(req.user, { engagement: String(engagementType), value: raw ? value : value / 100, name: String(goalName || 'Benchmark goal').trim().slice(0, 20) });
+          activity.record(req.user, req.tenant, 'pulse-metric', { metric: `${engagementType} benchmark`, goal: `${Math.round(g.value * 100)}th`, created: true, portal: true });
+          return res.json({ ok: true, metricId: g.id, name: BENCHMARK_DEF, goal: `${Math.round(g.value * 100)}th`, created: true, portal: true });
+        }
         if (definitionName) console.warn(`[metrics/create] no Pulse definition named "${definitionName}" on the agent data sources`);
         return res.status(400).json({ error: definitionName ? `“${definitionName}” isn’t set up in Tableau right now, so a goal can’t be created for it.` : 'Pick one of your metrics.' });
       }
-      const value = Number(goal);
-      if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
       // Start from the definition's default metric (period + comparison), scoped to this client.
       const { metrics = [] } = await pulse.request(req.user, 'GET', `/pulse/definitions/${def.metadata.id}/metrics`);
       const base = metrics.find((m) => m.is_default) || metrics.find((m) => !(m.specification?.filters || []).length) || metrics[0];
@@ -565,11 +572,76 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           };
         })
       );
-      res.json({ goals });
+      res.json({ goals: [...goals, ...(await portalGoalCards(req.user))] });
     } catch (e) {
       fail(res, e);
     }
   });
+
+  // ── Portal-tracked benchmark goals (fallback when the Pulse definition is missing) ──
+  // Stored per user in data/portal-goals.json; the current value is the year-to-date average Benchmark
+  // Percentile for that engagement (same aggregation as the Pulse definition), queried as the user.
+  const BENCHMARK_DEF = 'Benchmark Percentile';
+  const GOALS_FILE = require('path').join(__dirname, '..', '..', 'data', 'portal-goals.json');
+  let portalGoals = {};
+  try {
+    portalGoals = JSON.parse(require('fs').readFileSync(GOALS_FILE, 'utf8'));
+  } catch {
+    /* none yet */
+  }
+  const savePortalGoals = () => require('fs').writeFile(GOALS_FILE, JSON.stringify(portalGoals, null, 1), () => {});
+  const portalGoalsFor = (user) => portalGoals[user.id] || [];
+  function savePortalGoal(user, { engagement, value, name }) {
+    const g = { id: `portal-${engagement.toLowerCase().replace(/[^a-z0-9]+/g, '-')}`, engagement, value, name };
+    portalGoals[user.id] = [...portalGoalsFor(user).filter((x) => x.id !== g.id), g]; // one goal per engagement
+    savePortalGoals();
+    return g;
+  }
+  function forgetPortalGoal(user, id) {
+    const before = portalGoalsFor(user).length;
+    portalGoals[user.id] = portalGoalsFor(user).filter((x) => x.id !== id);
+    savePortalGoals();
+    return portalGoals[user.id].length < before;
+  }
+  async function portalGoalCards(user) {
+    const list = portalGoalsFor(user);
+    if (!list.length) return [];
+    const luid = await pulse.resolveDatasource(user, cfg.benchmarks?.datasource || cfg.authoring.datasources[0].name);
+    const r = await pulse.vds(user, luid, [
+      { fieldCaption: 'Engagement Type', fieldAlias: 'Engagement' },
+      { fieldCaption: 'Date', function: 'TRUNC_MONTH', fieldAlias: 'Month' },
+      { fieldCaption: BENCHMARK_DEF, function: 'SUM', fieldAlias: 'Sum' },
+      { fieldCaption: BENCHMARK_DEF, function: 'COUNT', fieldAlias: 'N' }
+    ]);
+    const rows = r.ok ? JSON.parse(r.text).data || [] : [];
+    const now = new Date();
+    const year = String(now.getFullYear());
+    const cutoff = `${year}-${String(now.getMonth() + 1).padStart(2, '0')}`;
+    return list.map((g) => {
+      const ytd = rows.filter((x) => x.Engagement === g.engagement && String(x.Month).slice(0, 4) === year && String(x.Month).slice(0, 7) <= cutoff);
+      const n = ytd.reduce((a, x) => a + Number(x.N || 0), 0);
+      const value = n ? ytd.reduce((a, x) => a + Number(x.Sum || 0), 0) / n : null;
+      const nth = (v) => `${Math.round(v * 100)}th`;
+      const gap = value == null ? null : Math.round((g.value - value) * 100);
+      return {
+        metricId: g.id,
+        name: BENCHMARK_DEF,
+        scope: g.engagement,
+        source: 'Value Intelligence',
+        percentile: true,
+        unit: 'number',
+        goal: { name: g.name, value: g.value },
+        goalDisplay: nth(g.value),
+        value,
+        valueDisplay: value == null ? null : nth(value),
+        period: year,
+        upIsGood: true,
+        onTrack: value == null ? null : value >= g.value,
+        sentence: value == null ? null : `${g.engagement} is at the ${nth(value)} percentile so far in ${year}${gap > 0 ? ` — ${gap} points short of your ${nth(g.value)} goal` : `, at or above your ${nth(g.value)} goal`}.`,
+        portal: true
+      };
+    });
+  }
 
   // ── Delete a client's own goal metric (demo clean-up) ─────────────────────
   // Safeguard: only metrics this portal actually created for this user (getOrCreate returned
@@ -605,6 +677,11 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   app.delete('/api/metrics/:metricId', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
     try {
+      if (req.params.metricId.startsWith('portal-')) {
+        if (!forgetPortalGoal(req.user, req.params.metricId)) return res.status(404).json({ error: 'Goal not found.' });
+        activity.record(req.user, req.tenant, 'pulse-metric', { metricId: req.params.metricId, deleted: true });
+        return res.json({ ok: true });
+      }
       await deleteOwnMetric(req.user, req.params.metricId);
       pulse.resetContext(req.user);
       attentionCache.delete(attentionKey(req.user));
@@ -630,11 +707,15 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           )
         )
       );
+      const local = portalGoalsFor(req.user).length;
+      portalGoals[req.user.id] = [];
+      savePortalGoals();
       pulse.resetContext(req.user);
       attentionCache.delete(attentionKey(req.user));
       saveAttention();
-      activity.record(req.user, req.tenant, 'pulse-metric', { reset: true, deleted: results.filter(Boolean).length });
-      res.json({ ok: true, deleted: results.filter(Boolean).length, failed: results.filter((x) => !x).length });
+      const deleted = results.filter(Boolean).length + local;
+      activity.record(req.user, req.tenant, 'pulse-metric', { reset: true, deleted });
+      res.json({ ok: true, deleted, failed: results.filter((x) => !x).length });
     } catch (e) {
       fail(res, e);
     }

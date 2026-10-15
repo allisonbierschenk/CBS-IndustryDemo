@@ -6,3 +6,4 @@ dist/
 data/activity.jsonl
 data/attention-cache.json
 data/portal-metrics.json
+data/portal-goals.json
