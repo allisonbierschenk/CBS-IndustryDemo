@@ -399,7 +399,7 @@ const ABOUT = {
   "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
   "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
   "selectionAgent": "Select data on a chart, ask the chat about it.",
-  "explain": "Select data on a chart → Pulse explains it → act on it.",
+  "explain": "Select a data point in a dashboard → Pulse explains it.",
   "tableauAgent": "Tableau’s AI inside the dashboard (needs a license).",
   "vi": "The value Apex has delivered to this client.",
   "early": "Banner for a brand-new client with little history.",
