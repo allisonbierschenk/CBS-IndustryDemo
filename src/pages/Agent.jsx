@@ -38,7 +38,7 @@ function Answer({ msg }) {
       <header className="ai-head">
         <span className="ai-badge">
           <Icon name="bolt" size={13} />
-          Tableau Pulse
+          Insight
         </span>
       </header>
       {uniqueChips.length > 0 && (
@@ -155,7 +155,7 @@ export default function Agent() {
             <h1>Agent</h1>
             <InfoTip kind="agent" extra={{ source }} label="About the Agent" />
           </div>
-          <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your Tableau Pulse metrics.</p>
+          <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your own metrics.</p>
           <PulseAiNote />
           {multiSource && (
             <div className="seg source-seg" role="radiogroup" aria-label="Data source">
@@ -191,7 +191,7 @@ export default function Agent() {
                     <i />
                     <i />
                   </span>
-                  Loading your Pulse metrics…
+                  Loading your metrics…
                 </div>
               )}
               {prep.error && (
@@ -240,7 +240,7 @@ export default function Agent() {
               <div key={i} ref={ref} style={{ scrollMarginTop: 12 }}>
                 {multiSource && m.source && (
                   <div className="answer-source">
-                    From {m.source} Pulse metrics{m.metricCount ? ` · ${m.metricCount}` : ''}
+                    From your {m.source} metrics{m.metricCount ? ` · ${m.metricCount}` : ''}
                   </div>
                 )}
                 <Answer msg={m} />
@@ -255,7 +255,7 @@ export default function Agent() {
                 <i />
                 <i />
               </span>
-              Analyzing your data with Tableau Pulse…
+              Analyzing your data…
             </div>
           )}
         </div>

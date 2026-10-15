@@ -14,6 +14,7 @@ import Icon from './Icon.jsx';
 const included = (t) => [
   ['star', 'Know where you stand', `Your percentile against anonymized ${t.industry.toLowerCase()} peers — for every engagement, and how it’s trending.`],
   ['target', 'Know where to invest next', 'See which engagements are furthest from the top quartile, so effort goes where it pays off most.'],
+  ['target', 'Set your own goals', 'Create your own metrics with a target — we track your progress and flag when you’re off track.'],
   ['calendar', 'Turn gaps into a plan', 'Benchmark reviews with your Apex team to agree what to change, and by when.'],
   ['chart', 'Answer your own questions', 'Build your own reports in Tableau on the same governed data, with the same security.']
 ];

@@ -23,7 +23,7 @@ export default function AttentionPanel() {
     const when = new Date(state.generatedAt).toLocaleDateString([], { dateStyle: 'medium' });
     contact(
       'Schedule a review',
-      [`${opening} Tableau Pulse flagged it in my portal's Needs attention summary on ${when}.`, `\nWhat Pulse shows:\n${facts.filter(Boolean).map((l) => `• ${l}`).join('\n')}`, `\nWhat I'd like to cover:\n${agenda.map((q) => `• ${q}`).join('\n')}`].join('\n')
+      [`${opening} It was flagged in my portal's Needs attention summary on ${when}.`, `\nWhat the data shows:\n${facts.filter(Boolean).map((l) => `• ${l}`).join('\n')}`, `\nWhat I'd like to cover:\n${agenda.map((q) => `• ${q}`).join('\n')}`].join('\n')
     );
   };
 
@@ -50,7 +50,7 @@ export default function AttentionPanel() {
     <section className="attention" aria-labelledby="att-title">
       <div className="attention-head">
         <div>
-          <div className="kicker">From your Tableau Pulse metrics</div>
+          <div className="kicker">From your metrics</div>
           <h2 id="att-title">Needs attention</h2>
         </div>
         <div style={{ display: 'flex', gap: 8, alignItems: 'center' }}>

@@ -25,6 +25,7 @@ function entitlementsFor(tenant) {
   if (tenant.tier === 'premium') {
     set.add('benchmarks');
     set.add('authoring'); // build-your-own reports
+    set.add('goals'); // create their own Pulse metrics with goals
   }
   return set;
 }

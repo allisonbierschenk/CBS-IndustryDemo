@@ -110,7 +110,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
               {pulseSource && (
                 <button className="btn btn-lime btn-sm" onClick={explain}>
                   <Icon name="spark" />
-                  Explain with Pulse
+                  Explain this
                 </button>
               )}
               <button className={`btn ${pulseSource ? 'btn-sel' : 'btn-lime'} btn-sm`} onClick={askAgent}>

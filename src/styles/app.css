@@ -1137,3 +1137,47 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .guide-how li::before { content: counter(how); display: inline-grid; place-items: center; width: 20px; height: 20px; flex: none; border-radius: 999px; background: var(--ink); color: var(--lime); font-size: 11px; font-weight: 800; }
 .bm-hit { fill: none; stroke: transparent; stroke-width: 16; cursor: pointer; pointer-events: stroke; }
 .bm-end-lbl { cursor: pointer; }
+
+/* Create your own Pulse metric */
+.create-metric { margin: 0 0 16px; padding: 16px 18px; border-radius: 18px; background: var(--surface); border: 1.5px solid var(--ink); }
+.cm-head { display: grid; grid-template-columns: 22px 1fr; gap: 10px; align-items: start; margin-bottom: 12px; }
+.cm-head > svg { width: 20px; height: 20px; color: #e0702f; margin-top: 1px; }
+.cm-head b { display: block; font-size: 15px; }
+.cm-head span { font-size: 12.5px; color: var(--muted); }
+.cm-fields { display: grid; grid-template-columns: 2fr 1fr 1.3fr auto; gap: 12px; align-items: end; }
+.cm-fields .field { margin: 0; }
+.cm-goal { display: flex; align-items: center; gap: 6px; }
+.cm-goal span { font-weight: 800; color: var(--muted); }
+.cm-done { display: flex; gap: 6px; align-items: center; margin: 10px 0 0; font-size: 13px; color: #1f6b46; }
+.metric-detail { font-weight: 600; color: var(--muted); }
+.goal-chip { display: inline-block; margin-left: 8px; padding: 1px 8px; border-radius: 999px; background: color-mix(in srgb, #e0702f 12%, white); color: #b5541c; font-size: 11.5px; font-weight: 700; }
+@media (max-width: 900px) { .cm-fields { grid-template-columns: 1fr; } }
+.create-metric.is-locked { border-style: dashed; }
+.create-metric.is-locked .cm-head { grid-template-columns: 22px 1fr auto; margin-bottom: 0; align-items: center; }
+.create-metric.is-locked .cm-head > svg { color: var(--muted); }
+.bm-trend-wrap { cursor: pointer; }
+.track-goal { position: absolute; top: 3px; bottom: 3px; width: 3px; margin-left: -1.5px; border-radius: 2px; background: #fff; box-shadow: 0 0 10px rgba(255, 255, 255, .7); }
+.track-goal::after { content: 'goal'; position: absolute; top: -14px; left: 50%; transform: translateX(-50%); font-size: 9px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: rgba(255, 255, 255, .7); }
+.goal-row { display: flex; align-items: center; gap: 12px; }
+.goal-row input { flex: 1; accent-color: var(--ink); }
+.goal-row b { min-width: 48px; font-size: 18px; }
+
+/* Benchmarks: the client's Pulse goal metrics */
+.bm-goals { grid-column: 1 / -1; }
+.goal-cards { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px, 1fr)); gap: 14px; }
+.goal-card { padding: 16px; border-radius: 18px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); display: grid; gap: 10px; animation: rise .5s ease-out both; }
+.goal-card-head { display: flex; justify-content: space-between; align-items: start; gap: 10px; }
+.goal-card-head b { display: block; font-size: 14px; color: #fff; }
+.goal-card-head small { font-size: 11.5px; color: rgba(255, 255, 255, .5); }
+.goal-status { padding: 2px 9px; border-radius: 999px; font-size: 10.5px; font-weight: 800; letter-spacing: .06em; text-transform: uppercase; background: rgba(255, 255, 255, .1); color: rgba(255, 255, 255, .8); white-space: nowrap; }
+.goal-card.is-on .goal-status { background: rgba(111, 227, 176, .15); color: #6fe3b0; }
+.goal-card.is-behind .goal-status { background: rgba(255, 143, 163, .15); color: #ff8fa3; }
+.goal-nums { display: grid; gap: 2px; }
+.goal-nums b { font-size: 34px; font-weight: 800; letter-spacing: -.03em; color: #fff; line-height: 1; }
+.goal-nums span { font-size: 12px; color: rgba(255, 255, 255, .6); }
+.goal-nums em { font-style: normal; font-weight: 800; color: var(--lime); }
+.goal-bar { position: relative; height: 10px; border-radius: 999px; background: rgba(255, 255, 255, .08); }
+.goal-fill { position: absolute; inset: 0 auto 0 0; border-radius: 999px; background: linear-gradient(90deg, #7ad7f0, #e6f264); box-shadow: 0 0 14px rgba(230, 242, 100, .3); animation: grow 1s ease-out both; transform-origin: left; }
+.goal-card.is-behind .goal-fill { background: linear-gradient(90deg, #f2a65a, #ff8fa3); box-shadow: 0 0 14px rgba(255, 143, 163, .3); }
+.goal-mark { position: absolute; right: -1px; top: -4px; bottom: -4px; width: 3px; border-radius: 2px; background: #fff; }
+.goal-card p { margin: 0; font-size: 12.5px; line-height: 1.5; color: rgba(255, 255, 255, .7); }

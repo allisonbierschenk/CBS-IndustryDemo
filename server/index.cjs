@@ -256,6 +256,7 @@ app.get('/api/me', (req, res) => {
       authoring: (store.content.authoring?.requires || []).every((r) => ent.has(r)),
       activityLog: (user.roles || []).includes('activity'),
       slackChannels: store.slackChannelsFor(tenant),
+      pulseGoals: ent.has('goals'),
       benchmarks: { price: store.content.benchmarks?.price || null, cover: store.content.benchmarks?.cover || null }
     }
   });
@@ -339,9 +340,9 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
   const started = Date.now();
   try {
     const all = await pulse.metricContext(req.user, agentScope(req.tenant));
-    if (!all.length) return res.status(404).json({ error: 'You aren’t following any Tableau Pulse metrics yet, so the agent has nothing to answer from.' });
+    if (!all.length) return res.status(404).json({ error: 'You aren’t following any metrics yet, so the agent has nothing to answer from.' });
     const ctx = source === 'all' ? all : all.filter((c) => c.source === source);
-    if (!ctx.length) return res.status(400).json({ error: `You don’t follow any Pulse metrics on ${source}.` });
+    if (!ctx.length) return res.status(400).json({ error: `You don’t follow any metrics on ${source}.` });
     const messages = [
       ...history,
       {

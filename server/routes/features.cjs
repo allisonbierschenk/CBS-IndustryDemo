@@ -69,7 +69,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     /* no cache yet */
   }
   const saveAttention = () => require('fs').writeFile(ATTENTION_FILE, JSON.stringify(Object.fromEntries(attentionCache)), () => {});
-  const ATTENTION_FORMAT = 7; // bump when the cached shape changes so old entries are ignored
+  const ATTENTION_FORMAT = 10; // bump when the cached shape changes so old entries are ignored
   const attentionKey = (user) => `v${ATTENTION_FORMAT}|${user.id}|${cfg.attention.question}`;
   const attentionTtl = () => (cfg.attention?.cacheMinutes || 15) * 60 * 1000;
 
@@ -79,7 +79,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     const started = Date.now();
     const job = (async () => {
       const ctx = await pulse.metricContext(user, agentScope(tenant));
-      if (!ctx.length) return { empty: true, reason: 'You aren’t following any Tableau Pulse metrics yet.' };
+      if (!ctx.length) return { empty: true, reason: 'You aren’t following any metrics yet.' };
       const r = await pulse.brief(user, [
         { role: 'ROLE_USER', content: cfg.attention.question, action_type: 'ACTION_TYPE_ANSWER', metric_group_context: ctx.map((c) => c.item), metric_group_context_resolved: false }
       ]);
@@ -147,7 +147,8 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const was = f.comparison_period_value?.formatted;
       const vs = f.comparison_time_period?.label || 'the prior period';
       const period = f.target_time_period?.label || 'this period';
-      const unfavorable = f.sentiment === 'negative' || (dir !== 'flat' && (dir === 'up') !== upIsGood);
+      const goalMiss = c.goal?.value != null && f.target_period_value.raw != null && (upIsGood ? f.target_period_value.raw < c.goal.value : f.target_period_value.raw > c.goal.value);
+      const unfavorable = goalMiss || f.sentiment === 'negative' || (dir !== 'flat' && (dir === 'up') !== upIsGood);
       if (!unfavorable) {
         onTrack.push({ name, note: dir === 'flat' ? `steady at ${now}` : `${dir} ${rel} to ${now}` });
         continue;
@@ -160,7 +161,9 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         ...base,
         status: 'off-track',
         issue: `${dir === 'up' ? 'Up' : 'Down'} ${rel} (${abs}) vs ${vs}: ${now} in ${period}${was ? ` vs ${was}` : ''}.`,
-        expectation: upIsGood ? `Higher is better: should be at or above ${was || 'the prior period'}.` : `Lower is better: should be at or below ${was || 'the prior period'}.`,
+        expectation: c.goal?.value != null
+          ? `${c.goal.name || 'Goal'}: ${upIsGood ? 'at least' : 'at most'} ${formatGoal(c.item.metric, c.goal.value)} (your goal).`
+          : upIsGood ? `Higher is better: should be at or above ${was || 'the prior period'}.` : `Lower is better: should be at or below ${was || 'the prior period'}.`,
         drivers: drv.slice(0, 2),
         ask: `Why is ${name} ${dir} ${rel} vs ${vs}, and what is driving it?`,
         _mag: Math.abs(f.difference?.relative?.raw || 0)
@@ -402,9 +405,19 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const followedMetrics = (followed.metric_groups || []).flatMap((g) => g.metrics || []);
       const followedIds = new Set(followedMetrics.map((m) => m.id));
       const defName = new Map(defs.map((d) => [d.metadata.id, d.metadata.name]));
+      const defById = new Map(defs.map((d) => [d.metadata.id, d]));
+      const filterLabel = (m) => (m.specification?.filters || []).map((f) => (f.values || f.categorical_values?.map((c) => c.string_value) || []).join(', ')).filter(Boolean).join(' · ');
       const out = followedMetrics
         .filter((m) => defName.has(m.definition_id))
-        .map((m) => ({ id: m.id, name: defName.get(m.definition_id), following: true, via: direct.has(m.id) ? 'you' : 'group', canUnfollow: direct.has(m.id) }));
+        .map((m) => ({
+          id: m.id,
+          name: defName.get(m.definition_id),
+          detail: filterLabel(m),
+          goal: m.goals?.target ? { ...m.goals.target, display: formatGoal(defById.get(m.definition_id), m.goals.target.value) } : null,
+          following: true,
+          via: direct.has(m.id) ? 'you' : 'group',
+          canUnfollow: direct.has(m.id)
+        }));
       // Followable: each definition's default (unfiltered) metric that the user doesn't already follow.
       const followable = await Promise.all(
         defs.map(async (d) => {
@@ -414,6 +427,133 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         })
       );
       res.json({ metrics: [...out, ...followable.filter(Boolean)].sort((a, b) => a.name.localeCompare(b.name)) });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
+  // ── Customer-created Pulse metrics with a goal ────────────────────────────
+  // Per Tableau's Pulse REST API: any user with read/connect access can create a metric in a definition
+  // (metrics:getOrCreate) and follow it (subscriptions). The goal is stored on that metric only
+  // (UpdateMetricRequest.goals.target), so it never touches other clients' metrics.
+  const isPercent = (d) => /PERCENT/.test(d?.representation_options?.type || '');
+  function formatGoal(d, v) {
+    if (v == null) return '';
+    if (isPercent(d)) return `${Math.round(v * 1000) / 10}%`;
+    if (/CURRENCY/.test(d?.representation_options?.type || '')) return `$${Number(v).toLocaleString('en-US')}`;
+    return Number(v).toLocaleString('en-US');
+  }
+
+  app.get('/api/metrics/definitions', requireUser, async (req, res) => {
+    if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Creating your own metrics with goals is part of Premium.' });
+    try {
+      const scope = agentScope(req.tenant);
+      const dsIds = new Map();
+      for (const ds of scope.datasources) dsIds.set(await pulse.resolveDatasource(req.user, ds.name), ds.label);
+      const defs = await definitionsOn(req.user, new Set(dsIds.keys()));
+      res.json({
+        definitions: defs
+          .map((d) => ({
+            id: d.metadata.id,
+            name: d.metadata.name,
+            source: dsIds.get(d.specification?.datasource?.id),
+            unit: isPercent(d) ? 'percent' : /CURRENCY/.test(d.representation_options?.type || '') ? 'currency' : 'number',
+            upIsGood: d.representation_options?.sentiment_type !== 'SENTIMENT_TYPE_DOWN_IS_GOOD'
+          }))
+          .sort((a, b) => a.name.localeCompare(b.name))
+      });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
+  app.post('/api/metrics/create', requireUser, async (req, res) => {
+    if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Creating your own metrics with goals is part of Premium.' });
+    // engagementType: optional extra filter (e.g. a benchmark goal for one engagement).
+    // raw: goal is already in the metric's own units (e.g. 0.75 for the 75th percentile).
+    const { definitionId, definitionName, goal, goalName, engagementType, raw } = req.body || {};
+    try {
+      const scope = agentScope(req.tenant);
+      const dsIds = new Set();
+      for (const ds of scope.datasources) dsIds.add(await pulse.resolveDatasource(req.user, ds.name));
+      const def = (await definitionsOn(req.user, dsIds)).find((d) => d.metadata.id === definitionId || (definitionName && d.metadata.name === definitionName));
+      if (!def) return res.status(400).json({ error: 'Pick one of your metrics.' });
+      const value = Number(goal);
+      if (!Number.isFinite(value)) return res.status(400).json({ error: 'Enter a goal.' });
+      // Start from the definition's default metric (period + comparison), scoped to this client.
+      const { metrics = [] } = await pulse.request(req.user, 'GET', `/pulse/definitions/${def.metadata.id}/metrics`);
+      const base = metrics.find((m) => m.is_default) || metrics.find((m) => !(m.specification?.filters || []).length) || metrics[0];
+      const clients = store.scopeFor(req.user).clients;
+      const specification = {
+        measurement_period: base?.specification?.measurement_period || { granularity: 'GRANULARITY_BY_YEAR', range: 'RANGE_CURRENT_PARTIAL' },
+        comparison: base?.specification?.comparison || { comparison: 'TIME_COMPARISON_PREVIOUS_PERIOD' },
+        filters: [
+          { field: 'Client Name', operator: 'OPERATOR_EQUAL', categorical_values: clients.map((c) => ({ string_value: c })) },
+          ...(engagementType ? [{ field: 'Engagement Type', operator: 'OPERATOR_EQUAL', categorical_values: [{ string_value: String(engagementType) }] }] : [])
+        ]
+      };
+      const created = await pulse.request(req.user, 'POST', '/pulse/metrics:getOrCreate', { definition_id: def.metadata.id, specification });
+      const metric = created.metric;
+      // Pulse rejects goal names longer than ~20 characters (HTTP 400; verified on this site — 20 OK, 25 rejected).
+      const target = { name: String(goalName || 'Our goal').trim().slice(0, 20) || 'Our goal', value: !raw && isPercent(def) ? value / 100 : value };
+      await pulse.request(req.user, 'PATCH', `/pulse/metrics/${metric.id}`, { metric_id: metric.id, specification: metric.specification, goals: { target } });
+      const me = await pulse.me(req.user);
+      // Follow it (skip if already following).
+      const subs = await pulse.request(req.user, 'GET', `/pulse/subscriptions?user_id=${me.userId}&metric_id=${encodeURIComponent(metric.id)}`);
+      if (!(subs.subscriptions || []).some((s) => s.follower?.user_id === me.userId)) {
+        await pulse.request(req.user, 'POST', '/pulse/subscriptions', { metric_id: metric.id, follower: { user_id: me.userId } });
+      }
+      pulse.resetContext(req.user);
+      attentionCache.delete(attentionKey(req.user));
+      saveAttention();
+      activity.record(req.user, req.tenant, 'pulse-metric', { metric: def.metadata.name, goal: formatGoal(def, target.value), created: Boolean(created.is_metric_created) });
+      res.json({ ok: true, metricId: metric.id, name: def.metadata.name, goal: formatGoal(def, target.value), created: Boolean(created.is_metric_created) });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
+  // The client's goal metrics, live from Pulse: each followed metric with a goal, its current value from the
+  // Pulse BAN insight (POST /pulse/insights/ban), and progress to the goal. Premium.
+  const BAN_TYPE = 'application/vnd.tableau.pulse.insightsservice.v1.GenerateInsightBundleBANRequest+json';
+  app.get('/api/metrics/goals', requireUser, async (req, res) => {
+    if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
+    try {
+      const ctx = (await pulse.metricContext(req.user, agentScope(req.tenant))).filter((c) => c.goal?.value != null);
+      const goals = await Promise.all(
+        ctx.map(async (c) => {
+          const body = {
+            bundle_request: {
+              version: 1,
+              options: { output_format: 'OUTPUT_FORMAT_TEXT', time_zone: 'America/New_York', language: 'LANGUAGE_EN_US', locale: 'LOCALE_EN_US' },
+              input: { metadata: c.item.metadata, metric: { ...c.item.metric, goals: { metric_goals: { target: c.goal } } } }
+            }
+          };
+          const r = await pulse.request(req.user, 'POST', '/pulse/insights/ban', body, { types: { contentType: BAN_TYPE, accept: BAN_TYPE.replace('Request', 'Response') } }).catch((e) => ({ error: e.message }));
+          const ins = (r.bundle_response?.result?.insight_groups || []).flatMap((g) => g.insights || []).find((i) => i.result?.facts?.target_period_value) || null;
+          const f = ins?.result?.facts || {};
+          const upIsGood = c.item.metric.representation_options?.sentiment_type !== 'SENTIMENT_TYPE_DOWN_IS_GOOD';
+          const value = f.target_period_value?.raw ?? null;
+          const filters = (c.item.metric.metric_specification?.filters || []).filter((x) => x.field !== 'Client Name');
+          return {
+            metricId: c.item.metadata.metric_id,
+            name: c.item.metadata.name,
+            scope: filters.map((x) => (x.values || x.categorical_values?.map((v) => v.string_value) || []).join(', ')).join(' · '),
+            source: c.source,
+            percentile: /Benchmark Percentile/i.test(c.item.metadata.name),
+            unit: isPercent(c.item.metric) ? 'percent' : /CURRENCY/.test(c.item.metric.representation_options?.type || '') ? 'currency' : 'number',
+            goal: c.goal,
+            goalDisplay: formatGoal(c.item.metric, c.goal.value),
+            value,
+            valueDisplay: f.target_period_value?.formatted ?? null,
+            period: f.target_time_period?.label ?? null,
+            upIsGood,
+            onTrack: value == null ? null : upIsGood ? value >= c.goal.value : value <= c.goal.value,
+            sentence: ins?.result?.markup ? String(ins.result.markup).replace(/<[^>]+>/g, '') : null
+          };
+        })
+      );
+      res.json({ goals });
     } catch (e) {
       fail(res, e);
     }

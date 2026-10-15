@@ -62,7 +62,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 | `/reports` | Report library: every entitled view in `library.project`, with Tableau favorites (star) |
 | `/reports/:viewId` | Any library view, embedded with the same JWT + RLS |
 | `/reports/new` | **Premium** — build your own report (embedded web authoring, `tableau:views:embed_authoring`) |
-| `/alerts` | Email subscriptions (Tableau REST) and Pulse metric follows; group follows are read-only |
+| `/alerts` | Email subscriptions (Tableau REST) and Pulse metric follows; group follows are read-only. **Premium:** create your own Pulse metric with a goal (Pulse REST `metrics:getOrCreate` → `PATCH goals.target` → follow) — the goal lives on that client’s metric only, and Needs attention uses it as “Expected” |
 | `/feeds` | Personal, signed CSV feed (VizQL Data Service as the user, so RLS applies) for Excel / Google Sheets |
 | `/activity` | Portal activity log — users with `roles: ["activity"]` only |
 | `/l/:token` | Signed share link (keeps dashboard filters); recipient signs in as themselves |
@@ -76,7 +76,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 - **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.
 - **Export → Share** — signed link + QR code that reopens the page with its filters (`?service-line=…&engagement-type=…`).
 - **Select marks → act** — selecting marks raises an action bar: *Ask the Agent* (question built from the selection), *Share to Slack* (demo; recorded, not posted), *Schedule with Apex* (contact form prefilled with the selection) and *Download rows* (CSV of the selected marks).
-- **Explain with Pulse** (Transportation) — selecting marks asks the Insight Brief about them using only the Transportation metrics the user follows, and shows the answer in a side panel; *Continue in the Agent* keeps the same source.
+- **Explain this** (Transportation) — selecting marks asks the Insight Brief about them using only the Transportation metrics the user follows, and shows the answer in a side panel; *Continue in the Agent* keeps the same source.
 - **Engagement scorecard** (Value Intelligence) — read from the `scorecard.worksheet` summary data; follows the filters, and clicking a row filters the dashboard.
 - **Needs attention** (Home) — a Pulse Insight Brief over the user's followed metrics, cached `attention.cacheMinutes`. A live brief can take ~30–40 s, so the first load after a restart is slow.
 

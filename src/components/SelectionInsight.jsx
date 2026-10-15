@@ -29,7 +29,7 @@ export default function SelectionInsight({ question, source, what, worksheet, on
     <aside className="insight-drawer" role="dialog" aria-labelledby="insight-title">
       <div className="insight-head">
         <div>
-          <div className="kicker">Tableau Pulse · {source} metrics</div>
+          <div className="kicker">Explained from your {source} metrics</div>
           <h3 id="insight-title">{what}</h3>
           <small className="muted">Selected in {worksheet}</small>
         </div>

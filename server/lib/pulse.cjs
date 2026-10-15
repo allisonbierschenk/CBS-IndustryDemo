@@ -27,6 +27,8 @@ const SCOPES = [
   'tableau:metric_subscriptions:delete',
   'tableau:insight_definitions_metrics:read',
   'tableau:insight_metrics:read',
+  'tableau:insight_metrics:create', // customer creates their own Pulse metric
+  'tableau:insight_metrics:update', // …and sets its goal
   'tableau:insights:read',
   'tableau:insight_brief:create',
   'tableau:viz_data_service:read'
@@ -132,11 +134,15 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
           if (!source) return null; // followed, but on a data source this customer isn't entitled to
           return {
             source: source.label,
+            goal: m.goals?.target ?? null, // { name, value } — set by the customer (or Apex) on this metric
             item: {
               metadata: { name: d.metadata.name, metric_id: m.id, definition_id: m.definition_id },
               metric: {
                 definition: { datasource: d.specification.datasource, basic_specification: d.specification.basic_specification },
                 metric_specification: {
+                  // The metric's own filters (e.g. a client's goal metric scoped to one engagement) — without them
+                  // Pulse would compute the definition's unfiltered metric.
+                  filters: (m.specification?.filters || []).map(({ field, operator, categorical_values }) => ({ field, operator, categorical_values })),
                   measurement_period: m.specification?.measurement_period,
                   comparison: { comparison: m.specification?.comparison?.comparison ?? 'TIME_COMPARISON_PREVIOUS_PERIOD' }
                 },

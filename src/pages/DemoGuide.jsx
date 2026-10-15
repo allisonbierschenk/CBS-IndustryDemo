@@ -84,7 +84,7 @@ const FEATURES = [
     ask: [
       ['Where does this come from?', 'A Tableau Pulse Insight Brief over the metrics the user follows. The numbers and drivers come from Pulse’s insights platform; the Issue / Expected rows use only those facts.'],
       ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed and never analyzes raw data, so insights are deterministic. Included with Tableau+ and unmetered.'],
-      ['Can “expected” be a real target?', 'Yes — with Pulse goals. Apex sets goals on the metric definitions and Pulse reports progress and pace to them. Today “expected” is last period’s level, because no goals are set on this site yet.']
+      ['Can “expected” be a real target?', 'Yes — Premium clients can set a goal on their own Pulse metric (Alerts & subscriptions → Create your own metric), and “Expected” becomes that goal.']
     ]
   })),
   F('attentionAct', 'ai', 'Act on an off-track metric', () => ({
@@ -96,17 +96,17 @@ const FEATURES = [
     tech: ['pulse'],
     ask: [['Who wrote the Contact Apex message?', 'The portal, from Pulse’s facts for that metric — no generated text.']]
   })),
-  F('goals', 'ai', 'Pulse goals (talking point)', () => ({
-    title: 'Goals that Pulse tracks for you',
-    where: 'Needs attention / Agent (talking point)',
-    do: 'No click needed yet — say it while Needs attention or the Agent is on screen. It becomes a live demo once goals are set on the Pulse metric definitions.',
-    say: 'Agree a target with Apex once — Pulse tells you every week whether you’re on pace to hit it.',
-    money: 'Goals agreed with Apex become a standing reason for the next check-in.',
-    tech: ['pulse'],
+  F('goals', 'money', 'Your own metric with a goal (Premium)', (p) => ({
+    title: 'Set your own goal in Pulse',
+    where: 'Account menu → Alerts & subscriptions',
+    do: `${p.plan === 'standard' ? 'After upgrading, go' : 'Go'} to Alerts & subscriptions → Create your own metric: pick Value Realization Rate, enter a goal (e.g. 92%) and click Create & follow. Then show Needs attention: “Expected” is now ${p.first}’s goal.`,
+    say: 'Set the target once — Pulse tells you every week whether you’re on track to hit it.',
+    money: 'A Premium feature: client-set goals give Apex a standing reason for the next check-in — and a clear way to prove it delivered.',
+    tech: ['pulse', 'rls'],
     ask: [
-      ['Where do goals live?', 'On the Pulse metric definition, set by whoever owns it (here, Apex) — not by the client in the portal.'],
-      ['What does the client get?', 'Goal insights from Pulse: Goal and Threshold Breakdown (progress to goal by breakdown) and Pace to Goal (on track to hit it by period end). Pace to Goal needs Tableau+ with the Forecast insight on.'],
-      ['Is it in this demo yet?', 'Not yet — no goals are set on this site’s definitions. Once Apex sets them, they flow into Needs attention, the Agent and Explain with Pulse with no portal changes.']
+      ['What just happened in Tableau?', 'The portal created a Pulse metric for this client only (the KPI filtered to their company), saved the goal on that metric, and followed it for the user — all through Tableau’s Pulse REST API, as the user.'],
+      ['Does the goal affect other clients?', 'No — the goal lives on this client’s own metric, not on the shared definition.'],
+      ['What does Pulse do with the goal?', 'It tracks progress to the goal; Pulse also offers Goal and Threshold Breakdown and Pace to Goal insights (Pace to Goal needs Tableau+ with Forecast on).']
     ]
   })),
   F('agent', 'ai', 'Ask the Agent', (p) => ({
@@ -137,12 +137,12 @@ const FEATURES = [
     tech: ['embed', 'pulse'],
     ask: [['How is the question built?', 'From the selected marks’ fields and values, read through the Embedding API.']]
   })),
-  F('explain', 'ai', 'Explain with Pulse', (p) => ({
-    title: 'Explain with Pulse',
+  F('explain', 'ai', 'Explain this', (p) => ({
+    title: 'Explain this',
     where: p.transport ? 'Transportation (or Value Intelligence)' : 'Value Intelligence',
     do: p.transport
-      ? 'Select a few lanes or carriers → Explain with Pulse → click a follow-up to act.'
-      : 'Select a few engagements on a chart → Explain with Pulse → click a follow-up to act.',
+      ? 'Select a few lanes or carriers → Explain this → click a follow-up to act.'
+      : 'Select a few engagements on a chart → Explain this → click a follow-up to act.',
     say: 'See something on a dashboard? Get the why — and act on it — without leaving the page.',
     money: 'Every explanation ends in a next step — Continue in the Agent, or a conversation with Apex.',
     tech: ['pulse', 'embed'],
@@ -283,7 +283,7 @@ const FEATURES = [
     tech: ['vds', 'rls'],
     ask: [['Is the spreadsheet a copy?', 'No — it’s a live query against the same governed data source, under the same data security.']]
   })),
-  F('alerts', 'bi', 'Alerts & Pulse follows', () => ({
+  F('alerts', 'bi', 'Alerts & followed metrics', () => ({
     title: 'Alerts & subscriptions',
     where: 'Account menu → Alerts & subscriptions',
     do: 'Show email subscriptions and followed Pulse metrics; follow a new one.',
@@ -314,14 +314,14 @@ const FEATURES = [
     where: 'What’s included → Confirm upgrade',
     do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens.',
     say: 'Clients upgrade themselves, right inside the experience.',
-    money: 'A Standard client becomes Premium in one click ($5/month in this demo). Resets when you sign out.',
+    money: 'A Standard client becomes Premium in one click ($5/month in this demo): benchmarks, their own Pulse goals and build-your-own reports. Resets when you sign out.',
     tech: ['portal', 'jwt'],
     ask: [['What changed when they upgraded?', 'The session became Premium on the server; the next Tableau token carries subscription tier = Premium. Sign out to reset.']]
   }), onlyStandard),
   F('benchmarks', 'money', 'Industry Benchmarks page', (p) => ({
     title: 'Industry Benchmarks',
     where: 'Industry Benchmarks',
-    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time and where each engagement stands. Click an engagement → Explain with Pulse or Schedule with Apex.`,
+    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time and where each engagement stands. Click an engagement → Explain this or Schedule with Apex.`,
     say: 'Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you.',
     money: 'Peer comparison only Apex can provide — sold as a Premium tier.',
     tech: ['vds', 'rls', 'portal'],
@@ -401,7 +401,7 @@ const ABOUT = {
   "hood": "The secure token behind the sign-in.",
   "attention": "Pulse flags the metrics going the wrong way.",
   "attentionAct": "One click to ask why, open the dashboard or email Apex.",
-  "goals": "Pulse tracks progress and pace to goals Apex agrees with the client.",
+  "goals": "Premium: the client creates their own Pulse metric, sets a goal and follows it.",
   "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
   "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
   "selectionAgent": "Select data on a chart, ask the chat about it.",
@@ -435,7 +435,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

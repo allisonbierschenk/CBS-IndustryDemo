@@ -25,8 +25,8 @@ export default function PremiumPanel({ me }) {
         </div>
         <p>
           {premium
-            ? `Your Industry Performance Benchmarks panel compares ${t.shortName}'s results with an anonymized ${peers}.`
-            : `Industry Performance Benchmarks compare your results with an anonymized ${peers}: peer percentile rankings, improvement opportunities and advisory recommendations. They aren't part of your Standard subscription.`}
+            ? `Premium includes Industry Performance Benchmarks (vs an anonymized ${peers}), your own metrics with goals, and build-your-own reports.`
+            : `Premium adds Industry Performance Benchmarks — how you compare with an anonymized ${peers} — your own metrics with goals, and build-your-own reports. They aren't part of your Standard subscription.`}
         </p>
       </div>
       {premium ? (

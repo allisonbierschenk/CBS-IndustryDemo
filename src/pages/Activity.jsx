@@ -17,7 +17,7 @@ const LABELS = {
   assistant: 'Tableau Agent',
   favorite: 'Favorite',
   subscription: 'Subscription',
-  'pulse-follow': 'Pulse follow',
+  'pulse-follow': 'Followed a metric',
   authoring: 'Built a report',
   feed: 'Data feed refreshed',
   message: 'Messaged Apex',

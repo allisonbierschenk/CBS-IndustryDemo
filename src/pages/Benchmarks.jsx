@@ -1,15 +1,18 @@
 // Industry Benchmarks (Premium) — a custom, headless view built with d3 from the governed published data
 // source (VizQL Data Service, queried as the user, so row-level security applies). Premium is enforced by
 // the server; Standard clients see what's included and an upgrade path.
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
+import { createPortal } from 'react-dom';
 import * as d3 from 'd3';
-import { api } from '../lib/api.js';
+import { api, track } from '../lib/api.js';
+import { useToast } from '../context/ToastContext.jsx';
 import { useSession } from '../context/SessionContext.jsx';
 import { useContact } from '../context/ContactContext.jsx';
 import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import Crumbs from '../components/Crumbs.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import InfoTip from '../components/InfoTip.jsx';
+import Icon from '../components/Icon.jsx';
 
 const COLORS = ['#e6f264', '#7ad7f0', '#f2a65a', '#c39bff', '#6fe3b0', '#ff8fa3'];
 const ZONES = [
@@ -90,6 +93,23 @@ function BenchmarkBoard({ data, me }) {
   const overall = latest ? pct(latest.percentile) : null;
   const delta = latest && yearAgo ? pct(latest.percentile) - pct(yearAgo.percentile) : null;
   const [selected, setSelected] = useState(null); // engagement selected on a chart → the shared action bar
+  const [goalFor, setGoalFor] = useState(null); // engagement whose Pulse goal dialog is open
+  // The client's Pulse goal metrics, live from Pulse (value from the BAN insight, progress to goal).
+  const [goalMetrics, setGoalMetrics] = useState(null);
+  const loadGoals = useCallback(() => {
+    api('/api/metrics/goals')
+      .then((d) => setGoalMetrics(d.goals || []))
+      .catch(() => setGoalMetrics([]));
+  }, []);
+  // Benchmark goals per engagement → goal markers on the Where you stand track.
+  const goals = useMemo(() => {
+    const g = {};
+    for (const m of goalMetrics || []) if (m.percentile) for (const s of series) if ((m.scope || '').includes(s.name)) g[s.name] = m.goal.value * 100;
+    return g;
+  }, [goalMetrics, series]);
+  useEffect(() => {
+    loadGoals();
+  }, [loadGoals]);
   const leader = [...series].sort((a, b) => b.last.v - a.last.v)[0];
   const laggard = [...series].sort((a, b) => a.last.v - b.last.v)[0];
 
@@ -124,6 +144,20 @@ function BenchmarkBoard({ data, me }) {
         </div>
       </section>
 
+      {goalMetrics?.length > 0 && (
+        <section className="bm-panel bm-goals" aria-labelledby="bm-goals-title">
+          <div className="bm-panel-head">
+            <h3 id="bm-goals-title">Your goals</h3>
+            <span>Updated live · set a goal by selecting an engagement</span>
+          </div>
+          <div className="goal-cards">
+            {goalMetrics.map((m) => (
+              <GoalCard key={m.metricId} m={m} />
+            ))}
+          </div>
+        </section>
+      )}
+
       <section className="bm-panel bm-trend">
         <div className="bm-panel-head">
           <h3>Percentile over time</h3>
@@ -137,7 +171,7 @@ function BenchmarkBoard({ data, me }) {
           <h3>Where you stand</h3>
           <span>Select an engagement to act on it · dot size = business value delivered</span>
         </div>
-        <StandingTrack series={series} onPick={(s) => setSelected(s.name)} />
+        <StandingTrack series={series} goals={goals} onPick={(s) => setSelected(s.name)} />
       </section>
 
       <section className="bm-panel bm-bullets">
@@ -159,7 +193,21 @@ function BenchmarkBoard({ data, me }) {
         pulseSource="Value Intelligence"
         selection={selected ? benchmarkSelection(series.find((x) => x.name === selected)) : null}
         onClear={() => setSelected(null)}
+        actions={[{ label: 'Set a goal', icon: 'target', onClick: () => setGoalFor(selected) }]}
       />
+      {goalFor &&
+        createPortal(
+          <GoalDialog
+            s={series.find((x) => x.name === goalFor)}
+            current={goals[goalFor]}
+            onClose={() => setGoalFor(null)}
+            onSaved={() => {
+              setGoalFor(null);
+              loadGoals();
+            }}
+          />,
+          document.body
+        )}
     </div>
   );
 }
@@ -220,6 +268,99 @@ function Gauge({ value }) {
   );
 }
 
+const fmtValue = (m, v) => {
+  if (v == null) return '—';
+  if (m.percentile) return ordinal(Math.round(v * 100));
+  if (m.unit === 'percent') return `${Math.round(v * 1000) / 10}%`;
+  if (m.unit === 'currency') return d3.format('$,.3s')(v).replace('G', 'B');
+  return d3.format(',.2~f')(v);
+};
+
+/** One Pulse goal metric: current value (Pulse BAN), the goal, progress, status and Pulse's own sentence. */
+function GoalCard({ m }) {
+  const pct = m.value == null ? 0 : Math.max(0, Math.min(1, m.upIsGood ? m.value / m.goal.value : m.goal.value / m.value));
+  return (
+    <div className={`goal-card${m.onTrack === false ? ' is-behind' : m.onTrack ? ' is-on' : ''}`}>
+      <div className="goal-card-head">
+        <span>
+          <b>{m.name}</b>
+          <small>{m.scope || m.source}</small>
+        </span>
+        {m.onTrack != null && <span className="goal-status">{m.onTrack ? 'On track' : 'Behind goal'}</span>}
+      </div>
+      <div className="goal-nums">
+        <b>{fmtValue(m, m.value)}</b>
+        <span>
+          {m.period ? `${m.period} to date` : 'Current'} · {m.goal.name}: <em>{fmtValue(m, m.goal.value)}</em>
+        </span>
+      </div>
+      <div className="goal-bar">
+        <span className="goal-fill" style={{ width: `${pct * 100}%` }} />
+        <span className="goal-mark" title="Goal" />
+      </div>
+      {m.sentence && <p>{m.sentence}</p>}
+    </div>
+  );
+}
+
+/** Set a Pulse goal on an engagement's benchmark: creates the client's own Benchmark Percentile metric
+ * (filtered to this engagement), saves the goal on it in Tableau Pulse, and follows it. */
+function GoalDialog({ s, current, onClose, onSaved }) {
+  const toast = useToast();
+  const [v, setV] = useState(current ? Math.round(current) : Math.min(100, Math.max(75, Math.ceil(s.last.v / 5) * 5 + 5)));
+  const [state, setState] = useState({ kind: 'editing' });
+  useEffect(() => {
+    const onKey = (e) => e.key === 'Escape' && onClose();
+    document.addEventListener('keydown', onKey);
+    return () => document.removeEventListener('keydown', onKey);
+  }, [onClose]);
+  const save = async () => {
+    setState({ kind: 'saving' });
+    try {
+      await api('/api/metrics/create', { method: 'POST', body: { definitionName: 'Benchmark Percentile', engagementType: s.name, goal: v / 100, raw: true, goalName: 'Benchmark goal' } });
+      track('selection-action', { action: 'benchmark-goal', engagement: s.name, goal: v });
+      toast(`Goal set: ${s.name} at the ${ordinal(v)} percentile`);
+      onSaved();
+    } catch (e) {
+      setState({ kind: 'error', message: e.message });
+    }
+  };
+  return (
+    <div className="modal-backdrop" onMouseDown={(e) => e.target === e.currentTarget && onClose()}>
+      <div className="modal" role="dialog" aria-modal="true" aria-labelledby="goal-title">
+        <div className="modal-head">
+          <div>
+            <div className="kicker">Your goal</div>
+            <h3 id="goal-title">{s.name}</h3>
+          </div>
+          <button className="icon-btn" aria-label="Close" onClick={onClose}>
+            ✕
+          </button>
+        </div>
+        <div className="modal-body">
+          <p className="muted" style={{ margin: '0 0 14px', fontSize: 13.5 }}>
+            Today: <b>{ordinal(Math.round(s.last.v))} percentile</b>. We’ll track your progress to this goal and flag it in Needs attention.
+          </p>
+          <div className="goal-row">
+            <input type="range" min="50" max="100" step="5" value={v} onChange={(e) => setV(Number(e.target.value))} aria-label="Goal percentile" />
+            <b>{ordinal(v)}</b>
+          </div>
+          {state.kind === 'error' && <div className="error-msg">{state.message}</div>}
+          <div className="modal-actions">
+            <button className="btn btn-ghost" onClick={onClose}>
+              Cancel
+            </button>
+            <button className="btn btn-dark" onClick={save} disabled={state.kind === 'saving'}>
+              <Icon name="target" />
+              {state.kind === 'saving' ? 'Saving…' : current ? 'Update goal' : 'Set goal & follow'}
+            </button>
+          </div>
+        </div>
+      </div>
+    </div>
+  );
+}
+
 /** Multi-line percentile trend over quartile bands, with a hover crosshair. */
 function TrendChart({ series, target, onPick }) {
   const ref = useRef(null);
@@ -245,6 +386,19 @@ function TrendChart({ series, target, onPick }) {
   for (let i = 1; i < labels.length; i++) labels[i].y = Math.max(labels[i].y, labels[i - 1].y + 16);
   const line = d3.line().x((p) => x(p.date)).y((p) => y(p.v)).curve(d3.curveMonotoneX);
   const months = [...new Set(dates.map((d) => +d))].sort((a, b) => a - b).map((t) => new Date(t));
+  // Clicking anywhere on the chart (a dot, a line, or next to them) selects the line nearest the pointer.
+  const onClickChart = (e) => {
+    if (!onPick) return;
+    const box = ref.current.getBoundingClientRect();
+    const px = e.clientX - box.left;
+    const py = e.clientY - box.top;
+    const near = d3.least(months, (d) => Math.abs(x(d) - px));
+    const hit = d3.least(
+      series.map((s) => ({ s, p: s.pts.find((q) => +q.date === +near) })).filter((o) => o.p),
+      (o) => Math.abs(y(o.p.v) - py)
+    );
+    if (hit) onPick(hit.s);
+  };
   const onMove = (e) => {
     const box = ref.current.getBoundingClientRect();
     const px = e.clientX - box.left;
@@ -252,7 +406,7 @@ function TrendChart({ series, target, onPick }) {
     setHover(near ? { date: near, x: x(near) } : null);
   };
   return (
-    <div ref={ref} className="bm-trend-wrap" onMouseMove={onMove} onMouseLeave={() => setHover(null)}>
+    <div ref={ref} className="bm-trend-wrap" onMouseMove={onMove} onMouseLeave={() => setHover(null)} onClick={onClickChart}>
       <svg width={w} height={h} role="img" aria-label="Benchmark percentile over time by engagement">
         <defs>
           {series.map((s, i) => (
@@ -295,14 +449,14 @@ function TrendChart({ series, target, onPick }) {
         ))}
         {/* Wide invisible strokes so a line is easy to click. */}
         {series.map((s) => (
-          <path key={`hit-${s.name}`} className="bm-hit" d={line(s.pts)} onClick={() => onPick?.(s)}>
+          <path key={`hit-${s.name}`} className="bm-hit" d={line(s.pts)} >
             <title>{`Act on ${s.name}`}</title>
           </path>
         ))}
         {labels.map(({ s, y: ly }) => (
           <g key={`e-${s.name}`}>
             <circle cx={x(s.last.date)} cy={y(s.last.v)} r="5" fill={s.color} className="bm-pulse" />
-            <text className="bm-end-lbl" x={x(s.last.date) + 12} y={ly + 4} fill={s.color} onClick={() => onPick?.(s)}>
+            <text className="bm-end-lbl" x={x(s.last.date) + 12} y={ly + 4} fill={s.color}>
               {Math.round(s.last.v)} · {s.name}
             </text>
           </g>
@@ -337,7 +491,7 @@ function TrendChart({ series, target, onPick }) {
 }
 
 /** 0–100 track with quartile zones; one dot per engagement, sized by business value. */
-function StandingTrack({ series, onPick }) {
+function StandingTrack({ series, goals = {}, onPick }) {
   const max = d3.max(series, (s) => s.value) || 1;
   const size = d3.scaleSqrt().domain([0, max]).range([10, 26]);
   const sorted = [...series].sort((a, b) => b.last.v - a.last.v);
@@ -358,6 +512,7 @@ function StandingTrack({ series, onPick }) {
             <span className="track-name">{s.name}</span>
             <div className="track-rail">
               <span className="track-fill" style={{ width: `${s.last.v}%`, background: `linear-gradient(90deg, transparent, ${s.color})` }} />
+              {goals[s.name] != null && <span className="track-goal" style={{ left: `${goals[s.name]}%` }} title={`Your goal: ${ordinal(Math.round(goals[s.name]))} percentile`} />}
               <span className="track-dot" style={{ left: `${s.last.v}%`, width: d, height: d, background: s.color, boxShadow: `0 0 18px ${s.color}` }} title={`${d3.format('$,.3s')(s.value).replace('G', 'B')} delivered`} />
             </div>
             <span className="track-val">
