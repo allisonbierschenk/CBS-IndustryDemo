@@ -29,6 +29,7 @@ const SCOPES = [
   'tableau:insight_metrics:read',
   'tableau:insight_metrics:create', // customer creates their own Pulse metric
   'tableau:insight_metrics:update', // …and sets its goal
+  'tableau:insight_metrics:delete', // …and can delete it (demo clean-up)
   'tableau:insights:read',
   'tableau:insight_brief:create',
   'tableau:viz_data_service:read'

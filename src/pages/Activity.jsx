@@ -18,6 +18,8 @@ const LABELS = {
   favorite: 'Favorite',
   subscription: 'Subscription',
   'pulse-follow': 'Followed a metric',
+  'pulse-metric': 'Goal metric (created / deleted)',
+  upgrade: 'Upgraded to Premium',
   authoring: 'Built a report',
   feed: 'Data feed refreshed',
   message: 'Messaged Apex',

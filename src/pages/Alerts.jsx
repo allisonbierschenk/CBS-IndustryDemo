@@ -43,6 +43,20 @@ export default function Alerts() {
     }
   };
 
+  const removeMetric = async (m) => {
+    if (!window.confirm(`Delete your ${m.name} metric and its goal? This removes it from Tableau.`)) return;
+    setBusy(m.id);
+    try {
+      await api(`/api/metrics/${m.id}`, { method: 'DELETE' });
+      toast(`Deleted your ${m.name} metric`);
+      await loadMetrics();
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(null);
+    }
+  };
+
   const follow = async (m, on) => {
     setBusy(m.id);
     try {
@@ -129,7 +143,11 @@ export default function Alerts() {
                     {m.goal && <span className="goal-chip">🎯 {m.goal.name}: {m.goal.display}</span>}
                   </span>
                 </div>
-                {m.following ? (
+                {m.own ? (
+                  <button className="btn btn-ghost btn-sm" disabled={busy === m.id} onClick={() => removeMetric(m)}>
+                    {busy === m.id ? 'Deleting…' : 'Delete'}
+                  </button>
+                ) : m.following ? (
                   m.canUnfollow ? (
                     <button className="btn btn-ghost btn-sm" disabled={busy === m.id} onClick={() => follow(m, false)}>
                       Unfollow

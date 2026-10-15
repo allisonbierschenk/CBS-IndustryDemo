@@ -5,3 +5,4 @@ node_modules/
 dist/
 data/activity.jsonl
 data/attention-cache.json
+data/portal-metrics.json

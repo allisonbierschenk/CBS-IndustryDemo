@@ -1181,3 +1181,8 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .goal-card.is-behind .goal-fill { background: linear-gradient(90deg, #f2a65a, #ff8fa3); box-shadow: 0 0 14px rgba(255, 143, 163, .3); }
 .goal-mark { position: absolute; right: -1px; top: -4px; bottom: -4px; width: 3px; border-radius: 2px; background: #fff; }
 .goal-card p { margin: 0; font-size: 12.5px; line-height: 1.5; color: rgba(255, 255, 255, .7); }
+.goal-card-tools { display: inline-flex; align-items: center; gap: 6px; }
+.goal-del { width: 24px; height: 24px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .15); background: transparent; color: rgba(255, 255, 255, .6); font-size: 11px; cursor: pointer; }
+.goal-del:hover { color: #fff; border-color: #ff8fa3; }
+.dock-reset { display: grid; grid-template-columns: 1fr auto; gap: 10px; align-items: center; margin: 0 0 12px; padding: 10px 12px; border-radius: 14px; background: var(--page); border: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.dock-reset b { color: var(--ink); margin-right: 4px; }

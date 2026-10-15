@@ -103,6 +103,7 @@ function SwitchTab({ personas, currentId, onPick }) {
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
         with the new user's email as <span className="code-inline">sub</span>.
       </p>
+      <ResetGoals />
       <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact />
     </>
   );
@@ -191,5 +192,35 @@ function HoodTab({ me, token }) {
           : 'Standard only — no add-on entitlements.'}
       </p>
     </>
+  );
+}
+
+/** Demo clean-up: delete every goal metric the signed-in client created (only their own — never shared ones). */
+function ResetGoals() {
+  const { me } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  if (!me.features?.pulseGoals) return null;
+  const reset = async () => {
+    if (!window.confirm(`Delete every goal metric ${me.user.name} created? This removes them from Tableau.`)) return;
+    setBusy(true);
+    try {
+      const r = await api('/api/metrics/reset-goals', { method: 'POST' });
+      toast(r.deleted ? `Deleted ${r.deleted} goal metric${r.deleted > 1 ? 's' : ''}${r.failed ? ` (${r.failed} couldn’t be deleted)` : ''}` : 'No goal metrics to delete');
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="dock-reset">
+      <span>
+        <b>Clean up</b> Delete the goals {me.user.name.split(' ')[0]} created during this demo.
+      </span>
+      <button className="btn btn-ghost btn-sm" onClick={reset} disabled={busy}>
+        {busy ? 'Deleting…' : 'Reset demo goals'}
+      </button>
+    </div>
   );
 }

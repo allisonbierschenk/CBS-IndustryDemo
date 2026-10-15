@@ -78,6 +78,7 @@ function LockedPreview() {
 
 function BenchmarkBoard({ data, me }) {
   const contact = useContact();
+  const toast = useToast();
   const series = useMemo(() => {
     const by = d3.group(data.engagements, (r) => r.engagement);
     return [...by.entries()].map(([name, rows], i) => {
@@ -152,7 +153,20 @@ function BenchmarkBoard({ data, me }) {
           </div>
           <div className="goal-cards">
             {goalMetrics.map((m) => (
-              <GoalCard key={m.metricId} m={m} />
+              <GoalCard
+                key={m.metricId}
+                m={m}
+                onDelete={async () => {
+                  if (!window.confirm(`Delete this goal and its metric? This removes it from Tableau.`)) return;
+                  try {
+                    await api(`/api/metrics/${m.metricId}`, { method: 'DELETE' });
+                    toast('Goal deleted');
+                    loadGoals();
+                  } catch (e) {
+                    toast(e.message);
+                  }
+                }}
+              />
             ))}
           </div>
         </section>
@@ -277,16 +291,25 @@ const fmtValue = (m, v) => {
 };
 
 /** One Pulse goal metric: current value (Pulse BAN), the goal, progress, status and Pulse's own sentence. */
-function GoalCard({ m }) {
+function GoalCard({ m, onDelete }) {
   const pct = m.value == null ? 0 : Math.max(0, Math.min(1, m.upIsGood ? m.value / m.goal.value : m.goal.value / m.value));
+  // Lead with what the goal is about: "Change Management engagement benchmark", not the metric's name.
+  const title = m.percentile ? `${m.scope ? `${m.scope} engagement` : 'Overall'} benchmark` : m.scope ? `${m.name} · ${m.scope}` : m.name;
   return (
     <div className={`goal-card${m.onTrack === false ? ' is-behind' : m.onTrack ? ' is-on' : ''}`}>
       <div className="goal-card-head">
         <span>
-          <b>{m.name}</b>
-          <small>{m.scope || m.source}</small>
+          <b>{title}</b>
+          <small>{m.percentile ? 'Your percentile vs. industry peers' : m.scope || m.source}</small>
         </span>
-        {m.onTrack != null && <span className="goal-status">{m.onTrack ? 'On track' : 'Behind goal'}</span>}
+        <span className="goal-card-tools">
+          {m.onTrack != null && <span className="goal-status">{m.onTrack ? 'On track' : 'Behind goal'}</span>}
+          {onDelete && (
+            <button type="button" className="goal-del" onClick={onDelete} aria-label={`Delete ${title} goal`} title="Delete this goal">
+              ✕
+            </button>
+          )}
+        </span>
       </div>
       <div className="goal-nums">
         <b>{fmtValue(m, m.value)}</b>

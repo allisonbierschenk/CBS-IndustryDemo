@@ -414,6 +414,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           name: defName.get(m.definition_id),
           detail: filterLabel(m),
           goal: m.goals?.target ? { ...m.goals.target, display: formatGoal(defById.get(m.definition_id), m.goals.target.value) } : null,
+          own: isOwnGoalMetric(m, req.user),
           following: true,
           via: direct.has(m.id) ? 'you' : 'group',
           canUnfollow: direct.has(m.id)
@@ -492,7 +493,12 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           ...(engagementType ? [{ field: 'Engagement Type', operator: 'OPERATOR_EQUAL', categorical_values: [{ string_value: String(engagementType) }] }] : [])
         ]
       };
+      // Never write a goal onto a metric that already existed in Tableau (the demo's shared metrics).
+      // getOrCreate matches on filters only (comparison and include_null are ignored — verified on this site),
+      // so if it hands back a metric this portal didn't create for this user, refuse rather than edit it.
       const created = await pulse.request(req.user, 'POST', '/pulse/metrics:getOrCreate', { definition_id: def.metadata.id, specification });
+      if (created.is_metric_created) rememberOwn(req.user, created.metric.id); // only portal-created metrics are editable / deletable here
+      if (!ownIds(req.user).has(created.metric.id)) return res.status(409).json({ error: 'This metric is already shared with your team, so a personal goal can’t be added to it. Pick a specific engagement instead.' });
       const metric = created.metric;
       // Pulse rejects goal names longer than ~20 characters (HTTP 400; verified on this site — 20 OK, 25 rejected).
       const target = { name: String(goalName || 'Our goal').trim().slice(0, 20) || 'Our goal', value: !raw && isPercent(def) ? value / 100 : value };
@@ -519,7 +525,9 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   app.get('/api/metrics/goals', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
     try {
-      const ctx = (await pulse.metricContext(req.user, agentScope(req.tenant))).filter((c) => c.goal?.value != null);
+      // Only the metrics this client created here — never the shared metrics the demo relies on.
+      const mine = ownIds(req.user);
+      const ctx = (await pulse.metricContext(req.user, agentScope(req.tenant))).filter((c) => c.goal?.value != null && mine.has(c.item.metadata.metric_id));
       const goals = await Promise.all(
         ctx.map(async (c) => {
           const body = {
@@ -554,6 +562,75 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
         })
       );
       res.json({ goals });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
+  // ── Delete a client's own goal metric (demo clean-up) ─────────────────────
+  // Safeguard: only metrics this portal actually created for this user (getOrCreate returned
+  // is_metric_created = true) — recorded in data/portal-metrics.json. A metric that already existed in Tableau
+  // (even if a goal was added to it) and any shared / default metric can never be deleted from the portal.
+  const OWN_FILE = require('path').join(__dirname, '..', '..', 'data', 'portal-metrics.json');
+  let ownMetrics = {};
+  try {
+    ownMetrics = JSON.parse(require('fs').readFileSync(OWN_FILE, 'utf8'));
+  } catch {
+    /* none yet */
+  }
+  const saveOwn = () => require('fs').writeFile(OWN_FILE, JSON.stringify(ownMetrics, null, 1), () => {});
+  const ownIds = (user) => new Set(ownMetrics[user.id] || []);
+  const rememberOwn = (user, id) => {
+    ownMetrics[user.id] = [...new Set([...(ownMetrics[user.id] || []), id])];
+    saveOwn();
+  };
+  const forgetOwn = (user, id) => {
+    ownMetrics[user.id] = (ownMetrics[user.id] || []).filter((x) => x !== id);
+    saveOwn();
+  };
+  function isOwnGoalMetric(m, user) {
+    return Boolean(m && !m.is_default && ownIds(user).has(m.id));
+  }
+  async function deleteOwnMetric(user, metricId) {
+    const { metric } = await pulse.request(user, 'GET', `/pulse/metrics/${encodeURIComponent(metricId)}`);
+    if (!isOwnGoalMetric(metric, user)) throw Object.assign(new Error('Only metrics you created with a goal can be deleted.'), { status: 403 });
+    await pulse.request(user, 'DELETE', `/pulse/metrics/${encodeURIComponent(metricId)}`);
+    forgetOwn(user, metricId);
+    return metric;
+  }
+  app.delete('/api/metrics/:metricId', requireUser, async (req, res) => {
+    if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
+    try {
+      await deleteOwnMetric(req.user, req.params.metricId);
+      pulse.resetContext(req.user);
+      attentionCache.delete(attentionKey(req.user));
+      saveAttention();
+      activity.record(req.user, req.tenant, 'pulse-metric', { metricId: req.params.metricId, deleted: true });
+      res.json({ ok: true });
+    } catch (e) {
+      fail(res, e, e.status || 502);
+    }
+  });
+  // Presenter clean-up: delete every metric the portal created for this client.
+  app.post('/api/metrics/reset-goals', requireUser, async (req, res) => {
+    try {
+      const ids = [...ownIds(req.user)];
+      const results = await Promise.all(
+        ids.map((id) =>
+          deleteOwnMetric(req.user, id).then(
+            () => true,
+            (e) => {
+              if (e.status === 404) forgetOwn(req.user, id); // already gone in Tableau
+              return e.status === 404;
+            }
+          )
+        )
+      );
+      pulse.resetContext(req.user);
+      attentionCache.delete(attentionKey(req.user));
+      saveAttention();
+      activity.record(req.user, req.tenant, 'pulse-metric', { reset: true, deleted: results.filter(Boolean).length });
+      res.json({ ok: true, deleted: results.filter(Boolean).length, failed: results.filter((x) => !x).length });
     } catch (e) {
       fail(res, e);
     }
