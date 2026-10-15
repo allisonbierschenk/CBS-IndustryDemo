@@ -36,9 +36,12 @@ export default function Login() {
   return (
     <div className="frame">
       <div className="page">
-        <header className="topbar" style={{ gridTemplateColumns: 'auto 1fr' }}>
+        <header className="topbar" style={{ gridTemplateColumns: 'auto 1fr auto' }}>
           <Brand to="/login" />
           <span />
+          <a className="guide-link" href="/guide" target="_blank" rel="noreferrer">
+            Demo guide ↗
+          </a>
         </header>
         <main className="container">
           <section className="signin">

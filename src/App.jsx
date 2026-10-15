@@ -4,6 +4,7 @@ import Layout from './components/Layout.jsx';
 import { RequireAuth, RequireView } from './components/RouteGuards.jsx';
 import Activity from './pages/Activity.jsx';
 import Agent from './pages/Agent.jsx';
+import DemoGuide from './pages/DemoGuide.jsx';
 import Alerts from './pages/Alerts.jsx';
 import Feeds from './pages/Feeds.jsx';
 import Help from './pages/Help.jsx';
@@ -42,6 +43,8 @@ export default function App() {
   return (
     <Routes>
       <Route path="/login" element={<Login />} />
+      {/* Presenter guide — public so it can be opened before signing in */}
+      <Route path="/guide" element={<DemoGuide />} />
       <Route
         element={
           <RequireAuth>

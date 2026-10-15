@@ -52,6 +52,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 
 | Route | Who |
 |---|---|
+| `/guide` | **Presenter demo guide** (public): the scenes, what to say, and color-coded Tableau tech + “If they ask” answers. Linked from the login header and the presenter dock |
 | `/login` | Click a user to sign in (JWT is logged to the browser console with a jwt.io link) |
 | `/` | Landing page after sign-in: **Ask the agent** or **Open dashboards** |
 | `/agent` | Chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics. Users who follow metrics on more than one data source (Elena: Value Intelligence + Transportation) pick **All / one source**; each source is its own conversation (`?source=` deep-links it) — see `docs/AGENT.md` |

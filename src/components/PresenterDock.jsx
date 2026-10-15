@@ -72,7 +72,12 @@ export default function PresenterDock() {
       </button>
       <section className={`dock${open ? ' open' : ''}`} aria-label="Presenter controls">
         <div className="dock-head">
-          <div className="kicker">Demo controls</div>
+          <div className="kicker">
+            Demo controls
+            <a href="/guide" target="_blank" rel="noreferrer" className="dock-guide">
+              Demo guide ↗
+            </a>
+          </div>
         </div>
         <div className="tabs" role="tablist">
           {TABS.map(([k, label]) => (
