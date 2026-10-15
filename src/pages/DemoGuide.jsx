@@ -307,22 +307,13 @@ const FEATURES = [
   F('benchmarks', 'money', 'Industry Benchmarks page', (p) => ({
     title: 'Industry Benchmarks',
     where: 'Industry Benchmarks',
-    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time, and where each engagement stands.`,
+    do: `${p.plan === 'standard' ? 'After upgrading, open' : 'Open'} Industry Benchmarks: the percentile gauge, the trend over time and where each engagement stands. Click an engagement → Explain with Pulse or Schedule with Apex.`,
     say: 'Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you.',
     money: 'Peer comparison only Apex can provide — sold as a Premium tier.',
     tech: ['vds', 'rls', 'portal'],
     beats: benchmarkBeats(p),
     ask: benchmarkAsk
   }), (p) => (p.plan === 'premium' || p.plan === 'standard' ? null : 'Premium')),
-  F('benchmarkAct', 'money', 'Act on a benchmark (goal, plan)', () => ({
-    title: 'Turn a gap into a plan',
-    where: 'Industry Benchmarks → Where you stand',
-    do: 'Click an engagement (or its line in the trend chart): the same action bar as the dashboards appears — Explain with Pulse, Schedule with Apex, Share to Slack — plus Set a goal / plan.',
-    say: 'Know where you stand — and what to do next.',
-    money: 'Every benchmark gap becomes an advisory conversation.',
-    tech: ['portal'],
-    ask: [['Where does the next step come from?', 'Rule-based on the percentile — below the median, above it, or top quartile. No AI.']]
-  })),
   F('build', 'money', 'Build your own report', () => ({
     title: 'Build your own report',
     where: 'Reports → Build your own report',
@@ -421,7 +412,6 @@ const ABOUT = {
   "lock": "Premium chart blurred: “Unlock — $5/month”.",
   "upgrade": "Upgrade on the spot; the blur lifts. Sign out to reset.",
   "benchmarks": "How the client compares with similar companies.",
-  "benchmarkAct": "Set a goal or ask Apex for a plan.",
   "build": "Clients build their own charts in Tableau.",
   "contact": "Message the client’s Apex account manager.",
   "activity": "Apex sees what clients do in the portal.",
@@ -430,7 +420,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'benchmarkAct', 'build'];
+const RECOMMENDED = ['attention', 'attentionAct', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

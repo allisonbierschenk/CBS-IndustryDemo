@@ -1,16 +1,13 @@
 // Industry Benchmarks (Premium) — a custom, headless view built with d3 from the governed published data
 // source (VizQL Data Service, queried as the user, so row-level security applies). Premium is enforced by
 // the server; Standard clients see what's included and an upgrade path.
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { createPortal } from 'react-dom';
-import { Link } from 'react-router-dom';
+import { useEffect, useMemo, useRef, useState } from 'react';
 import * as d3 from 'd3';
-import { api, track } from '../lib/api.js';
+import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import { useContact } from '../context/ContactContext.jsx';
 import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import Crumbs from '../components/Crumbs.jsx';
-import Icon from '../components/Icon.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import InfoTip from '../components/InfoTip.jsx';
 
@@ -93,26 +90,6 @@ function BenchmarkBoard({ data, me }) {
   const overall = latest ? pct(latest.percentile) : null;
   const delta = latest && yearAgo ? pct(latest.percentile) - pct(yearAgo.percentile) : null;
   const [selected, setSelected] = useState(null); // engagement selected on a chart → the shared action bar
-  const [picked, setPicked] = useState(null); // engagement whose goal / plan panel is open
-  const goalsKey = `apex.benchGoals.${me.user.id}`;
-  const [goals, setGoals] = useState(() => {
-    try {
-      return JSON.parse(localStorage.getItem(goalsKey)) || {};
-    } catch {
-      return {};
-    }
-  });
-  const saveGoal = useCallback(
-    (name, v) =>
-      setGoals((g) => {
-        const next = { ...g };
-        if (v == null) delete next[name];
-        else next[name] = v;
-        localStorage.setItem(goalsKey, JSON.stringify(next));
-        return next;
-      }),
-    [goalsKey]
-  );
   const leader = [...series].sort((a, b) => b.last.v - a.last.v)[0];
   const laggard = [...series].sort((a, b) => a.last.v - b.last.v)[0];
 
@@ -160,7 +137,7 @@ function BenchmarkBoard({ data, me }) {
           <h3>Where you stand</h3>
           <span>Select an engagement to act on it · dot size = business value delivered</span>
         </div>
-        <StandingTrack series={series} goals={goals} onPick={(s) => setSelected(s.name)} />
+        <StandingTrack series={series} onPick={(s) => setSelected(s.name)} />
       </section>
 
       <section className="bm-panel bm-bullets">
@@ -176,28 +153,13 @@ function BenchmarkBoard({ data, me }) {
           </div>
         )}
       </section>
-      {picked &&
-        createPortal(
-          <BenchmarkActions
-            s={series.find((x) => x.name === picked)}
-            me={me}
-            vertical={data.vertical?.[0]}
-            goal={goals[picked]}
-            onGoal={(v) => saveGoal(picked, v)}
-            onClose={() => setPicked(null)}
-          />,
-          document.body
-        )}
-      {/* Same actions as a selection on the dashboards, plus the benchmark-specific goal / plan panel. */}
-      {!picked && (
-        <SelectionActions
-          title="Industry Benchmarks"
-          pulseSource="Value Intelligence"
-          selection={selected ? benchmarkSelection(series.find((x) => x.name === selected)) : null}
-          onClear={() => setSelected(null)}
-          actions={[{ label: 'Set a goal / plan', icon: 'target', onClick: () => setPicked(selected) }]}
-        />
-      )}
+      {/* Same actions as a selection on the dashboards. */}
+      <SelectionActions
+        title="Industry Benchmarks"
+        pulseSource="Value Intelligence"
+        selection={selected ? benchmarkSelection(series.find((x) => x.name === selected)) : null}
+        onClear={() => setSelected(null)}
+      />
     </div>
   );
 }
@@ -214,146 +176,6 @@ function benchmarkSelection(s) {
     measure: null,
     question: `How is ${s.name} performing against peers, and what is driving it?`
   };
-}
-
-/** Deterministic next step from where the engagement sits on the peer distribution. */
-function nextStep(v, change) {
-  if (v < 50) return { tone: 'down', title: 'Below the peer median', text: 'Prioritize an engagement review: agree the value levers and a recovery plan with Apex.' };
-  if (v < 75) return { tone: change < 0 ? 'down' : 'up', title: `${Math.ceil(75 - v)} pts from the top quartile`, text: change < 0 ? 'Slipping — act now to protect the gains and close the gap to the top quartile.' : 'Moving the right way — a focused push could reach the top quartile.' };
-  return { tone: 'up', title: 'Top-quartile performer', text: 'Protect what’s working and use it as a proof point for the next engagement.' };
-}
-
-/** Action panel for one engagement: its numbers, a recommended next step, and things to do about it. */
-function BenchmarkActions({ s, me, vertical, goal, onGoal, onClose }) {
-  const contact = useContact();
-  const [draft, setDraft] = useState(goal ?? Math.min(100, Math.max(75, Math.ceil(s.last.v / 5) * 5 + 5)));
-  useEffect(() => {
-    const onKey = (e) => e.key === 'Escape' && onClose();
-    document.addEventListener('keydown', onKey);
-    return () => document.removeEventListener('keydown', onKey);
-  }, [onClose]);
-  const v = s.last.v;
-  const change = s.last.v - s.first.v;
-  const best = s.pts.reduce((a, b) => (b.v > a.v ? b : a), s.pts[0]);
-  const step = nextStep(v, change);
-  const peers = (vertical || me.tenant.industry).toLowerCase();
-  const q = `How is ${s.name} performing, and what is holding it back?`;
-  const csv = () => {
-    const rows = [['Engagement', 'Month', 'Benchmark Percentile'], ...s.pts.map((p) => [s.name, p.month, (p.v / 100).toFixed(4)])];
-    const a = Object.assign(document.createElement('a'), { href: URL.createObjectURL(new Blob([rows.map((r) => r.join(',')).join('\n')], { type: 'text/csv' })), download: `${s.name} benchmarks.csv` });
-    a.click();
-    URL.revokeObjectURL(a.href);
-    track('selection-action', { action: 'benchmark-download', engagement: s.name });
-  };
-  const plan = () => {
-    track('selection-action', { action: 'benchmark-plan', engagement: s.name });
-    contact(
-      'Schedule a review',
-      [
-        `We'd like an improvement plan for ${s.name}.`,
-        '',
-        'Where it stands (Industry Benchmarks):',
-        `• ${ordinal(Math.round(v))} percentile vs anonymized ${peers} peers (${monthLabel(s.last.month)})`,
-        `• ${change >= 0 ? 'Up' : 'Down'} ${Math.abs(Math.round(change))} pts since ${monthLabel(s.first.month)}; best was ${ordinal(Math.round(best.v))} in ${monthLabel(best.month)}`,
-        v < 75 ? `• ${Math.ceil(75 - v)} pts from the top quartile` : '• Top quartile today',
-        goal ? `• Our goal: ${ordinal(goal)} percentile` : null,
-        '',
-        'What we would like to cover:',
-        '• What is driving the gap to peers?',
-        '• Which changes would move us up fastest, and by when?'
-      ]
-        .filter((l) => l !== null)
-        .join('\n')
-    );
-  };
-  return (
-    <aside className="insight-drawer bm-actions" role="dialog" aria-labelledby="bma-title">
-      <div className="insight-head">
-        <div>
-          <div className="kicker">Industry Benchmarks · act on it</div>
-          <h3 id="bma-title">{s.name}</h3>
-          <small className="muted">
-            vs anonymized {peers} peers · {monthLabel(s.last.month)}
-          </small>
-        </div>
-        <button className="icon-btn" aria-label="Close" onClick={onClose}>
-          ✕
-        </button>
-      </div>
-      <div className="insight-body">
-        <div className="bma-stats">
-          <div>
-            <b style={{ color: s.color }}>{ordinal(Math.round(v))}</b>
-            <span>percentile</span>
-          </div>
-          <div>
-            <b className={change >= 0 ? 'up' : 'down'}>
-              {change >= 0 ? '▲' : '▼'}
-              {Math.abs(Math.round(change))}
-            </b>
-            <span>pts since {monthLabel(s.first.month)}</span>
-          </div>
-          <div>
-            <b>{v < 75 ? Math.ceil(75 - v) : '✓'}</b>
-            <span>{v < 75 ? 'pts to top quartile' : 'top quartile'}</span>
-          </div>
-        </div>
-        <div className={`bma-next is-${step.tone}`}>
-          <b>{step.title}</b>
-          <span>{step.text}</span>
-        </div>
-
-        <div className="bma-section">Take action</div>
-        <button className="bma-action is-primary" onClick={plan}>
-          <Icon name="calendar" />
-          <span>
-            <b>Plan the improvement with Apex</b>
-            Request a review with these numbers already filled in
-          </span>
-        </button>
-        <div className="bma-action bma-goal">
-          <Icon name="target" />
-          <span>
-            <b>{goal ? `Goal: ${ordinal(goal)} percentile` : 'Set a goal'}</b>
-            <span className="bma-goal-row">
-              <input type="range" min={Math.max(5, Math.floor(v / 5) * 5)} max="100" step="5" value={draft} onChange={(e) => setDraft(Number(e.target.value))} aria-label="Goal percentile" />
-              <em>{ordinal(draft)}</em>
-              <button className="btn btn-dark btn-sm" onClick={() => onGoal(draft)}>
-                {goal ? 'Update' : 'Save'}
-              </button>
-              {goal && (
-                <button className="btn btn-ghost btn-sm" onClick={() => onGoal(null)}>
-                  Clear
-                </button>
-              )}
-            </span>
-            <small>Shown on the Where you stand track · saved in this browser</small>
-          </span>
-        </div>
-        <Link className="bma-action" to={`/agent?q=${encodeURIComponent(q)}&source=${encodeURIComponent('Value Intelligence')}`} onClick={() => track('selection-action', { action: 'benchmark-agent', engagement: s.name })}>
-          <Icon name="agent" />
-          <span>
-            <b>Ask the Agent</b>
-            “{q}”
-          </span>
-        </Link>
-        <Link className="bma-action" to={`/dashboards?engagement-type=${encodeURIComponent(s.name)}`}>
-          <Icon name="dashboard" />
-          <span>
-            <b>See it on your dashboard</b>
-            Value Intelligence, filtered to {s.name}
-          </span>
-        </Link>
-        <button className="bma-action" onClick={csv}>
-          <Icon name="download" />
-          <span>
-            <b>Download its benchmark history</b>
-            Monthly percentiles as CSV
-          </span>
-        </button>
-      </div>
-    </aside>
-  );
 }
 
 /** Radial gauge 0–100 with quartile arcs and an animated needle arc. */
@@ -515,7 +337,7 @@ function TrendChart({ series, target, onPick }) {
 }
 
 /** 0–100 track with quartile zones; one dot per engagement, sized by business value. */
-function StandingTrack({ series, goals = {}, onPick }) {
+function StandingTrack({ series, onPick }) {
   const max = d3.max(series, (s) => s.value) || 1;
   const size = d3.scaleSqrt().domain([0, max]).range([10, 26]);
   const sorted = [...series].sort((a, b) => b.last.v - a.last.v);
@@ -536,7 +358,6 @@ function StandingTrack({ series, goals = {}, onPick }) {
             <span className="track-name">{s.name}</span>
             <div className="track-rail">
               <span className="track-fill" style={{ width: `${s.last.v}%`, background: `linear-gradient(90deg, transparent, ${s.color})` }} />
-              {goals[s.name] != null && <span className="track-goal" style={{ left: `${goals[s.name]}%` }} title={`Goal: ${ordinal(goals[s.name])} percentile`} />}
               <span className="track-dot" style={{ left: `${s.last.v}%`, width: d, height: d, background: s.color, boxShadow: `0 0 18px ${s.color}` }} title={`${d3.format('$,.3s')(s.value).replace('G', 'B')} delivered`} />
             </div>
             <span className="track-val">
