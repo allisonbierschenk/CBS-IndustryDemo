@@ -47,7 +47,8 @@ export default function Benchmarks() {
             <InfoTip kind="benchmarks" label="About Industry Benchmarks" />
           </div>
           <p className="lead">
-            How {me.tenant.shortName} ranks against anonymized {(state.data?.vertical?.[0] || me.tenant.industry).toLowerCase()} peers — by engagement, over time.
+            How {me.tenant.shortName}’s results compare with anonymized {(state.data?.vertical?.[0] || me.tenant.industry).toLowerCase()} companies. A 70th
+            percentile means you’re ahead of 70 out of every 100 peers.
           </p>
         </div>
       </div>
@@ -147,7 +148,7 @@ function BenchmarkBoard({ data, me }) {
       <section className="bm-panel bm-trend">
         <div className="bm-panel-head">
           <h3>Percentile over time</h3>
-          <span>Each engagement against the peer distribution · median = benchmark target</span>
+          <span>Share of anonymized peers each engagement outperforms · dashed line = peer median</span>
         </div>
         <TrendChart series={series} target={(data.engagements[0]?.target ?? 0.5) * 100} />
       </section>
@@ -375,7 +376,7 @@ function TrendChart({ series, target }) {
     return () => ro.disconnect();
   }, []);
   const h = 320;
-  const m = { t: 14, r: 200, b: 28, l: 44 };
+  const m = { t: 14, r: 200, b: 28, l: 58 };
   const dates = series.flatMap((s) => s.pts.map((p) => p.date));
   const x = d3.scaleUtc().domain(d3.extent(dates)).range([m.l, w - m.r]);
   // Zoom to where the data is (always keeping the peer median in view), clamped to the 0–100 scale.
@@ -416,9 +417,12 @@ function TrendChart({ series, target }) {
         ))}
         {y.ticks(5).map((t) => (
           <text key={t} className="bm-axis" x={m.l - 10} y={y(t) + 4} textAnchor="end">
-            {t}
+            {t}%
           </text>
         ))}
+        <text className="bm-axis-title" transform={`translate(12 ${(m.t + h - m.b) / 2}) rotate(-90)`} textAnchor="middle">
+          Ahead of % of peers
+        </text>
         {x.ticks(6).map((t) => (
           <text key={+t} className="bm-axis" x={x(t)} y={h - 8} textAnchor="middle">
             {d3.utcFormat('%b %y')(t)}

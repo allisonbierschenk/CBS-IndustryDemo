@@ -7,13 +7,32 @@ import Icon from '../components/Icon.jsx';
 const TECH = {
   embed: { label: 'Embedding API v3', color: '#2f5fe0', note: 'Tableau dashboards inside the portal; the portal drives filters, reads selections and data, exports.' },
   jwt: { label: 'Connected App JWT', color: '#7a4fd6', note: 'Signed on the server per user and single-use; Tableau validates it, then keeps the user signed in with its own browser cookie (~2 hours).' },
-  rls: { label: 'Row-level security', color: '#1f8a5b', note: 'User attributes in the JWT; a filter on the published data source decides which rows each user sees.' },
+  rls: { label: 'Data security', color: '#1f8a5b', note: 'Row-level security: user attributes in the JWT and a filter on the published data source decide which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
   author: { label: 'Web authoring', color: '#c0398a', note: 'Tableau’s editor embedded on the governed data source.' },
   portal: { label: 'Portal entitlements', color: '#2a312e', note: 'Apex’s app decides what a client’s subscription includes — enforced on the server, not hidden in the UI.' }
 };
+
+// Who to sign in as — what each persona represents and what to demo with them.
+const ROLE = {
+  exec: { icon: 'users', label: 'Executive' },
+  lead: { icon: 'grid', label: 'Service-line lead' },
+  owner: { icon: 'target', label: 'Engagement owner' },
+  portfolio: { icon: 'people', label: 'Portfolio partner' }
+};
+const PLAN = { premium: { icon: 'star', label: 'Premium' }, standard: { icon: 'shield', label: 'Standard' } };
+const PERSONAS = [
+  ['Elena Ortiz', 'Vantage Group', 'exec', 'premium', 'The showcase client — every engagement improving; has the Transportation engagement.', ['Transportation + drill-down', 'Explain with Pulse', 'Agent across 2 data sources', 'Industry Benchmarks', 'Build your own report']],
+  ['Dana Whitfield', 'Northstar Enterprises', 'exec', 'standard', 'A relationship under pressure — Operational Transformation value has collapsed.', ['Needs attention (off-track metrics)', 'Act on a selection', 'Locked benchmarks → live upgrade']],
+  ['Priya Raman', 'Crestline Partners', 'exec', 'premium', 'A Premium success story — Digital Transformation is the top performer.', ['Value Intelligence', 'Industry Benchmarks', 'Build your own report']],
+  ['Marcus Bell', 'Meridian Solutions', 'exec', 'standard', 'Risk visibility — ERP Implementation over budget, milestones slipping.', ['Engagement Health', 'Needs attention', 'Schedule with Apex']],
+  ['Jordan Hayes', 'Helix Industries', 'exec', 'standard', 'Apex’s newest client — about four months of history.', ['Early-stage notice', 'Trends with limited history']],
+  ['Sam Patel', 'Northstar Enterprises', 'lead', 'standard', 'Same company as Dana, but only the Operations service line.', ['Data security by service line']],
+  ['Maya Chen', 'Crestline Partners', 'owner', 'premium', 'Sees one engagement only — Digital Transformation.', ['Data security by engagement']],
+  ['Alex Morgan', 'West Region Portfolio', 'portfolio', 'premium', 'An Apex partner covering two clients with one login.', ['Multi-client view (Crestline + Helix)', 'Activity log (account menu)']]
+];
 
 const MONEY = [
   ['Premium analytics tier', 'Benchmarks and build-your-own reports, sold per client ($5/month in this demo).'],
@@ -90,7 +109,7 @@ const SCENES = [
     ask: [
       ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed; it never analyzes raw data, so insights are deterministic.'],
       ['What does it cost to run?', 'Included with Tableau+ and unmetered — no tokens, no usage bill, however many questions clients ask.'],
-      ['What can it see?', 'Only the Pulse metrics the user follows, on the data source they pick, under the same row-level security.']
+      ['What can it see?', 'Only the Pulse metrics the user follows, on the data source they pick, under the same data security.']
     ]
   },
   {
@@ -102,6 +121,8 @@ const SCENES = [
     money: 'Self-serve upsell — a Standard client becomes Premium in one click ($5/month in this demo) — and every benchmark gap becomes an advisory conversation.',
     tech: ['portal', 'jwt', 'vds', 'rls'],
     ask: [
+      ['What does “where you stand among peers” mean?', 'Apex compares this client’s engagement results with anonymized companies in the same industry. The percentile is the share they outperform: 70th = better results than 70 out of 100 peers. 50th is the peer median.'],
+      ['Why would the client care?', 'Their own dashboard says whether they hit their targets; it can’t say whether those targets were ambitious. Peers answer “is 89% value realization good?”, give leadership the comparison boards ask for, and point to where investment would pay off most.'],
       ['What changed when they upgraded?', 'The portal marked the session Premium on the server; the next Tableau token carries subscription tier = Premium, so the tile and the Benchmarks page unlock — no new dashboards, no reload of data.'],
       ['Is the Benchmarks page a Tableau dashboard?', 'No — Apex’s own design (d3), fed by the same governed data source through VizQL Data Service, queried as the user. Custom look, same source of truth and security.'],
       ['Where does the next step come from?', 'It’s rule-based on the percentile: below the median, above it, or top quartile — no AI involved. The plan request carries the numbers so Apex starts with the facts.'],
@@ -187,6 +208,45 @@ export default function DemoGuide() {
             </div>
           </section>
 
+          <section className="guide-personas" aria-label="Who to sign in as">
+            <div className="kicker">Who to sign in as</div>
+            <div className="persona-legend">
+              {[...Object.values(ROLE), ...Object.values(PLAN)].map((r) => (
+                <span key={r.label}>
+                  <Icon name={r.icon} />
+                  {r.label}
+                </span>
+              ))}
+            </div>
+            <div className="persona-grid">
+              {PERSONAS.map(([name, co, role, plan, story, demos]) => (
+                <div key={name} className="pcard">
+                  <div className="pcard-head">
+                    <span className={`pcard-role is-${role}`} title={ROLE[role].label}>
+                      <Icon name={ROLE[role].icon} />
+                    </span>
+                    <div>
+                      <b>{name}</b>
+                      <span>{co}</span>
+                      <span className={`pcard-plan is-${plan}`}>
+                        <Icon name={PLAN[plan].icon} />
+                        {PLAN[plan].label}
+                      </span>
+                    </div>
+                  </div>
+                  <p>
+                    <b>{ROLE[role].label}.</b> {story}
+                  </p>
+                  <ul>
+                    {demos.map((d) => (
+                      <li key={d}>{d}</li>
+                    ))}
+                  </ul>
+                </div>
+              ))}
+            </div>
+          </section>
+
           <ol className="scenes">
             {SCENES.map((s) => (
               <li key={s.n} className="scene">
@@ -224,6 +284,28 @@ export default function DemoGuide() {
               </li>
             ))}
           </ol>
+
+          <section className="guide-explain" aria-label="How to talk about benchmarks">
+            <div className="kicker">How to talk about Industry Benchmarks</div>
+            <div className="explain-grid">
+              <div>
+                <b>What it is</b>
+                <span>How the client’s engagement results compare with anonymized companies in the same industry. 70th percentile = ahead of 70 of every 100 peers; 50th = the median.</span>
+              </div>
+              <div>
+                <b>Why the client cares</b>
+                <span>Hitting your own targets doesn’t tell you if they were good targets. Peers do — and that’s the comparison executives and boards ask for.</span>
+              </div>
+              <div>
+                <b>What they do with it</b>
+                <span>Find the engagement furthest from the top quartile, set a goal, and plan it with Apex.</span>
+              </div>
+              <div>
+                <b>Say it like this</b>
+                <span>“Your dashboard tells you how you did against your plan. Benchmarks tell you how you did against everyone like you.”</span>
+              </div>
+            </div>
+          </section>
 
           <section className="guide-extras">
             <div className="kicker">Time permitting</div>
