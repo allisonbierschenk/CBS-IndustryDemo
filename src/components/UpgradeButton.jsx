@@ -58,9 +58,11 @@ function UpgradeDialog({ intent, onClose }) {
   const confirm = async () => {
     setState({ kind: 'working' });
     try {
-      await api('/api/upgrade', { method: 'POST' });
+      const r = await api('/api/upgrade', { method: 'POST' });
       await reload();
       toast(`${me.tenant.shortName} is now on Premium`);
+      // Presenter heads-up: the upgrade worked in the portal but Apex's CRM didn't get it.
+      if (r.salesforce?.error) toast(r.salesforce.error);
       setState({ kind: 'done' });
     } catch (e) {
       setState({ kind: 'error', message: e.message });

@@ -25,10 +25,12 @@ function createSalesforceClient(env = process.env) {
       if (!res.ok) throw new Error(`Salesforce sign-in failed (HTTP ${res.status}): ${j.error_description || j.error || ''}`);
       auth = { token: j.access_token, instanceUrl: j.instance_url };
     } else {
+      // No colors: under `concurrently` / a TTY, FORCE_COLOR makes the CLI color even its --json output.
+      const cliEnv = { ...process.env, FORCE_COLOR: '0', NO_COLOR: '1', SF_DISABLE_COLORS: 'true', SF_SKIP_NEW_VERSION_CHECK: 'true' };
       const out = await new Promise((resolve, reject) =>
-        execFile('sf', ['org', 'display', '-o', env.SF_ORG_ALIAS, '--json'], { timeout: 60000 }, (err, stdout) => (err && !stdout ? reject(err) : resolve(stdout)))
+        execFile('sf', ['org', 'display', '-o', env.SF_ORG_ALIAS, '--json'], { timeout: 60000, env: cliEnv }, (err, stdout) => (err && !stdout ? reject(err) : resolve(stdout)))
       );
-      const r = JSON.parse(out).result || {};
+      const r = JSON.parse(String(out).replace(/\u001b\[[0-9;]*m/g, '')).result || {};
       if (!r.accessToken) throw new Error(`Salesforce CLI has no login for "${env.SF_ORG_ALIAS}" — run: sf org login web -a ${env.SF_ORG_ALIAS}`);
       auth = { token: r.accessToken, instanceUrl: r.instanceUrl };
     }
