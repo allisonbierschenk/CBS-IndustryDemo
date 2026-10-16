@@ -23,7 +23,8 @@ export default function Home() {
         <div className="choose-grid">
           <Link to="/agent" className={`choice choice-agent${me.features?.agent ? '' : ' is-locked'}`}>
             <span className="choice-ic">
-              <Icon name={me.features?.agent ? 'agent' : 'lock'} />
+              <Icon name="agent" />
+              {!me.features?.agent && <span className="lock-badge" aria-hidden="true"><Icon name="lock" /></span>}
             </span>
             <span className="choice-copy">
               <b>

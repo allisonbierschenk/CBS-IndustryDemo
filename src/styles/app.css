@@ -1268,3 +1268,12 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .chip-q.is-locked svg { width: 13px; height: 13px; }
 .choice.is-locked .choice-ic { opacity: .8; }
 .choice-badge { margin-left: 8px; vertical-align: middle; }
+
+/* Lock badge over an AI icon: shows what the button does, and that it's Premium */
+.att-icon.is-locked, .ic-wrap, .choice-ic { position: relative; }
+.ic-wrap { display: inline-flex; }
+.lock-badge { position: absolute; right: -5px; bottom: -5px; width: 16px; height: 16px; border-radius: 50%; display: grid; place-items: center; background: var(--lime); color: #111; box-shadow: 0 0 0 2px #fff; }
+.lock-badge svg { width: 10px; height: 10px; }
+.att-icon.is-locked .lock-badge { right: -3px; top: -3px; bottom: auto; width: 18px; height: 18px; }
+.att-icon.is-locked .lock-badge svg { width: 11px; height: 11px; }
+.att-icon.is-locked { opacity: 1; }

@@ -173,7 +173,8 @@ function ActionRow({ title, status, issue, expectation, drivers = [], ask, sourc
           </Link>
         ) : (
           <button type="button" className="att-icon is-locked" onClick={onUpgrade} title="Ask the Agent — Premium" aria-label={`Ask the Agent about ${title} (Premium)`}>
-            <Icon name="lock" />
+            <Icon name="agent" />
+            <span className="lock-badge" aria-hidden="true"><Icon name="lock" /></span>
           </button>
         )}
         {dashboard && (

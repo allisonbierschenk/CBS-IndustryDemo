@@ -119,7 +119,10 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
                 </button>
               )}
               <button className={`btn ${pulseSource ? 'btn-sel' : 'btn-lime'} btn-sm`} onClick={askAgent}>
-                <Icon name={me.features?.agent ? 'agent' : 'lock'} />
+                <span className="ic-wrap">
+                  <Icon name="agent" />
+                  {!me.features?.agent && <span className="lock-badge" aria-hidden="true"><Icon name="lock" /></span>}
+                </span>
                 Ask the Agent
               </button>
               <button className="btn btn-sel btn-sm" onClick={() => setSlack(true)}>
