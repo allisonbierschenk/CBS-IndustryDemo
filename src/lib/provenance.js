@@ -100,6 +100,14 @@ export function provenance(key, me, extra = {}) {
         security: `Entitlements are enforced on the server: content outside a client’s subscription never gets a token or data. Your subscription tier (${[].concat(me.user.attributes?.['subscription tier'] || []).join(', ') || 'none'}) also travels in your sign-in token, so Tableau can act on it too.`,
         why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project. And it’s connected to how Apex runs its business: the plan lives on the client’s Salesforce Account, and a self-service upgrade lands in Salesforce as a Closed Won Opportunity — revenue the account team sees immediately, attributed to the campaign that announced it. Larger clients buy Premium per seat: their portal admin picks the people, each seat is flagged on that person’s Salesforce Contact, and Tableau sees Premium in that person’s sign-in token only.'
       };
+    case 'data360':
+      return {
+        tag: 'Data 360',
+        freshness: 'Data 360 refreshes the Salesforce streams on a schedule; Sync to Data 360 starts a refresh now. Calculated insights recompute hourly.',
+        source: 'Data 360 harmonizes three sources into one model per client: Premium upgrades (Salesforce Opportunities), portal engagement (every sign-in, Agent question, goal and request the portal records in Salesforce) and the launch campaign (Campaign Members). Calculated insights compute Premium ARR, seats, engagement and campaign reach; this page reads them with the Data 360 Query API.',
+        security: 'Apex staff only — enforced on the server. Clients never see this page or each other’s data.',
+        why: 'Data 360 is what makes CRM, the portal and Tableau one system: the portal’s usage, the CRM’s revenue and the campaign’s reach land in one harmonized model, so Apex can see which campaign drove which upgrade and who to call next — and Create follow-ups sends that back to Salesforce as Tasks for the reps. Without it, each system only knows its own piece.'
+      };
     case 'goals':
       return {
         tag: 'Pulse REST API',

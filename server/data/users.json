@@ -211,7 +211,8 @@
         ]
       },
       "roles": [
-        "activity"
+        "activity",
+        "apex-growth"
       ]
     }
   ]

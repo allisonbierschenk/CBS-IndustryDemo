@@ -4,6 +4,7 @@ import Layout from './components/Layout.jsx';
 import { RequireAuth, RequireView } from './components/RouteGuards.jsx';
 import Activity from './pages/Activity.jsx';
 import Agent from './pages/Agent.jsx';
+import ApexGrowth from './pages/ApexGrowth.jsx';
 import Benchmarks from './pages/Benchmarks.jsx';
 import DemoGuide from './pages/DemoGuide.jsx';
 import Alerts from './pages/Alerts.jsx';
@@ -82,6 +83,7 @@ export default function App() {
         <Route path="alerts" element={<Alerts />} />
         <Route path="feeds" element={<Feeds />} />
         <Route path="activity" element={me?.features?.activityLog ? <Activity /> : <Navigate to="/" replace />} />
+        <Route path="growth" element={me?.features?.apexGrowth ? <ApexGrowth /> : <Navigate to="/" replace />} />
         <Route path="help" element={<Help />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="*" element={<NotFound />} />

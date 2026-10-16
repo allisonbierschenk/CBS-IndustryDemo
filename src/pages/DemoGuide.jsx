@@ -13,6 +13,7 @@ const TECH = {
   rls: { label: 'Data security', color: '#1f8a5b', note: 'Row-level security: user attributes in the JWT and a filter on the published data source decide which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
+  d360: { label: 'Data 360', color: '#5a2fd6', note: 'Harmonizes CRM revenue, portal engagement and campaign reach into one model per client; calculated insights + Query API; activates back to Salesforce.' },
   salesforce: { label: 'Salesforce CRM', color: '#0b5cab', note: 'Apex’s Sales Cloud org is the system of record: client tier on the Account, upgrades as Opportunities, follow-ups as Tasks.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
@@ -339,7 +340,7 @@ const FEATURES = [
     do: 'Open the Agent (Premium lock) → Upgrade your team. The roster is Northstar’s 40 people from Salesforce; click “All managers (20)” — 20 seats × $5/user/month = $100/month · $1,200/yr — and confirm. Switch to Salesforce: the bell 🔔 shows “💰 Northstar Enterprises bought 20 Premium seats — +$1,200/yr”; click it → the Closed Won Opportunity (20 seats, Dana as decision maker, attributed to the launch Campaign). Then Switch user → Sam Patel: he’s one of the managers, so he’s Premium — the Agent and benchmarks are open. Dana herself stays Standard (she didn’t give herself a seat).',
     say: 'Dana buys exactly what her team needs — the managers — in one step. Apex sees $1,200 of new annual revenue before she’s closed the dialog.',
     money: 'Seat-based pricing scales with the client: 20 managers today, all 40 next quarter. Every seat is a Contact in Salesforce, every purchase a Closed Won Opportunity attributed to the launch campaign.',
-    tech: ['portal', 'salesforce', 'jwt'],
+    tech: ['portal', 'salesforce', 'd360', 'jwt'],
     beats: [
       ['The need', '“Northstar has 40 people in the portal. Dana wants her 20 managers to have benchmarks and the Agent — not everyone.”'],
       ['The purchase', '“She picks All managers and confirms: 20 seats, $1,200 a year.”'],
@@ -372,6 +373,25 @@ const FEATURES = [
     beats: benchmarkBeats(p),
     ask: benchmarkAsk
   }), (p) => (p.plan === 'premium' || p.plan === 'standard' ? null : 'Premium')),
+  F('growth', 'money', 'Apex client growth (Data 360)', () => ({
+    title: 'Close the loop: Apex’s view in Data 360',
+    where: 'Switch user → Alex Morgan → Client growth',
+    do: 'Switch to Alex Morgan (Apex portfolio partner) → Client growth. Point at Premium ARR and “From the launch campaign” — Northstar’s $1,200 seat purchase is there, attributed to the campaign. Then Next best upsell: engaged Standard clients the campaign reached, ranked by portal engagement (the activity every client generates in the portal). Tick the top two → Create follow-ups in Salesforce → switch to Salesforce: Tasks for each client’s rep, with the Data 360 numbers in them. Hover the (i) for the Data 360 story.',
+    say: 'Every click in the portal, every deal in Salesforce and every campaign email lands in Data 360 — one model per client. That’s how Apex knows which campaign paid off and who to call next.',
+    money: 'Data 360 turns the portal into a growth engine: usage signals become the next upsell, and the campaign’s ROI is measured, not guessed.',
+    tech: ['d360', 'salesforce', 'portal'],
+    beats: [
+      ['Three systems, one model', '“The portal knows usage, Salesforce knows revenue, the campaign knows reach. Data 360 harmonizes all three per client.”'],
+      ['Measured', '“$1,200 of new ARR from the launch campaign — attributed, not guessed.”'],
+      ['Next', '“Northstar’s managers are using it heavily; Meridian is engaged and still on Standard — that’s the next call.”'],
+      ['Activated', '“One click: the reps have Tasks in Salesforce with the numbers to make the call.”']
+    ],
+    ask: [
+      ['What’s in Data 360 exactly?', 'CRM data streams for Opportunity, Campaign, Campaign Member and Apex Portal Activity (every portal sign-in, Agent question, goal, request and upgrade, written to Salesforce by the portal); mapped to three data model objects; calculated insights for Premium ARR and seats, engagement and campaign reach. The page reads them with the Data 360 Query API.'],
+      ['How fresh is it?', 'Data 360 refreshes the Salesforce streams on its schedule (minutes); Sync to Data 360 starts a refresh now. Insights recompute hourly.'],
+      ['Where does Tableau come in?', 'Tableau Cloud connects to the same Data 360 model, and Pulse metrics on it (Premium ARR, portal engagement) alert Apex leaders — the same governed numbers.']
+    ]
+  }), (p) => (p.id === 'alex' ? null : 'Alex Morgan (Apex)')),
   F('build', 'money', 'Build your own report', () => ({
     title: 'Build your own report',
     where: 'Reports → Build your own report',
@@ -442,6 +462,7 @@ const benchmarkAsk = [
 
 // Plain-English: what the audience will see — for presenters who have never seen the portal.
 const ABOUT = {
+  "growth": "Alex (Apex) sees every client’s Premium revenue, portal engagement and campaign reach — harmonized in Data 360 — and turns the next-best upsell into Salesforce Tasks.",
   "campaign": "Open with why the client is here: Apex’s email announcing conversational analytics and anonymized benchmarks — a real Salesforce Campaign every upgrade is attributed to.",
   "signin": "Pick a person — you’re in. No password, no Tableau login.",
   "hood": "The secure token behind the sign-in.",
@@ -481,7 +502,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['campaign', 'attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['campaign', 'growth', 'attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

@@ -38,6 +38,7 @@ export default function TopBar() {
         </Link>
         {me.views.transportation?.entitled && <NavLink to="/transportation">Transportation</NavLink>}
         <NavLink to="/reports">Reports</NavLink>
+        {me.features?.apexGrowth && <NavLink to="/growth">Client growth</NavLink>}
         <NavLink to="/benchmarks">
           Industry Benchmarks
           {!me.entitlements.includes('benchmarks') && <Icon name="lock" className="lock" />}

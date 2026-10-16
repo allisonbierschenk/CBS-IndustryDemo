@@ -17,9 +17,12 @@ const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
 const { createSalesforceClient } = require('./lib/salesforce.cjs');
 const { createCrm } = require('./lib/crm.cjs');
+const { createData360 } = require('./lib/data360.cjs');
 
 // Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
-const crm = createCrm(createSalesforceClient(), { campaign: store.content.crm?.campaign || null });
+const sfClient = createSalesforceClient();
+const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
+const d360 = createData360(sfClient); // Data 360 Query API — Apex's client growth view
 activity.onRecord((e, user, tenant) => crm.logActivity(e, user, tenant)); // portal engagement → Salesforce → Data 360
 
 const env = {
@@ -90,6 +93,7 @@ function crmTier(user) {
   const company = crm.tierFor(user.tenantId);
   return company !== 'premium' && crm.hasSeat(user.id) ? 'premium' : company;
 }
+const isApexGrowth = (user) => (user?.roles || []).includes('apex-growth') && d360.enabled;
 const isSeatAdmin = (user) => (user?.roles || []).includes('seat-admin') && crm.enabled;
 function withUpgrade(user, s) {
   if (!user) return user;
@@ -266,6 +270,104 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
 
 app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
 
+// ── Apex client growth (Apex staff, e.g. Alex Morgan) — Data 360 ────────────
+// Harmonized in Data 360: Premium upgrades (CRM Opportunities), portal engagement (Apex Portal Activity) and launch
+// campaign reach (Campaign Members), one row per client; "next best upsell" = engaged Standard clients the campaign reached.
+app.get('/api/apex/growth', requireUser, async (req, res) => {
+  if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
+  try {
+    const g = await d360.growth();
+    const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
+    const arr = by(g.arr.rows);
+    const eng = by(g.engagement.rows);
+    const reach = by(g.reach.rows);
+    const num = (v) => Number(v || 0);
+    const clients = store.tenants
+      .filter((t) => crm.accountFor(t.id))
+      .map((t) => {
+        const tier = crm.tierFor(t.id) || t.tier;
+        const e = eng[t.id] || {};
+        const a = arr[t.id] || {};
+        const events = num(e.events__c);
+        const people = num(e.active_people__c);
+        const recipients = num(reach[t.id]?.recipients__c);
+        return {
+          id: t.id,
+          name: t.clientName,
+          industry: t.industry,
+          tier,
+          arr: num(a.premium_arr__c),
+          seats: num(a.premium_seats__c),
+          upgrades: num(a.upgrades__c),
+          events,
+          people,
+          recipients,
+          weekly: g.weekly.filter((w) => w.Client_Id__c === t.id).map((w) => ({ week: String(w.week).slice(0, 10), events: num(w.events) })),
+          // Upsell signal: Standard, reached by the launch campaign, and actively using the portal.
+          upsell: tier !== 'premium' && recipients > 0 && events > 0 ? Math.round(events * 0.6 + people * 4 + recipients) : 0
+        };
+      })
+      .sort((x, y) => y.arr - x.arr || y.events - x.events);
+    const campaignId = g.upgrades.find((u) => u.Campaign_Id__c)?.Campaign_Id__c || null;
+    const upgrades = g.upgrades.map((u) => ({ name: u.Name__c, client: u.Client_Name__c, amount: num(u.Amount__c), seats: num(u.Seats__c), closed: String(u.Close_Date__c || '').slice(0, 10), campaign: Boolean(u.Campaign_Id__c) }));
+    res.json({
+      sources: { arr: g.arr.from, engagement: g.engagement.from, reach: g.reach.from },
+      totals: {
+        arr: clients.reduce((s, c) => s + c.arr, 0),
+        campaignArr: upgrades.filter((u) => u.campaign).reduce((s, u) => s + u.amount, 0),
+        seats: clients.reduce((s, c) => s + c.seats, 0),
+        events: clients.reduce((s, c) => s + c.events, 0)
+      },
+      clients,
+      upsell: clients.filter((c) => c.upsell > 0).sort((a, b) => b.upsell - a.upsell),
+      upgrades,
+      campaign: store.content.crm?.campaign || null,
+      campaignId
+    });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+// Activation: the Data 360 upsell list → follow-up Tasks for each client's Apex rep in Salesforce.
+app.post('/api/apex/followups', requireUser, async (req, res) => {
+  if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
+  const picks = Array.isArray(req.body?.clients) ? req.body.clients.slice(0, 20) : [];
+  try {
+    const out = [];
+    for (const p of picks) {
+      const tenant = store.tenants.find((t) => t.id === p.id);
+      if (!tenant) continue;
+      const t = await crm.createTask(tenant, {
+        subject: `Upsell Premium — ${tenant.clientName} is engaged and on Standard`,
+        description: `From Data 360 (Apex client growth): ${p.events} portal events by ${p.people} people in the last 30 days; the launch campaign reached ${p.recipients} of their people; still on Standard. Suggest: Premium seats for their managers.\nRequested by ${req.user.name}.`,
+        dueInDays: 2
+      });
+      out.push({ client: tenant.clientName, taskId: t.taskId });
+    }
+    activity.record(req.user, store.tenantFor(req.user), 'message', { topic: 'Upsell follow-ups', count: out.length });
+    res.json({ ok: true, created: out });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.post('/api/apex/sync', requireUser, async (req, res) => {
+  if (!d360.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    await crm.flushActivity();
+    res.json({ ok: true, streams: await d360.sync() });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.get('/api/apex/freshness', requireUser, async (req, res) => {
+  if (!d360.enabled) return res.json({ enabled: false });
+  try {
+    res.json({ enabled: true, ...(await d360.freshness()) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
 // ── Premium seats (portal admin, e.g. Dana at Northstar) ────────────────────
 app.get('/api/seats', requireUser, async (req, res) => {
   if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
@@ -353,6 +455,7 @@ app.get('/api/me', (req, res) => {
       // Dana-style portal admin: buys Premium seats for named people instead of upgrading the whole company.
       seats: isSeatAdmin(user) ? { price: store.content.crm?.seatPrice || store.content.benchmarks?.price || '' } : null,
       seatRoster: crm.enabled && tenant.id === 'northstar' ? true : false,
+      apexGrowth: isApexGrowth(user),
       benchmarks: { price: store.content.benchmarks?.price || null, cover: store.content.benchmarks?.cover || null }
     }
   });
