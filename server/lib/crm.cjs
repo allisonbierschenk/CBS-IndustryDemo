@@ -68,10 +68,10 @@ function createCrm(sf, { log = console } = {}) {
     return { opportunityId: opp.id, url: sf.recordUrl(opp.id) };
   }
 
-  /** Demo reset: remove the upgrade's Opportunity and put the Account back on Standard. */
-  async function revertUpgrade(tenant, opportunityId) {
+  /** Demo reset: put the Account back on Standard so the next demo can upgrade again. The Closed Won Opportunity
+   *  stays — it's the record of the upgrade (and the history Data 360 / Tableau report on). */
+  async function revertUpgrade(tenant) {
     const a = requireAccount(tenant);
-    if (opportunityId) await sf.remove('Opportunity', opportunityId).catch((e) => e.status === 404 || Promise.reject(e));
     await sf.update('Account', a.id, { Apex_Subscription_Tier__c: 'Standard' });
     a.tier = 'standard';
   }

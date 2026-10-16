@@ -329,7 +329,7 @@ const FEATURES = [
     money: 'A Standard client becomes Premium in one click ($5/month in this demo): benchmarks, their own Pulse goals and build-your-own reports. The account team sees it as a Closed Won Opportunity. Resets when you sign out.',
     tech: ['portal', 'salesforce', 'jwt'],
     ask: [
-      ['What changed when they upgraded?', 'Salesforce got a Closed Won Opportunity ($60/yr) and the Account’s Apex Subscription Tier became Premium; the portal reads the tier from that Account, so the next Tableau token carries subscription tier = Premium. Signing out deletes the demo Opportunity and puts the Account back on Standard.'],
+      ['What changed when they upgraded?', 'Salesforce got a Closed Won Opportunity ($60/yr) and the Account’s Apex Subscription Tier became Premium; the portal reads the tier from that Account, so the next Tableau token carries subscription tier = Premium. Signing out puts the Account back on Standard so you can demo it again; the Opportunity stays in Salesforce as the record of the upgrade.'],
       ['Where does a client’s plan come from?', 'Their Salesforce Account (Apex Subscription Tier) — change it in Salesforce and the portal follows within a minute.']
     ]
   }), onlyStandard),

@@ -82,7 +82,7 @@ app.use((req, res, next) => {
 // A client's tier comes from their Salesforce Account (Apex_Subscription_Tier__c) when Salesforce is configured,
 // else from tenants.json. Demo upgrade: a Standard client "buys" Premium during the demo — recorded in Salesforce
 // as a Closed Won Opportunity + tier change, and flagged in this portal session (signed cookie); signing out or
-// switching users reverts both. While Premium, the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+// switching users puts the Account back on Standard (the Opportunity stays as the record of the upgrade). While Premium, the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
 function crmTier(user) {
   return user ? crm.tierFor(user.tenantId) : null;
 }
@@ -104,8 +104,8 @@ async function revertSessionUpgrade(s) {
   const tenant = store.tenantFor(store.findUserById(s.uid));
   if (!tenant || !crm.enabled) return;
   try {
-    await crm.revertUpgrade(tenant, s.upgradeOpp);
-    console.log(`→ demo upgrade reverted in Salesforce: ${tenant.clientName} → Standard`);
+    await crm.revertUpgrade(tenant);
+    console.log(`→ demo reset: ${tenant.clientName} back on Standard in Salesforce (upgrade Opportunity kept)`);
   } catch (e) {
     console.warn(`⚠ could not revert ${tenant.clientName}'s upgrade in Salesforce: ${e.message}`);
   }
