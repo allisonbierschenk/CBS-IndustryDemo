@@ -21,12 +21,14 @@ export default function Home() {
         <h1>How would you like to explore {me.tenant.shortName}&apos;s results?</h1>
 
         <div className="choose-grid">
-          <Link to="/agent" className="choice choice-agent">
+          <Link to="/agent" className={`choice choice-agent${me.features?.agent ? '' : ' is-locked'}`}>
             <span className="choice-ic">
-              <Icon name="agent" />
+              <Icon name={me.features?.agent ? 'agent' : 'lock'} />
             </span>
             <span className="choice-copy">
-              <b>Ask the agent</b>
+              <b>
+                Ask the agent{!me.features?.agent && <span className="mini-tier premium choice-badge">Premium</span>}
+              </b>
               <span>Ask questions about your engagements in plain language.</span>
             </span>
             <span className="arrow-chip">

@@ -1210,10 +1210,6 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .seats-name small { color: var(--muted, #66706b); font-size: 12px; }
 .seats-total { justify-content: space-between; margin-top: 12px; }
 .seats-total small { font-weight: 400; color: var(--muted, #66706b); }
-/* Agent locked (Standard) */
-.agent-lock { max-width: 640px; margin: 40px auto; text-align: center; display: flex; flex-direction: column; align-items: center; gap: 10px; }
-.agent-lock-list { list-style: none; padding: 0; margin: 6px 0 10px; display: grid; gap: 8px; }
-.agent-lock-list li { background: rgba(0, 0, 0, 0.04); border-radius: 12px; padding: 10px 14px; font-style: italic; }
 
 /* Apex client growth (Data 360) */
 .gr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
@@ -1240,3 +1236,35 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .gr-table td { padding: 10px; border-bottom: 1px solid rgba(255, 255, 255, .06); color: #fff; }
 .gr-table .num { text-align: right; font-variant-numeric: tabular-nums; }
 @media (max-width: 900px) { .gr-grid, .gr-kpis { grid-template-columns: 1fr; } }
+
+/* Agent locked (Standard) */
+.agent-lock { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: 32px; align-items: center; padding: 36px; margin-top: 8px; }
+.agent-lock-kicker { display: inline-flex; align-items: center; gap: 6px; padding: 5px 12px; border-radius: 999px; background: var(--lime); color: #111; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; }
+.agent-lock-kicker svg { width: 14px; height: 14px; }
+.agent-lock h1 { color: #fff; font-size: clamp(30px, 3.4vw, 44px); letter-spacing: -.02em; margin: 14px 0 10px; }
+.agent-lock-copy > p { color: rgba(255, 255, 255, .72); font-size: 15px; max-width: 52ch; margin: 0 0 18px; }
+.agent-lock-qs { display: grid; gap: 8px; margin-bottom: 18px; }
+.agent-lock-qs button { display: flex; align-items: center; gap: 10px; text-align: left; padding: 11px 14px; border-radius: 14px; border: 1px solid rgba(255, 255, 255, .12); background: rgba(255, 255, 255, .05); color: #fff; font: inherit; font-size: 14px; cursor: pointer; transition: background .15s, border-color .15s; }
+.agent-lock-qs button:hover { background: rgba(255, 255, 255, .1); border-color: rgba(215, 240, 90, .5); }
+.agent-lock-qs button svg { width: 16px; height: 16px; color: var(--lime); flex: none; }
+.agent-lock-price { color: rgba(255, 255, 255, .7); font-size: 13.5px; margin-bottom: 16px; }
+.agent-lock-price b { color: var(--lime); font-size: 16px; }
+.agent-lock-preview { position: relative; border-radius: 20px; padding: 20px; background: rgba(255, 255, 255, .04); border: 1px solid rgba(255, 255, 255, .08); overflow: hidden; min-height: 320px; }
+.alp-q { margin-left: auto; width: fit-content; max-width: 85%; padding: 10px 14px; border-radius: 16px 16px 4px 16px; background: var(--lime); color: #111; font-size: 13.5px; font-weight: 600; margin-bottom: 14px; }
+.alp-a { filter: blur(3px); opacity: .85; }
+.alp-line { height: 10px; border-radius: 6px; background: rgba(255, 255, 255, .16); margin-bottom: 8px; }
+.alp-line.w90 { width: 90%; } .alp-line.w75 { width: 75%; } .alp-line.w60 { width: 60%; margin-top: 10px; }
+.alp-cards { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; margin: 12px 0; }
+.alp-card { padding: 12px; border-radius: 14px; background: rgba(255, 255, 255, .07); display: flex; flex-direction: column; gap: 2px; color: #fff; }
+.alp-card small { color: rgba(255, 255, 255, .6); font-size: 11.5px; }
+.alp-card b { font-size: 22px; }
+.alp-down { color: #ff8a8a; font-size: 12px; }
+.alp-chart { width: 100%; height: 80px; }
+.alp-veil { position: absolute; inset: 0; display: grid; place-items: center; background: linear-gradient(180deg, rgba(12, 16, 14, 0) 30%, rgba(12, 16, 14, .55) 100%); pointer-events: none; }
+@media (max-width: 960px) { .agent-lock { grid-template-columns: 1fr; padding: 24px; } }
+/* Locked AI actions (Standard) */
+.att-icon.is-locked { opacity: .75; }
+.chip-q.is-locked { display: inline-flex; align-items: center; gap: 6px; border: 0; cursor: pointer; font: inherit; }
+.chip-q.is-locked svg { width: 13px; height: 13px; }
+.choice.is-locked .choice-ic { opacity: .8; }
+.choice-badge { margin-left: 8px; vertical-align: middle; }

@@ -4,12 +4,17 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { api, track } from '../lib/api.js';
 import { useContact } from '../context/ContactContext.jsx';
+import { useSession } from '../context/SessionContext.jsx';
+import { useUpgrade } from './UpgradeButton.jsx';
 import Icon from './Icon.jsx';
 import InfoTip from './InfoTip.jsx';
 import PulseMarkup from './PulseMarkup.jsx';
 
 export default function AttentionPanel() {
   const contact = useContact();
+  const { me } = useSession();
+  const upgrade = useUpgrade();
+  const ai = Boolean(me.features?.agent); // investigating with the Agent is Premium; the attention list itself is for everyone
   const [state, setState] = useState({ loading: true });
   const [expanded, setExpanded] = useState(false);
 
@@ -87,7 +92,7 @@ export default function AttentionPanel() {
             <div className="att-actions">
               <div className="kicker">Take action</div>
               {state.metrics.slice(0, 5).map((m) => (
-                <ActionRow
+                <ActionRow ai={ai} onUpgrade={() => upgrade('upgrade')}
                   key={m.metricId}
                   title={m.name}
                   status="Off track"
@@ -119,12 +124,19 @@ export default function AttentionPanel() {
           )}
           {state.followups?.length > 0 && (
             <div className="attention-followups">
-              {state.followups.map((q) => (
-                <Link key={q} className="chip-q" to={`/agent?q=${encodeURIComponent(q)}`}>
-                  {q}
-                  <Icon name="arrowRight" />
-                </Link>
-              ))}
+              {state.followups.map((q) =>
+                ai ? (
+                  <Link key={q} className="chip-q" to={`/agent?q=${encodeURIComponent(q)}`}>
+                    {q}
+                    <Icon name="arrowRight" />
+                  </Link>
+                ) : (
+                  <button key={q} type="button" className="chip-q is-locked" onClick={() => upgrade('upgrade')} title="Ask the Agent — Premium">
+                    <Icon name="lock" />
+                    {q}
+                  </button>
+                )
+              )}
             </div>
           )}
         </>
@@ -133,7 +145,7 @@ export default function AttentionPanel() {
   );
 }
 
-function ActionRow({ title, status, issue, expectation, drivers = [], ask, source, dashboard, onContact }) {
+function ActionRow({ title, status, issue, expectation, drivers = [], ask, source, dashboard, onContact, ai = true, onUpgrade }) {
   return (
     <div className="att-row is-negative">
       <div className="att-what">
@@ -155,9 +167,15 @@ function ActionRow({ title, status, issue, expectation, drivers = [], ask, sourc
         </dl>
       </div>
       <div className="att-btns">
-        <Link className="att-icon" to={`/agent?q=${encodeURIComponent(ask)}${source ? `&source=${encodeURIComponent(source)}` : ''}`} title="Ask the Agent" aria-label={`Ask the Agent about ${title}`}>
-          <Icon name="agent" />
-        </Link>
+        {ai ? (
+          <Link className="att-icon" to={`/agent?q=${encodeURIComponent(ask)}${source ? `&source=${encodeURIComponent(source)}` : ''}`} title="Ask the Agent" aria-label={`Ask the Agent about ${title}`}>
+            <Icon name="agent" />
+          </Link>
+        ) : (
+          <button type="button" className="att-icon is-locked" onClick={onUpgrade} title="Ask the Agent — Premium" aria-label={`Ask the Agent about ${title} (Premium)`}>
+            <Icon name="lock" />
+          </button>
+        )}
         {dashboard && (
           <Link className="att-icon" to={dashboard.to} title={`Open ${dashboard.title}`} aria-label={`Open ${dashboard.title}`}>
             <Icon name="dashboard" />
