@@ -297,5 +297,10 @@
         "downIsGood": true
       }
     ]
+  },
+  "crm": {
+    "_comment": "Apex's Salesforce org. Upgrades are attributed to this Campaign (Opportunity.CampaignId) — the announcement that the partner portal now has conversational analytics and anonymized benchmarks.",
+    "campaign": "Partner portal update: conversational analytics + anonymized benchmarks",
+    "seatPrice": "$5/user/month"
   }
 }

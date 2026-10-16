@@ -37,11 +37,11 @@ const GROUPS = [
 // story = what they represent; focus = what to point at on Value Intelligence.
 const PERSONAS = [
   { id: 'elena', name: 'Elena Ortiz', first: 'Elena', company: 'Vantage Group', role: 'exec', plan: 'premium', transport: true, story: 'The showcase client — every engagement improving; has the Transportation engagement.', focus: 'Supply Chain Optimization: falling freight cost and rising realized savings.' },
-  { id: 'dana', name: 'Dana Whitfield', first: 'Dana', company: 'Northstar Enterprises', role: 'exec', plan: 'standard', story: 'A relationship under pressure — Operational Transformation value has collapsed.', focus: 'Operational Transformation’s value realization has collapsed, while Technology Modernization holds up.' },
+  { id: 'dana', name: 'Dana Whitfield', first: 'Dana', company: 'Northstar Enterprises', role: 'exec', plan: 'standard', seats: true, story: 'A relationship under pressure — Operational Transformation value has collapsed. Northstar’s portal admin: buys Premium seats for her 40-person team.', focus: 'Operational Transformation’s value realization has collapsed, while Technology Modernization holds up.' },
   { id: 'priya', name: 'Priya Raman', first: 'Priya', company: 'Crestline Partners', role: 'exec', plan: 'premium', story: 'A Premium success story — Digital Transformation is the top performer.', focus: 'Digital Transformation is the top performer; two engagements show minor friction.' },
   { id: 'marcus', name: 'Marcus Bell', first: 'Marcus', company: 'Meridian Solutions', role: 'exec', plan: 'standard', story: 'Risk visibility — ERP Implementation over budget, milestones slipping.', focus: 'ERP Implementation: Engagement Health has fallen and milestones are slipping.' },
   { id: 'jordan', name: 'Jordan Hayes', first: 'Jordan', company: 'Helix Industries', role: 'exec', plan: 'standard', story: 'Apex’s newest client — about four months of history.', focus: 'The early-stage notice: strong momentum, but not enough history for year-over-year comparisons.' },
-  { id: 'sam', name: 'Sam Patel', first: 'Sam', company: 'Northstar Enterprises', role: 'lead', plan: 'standard', story: 'Same company as Dana, but only the Operations service line.', focus: 'Only Operations engagements appear — the Technology engagement Dana sees is gone.' },
+  { id: 'sam', name: 'Sam Patel', first: 'Sam', company: 'Northstar Enterprises', role: 'lead', plan: 'standard', story: 'Same company as Dana, but only the Operations service line. One of Northstar’s 20 managers — Premium once Dana gives him a seat.', focus: 'Only Operations engagements appear — the Technology engagement Dana sees is gone.' },
   { id: 'maya', name: 'Maya Chen', first: 'Maya', company: 'Crestline Partners', role: 'owner', plan: 'premium', story: 'Sees one engagement only — Digital Transformation.', focus: 'One engagement only: every KPI and chart is Digital Transformation.' },
   { id: 'alex', name: 'Alex Morgan', first: 'Alex', company: 'West Region Portfolio', role: 'portfolio', plan: 'premium', story: 'An Apex partner covering two clients with one login.', focus: 'Crestline and Helix combined in one view — and nothing from any other client.' }
 ];
@@ -51,10 +51,22 @@ const F = (id, group, label, build, unavailable) => ({ id, group, label, build, 
 const onlyElena = (p) => (p.transport ? null : 'Elena only (Transportation)');
 const onlyStandard = (p) => (p.plan === 'standard' ? null : 'Standard clients');
 const onlyPremium = (p) => (p.plan === 'premium' ? null : 'Premium clients');
+// The Agent is Premium: Standard personas show it after upgrading (Dana: after giving herself a seat, or as Sam).
+const agentFirst = (p) => (p.plan === 'standard' ? (p.seats ? 'Premium — after the seat purchase, switch to Sam (or give Dana a seat too). ' : 'Premium — after upgrading. ') : '');
 
 // Feature library in script order. group: 'core' (in every script, not an option) | 'ai' | 'bi' | 'money'.
 // unavailable(p) → null, or the reason this persona can't show it.
 const FEATURES = [
+  // ── Opener ──────────────────────────────────────────────────────────────
+  F('campaign', 'money', 'The launch campaign (why they’re here)', (p) => ({
+    title: 'Set the scene: the launch campaign',
+    where: 'Salesforce → Campaigns (optional)',
+    do: `Open with the story: last week Apex emailed every client — “Our partner portal now includes conversational analytics and anonymized industry benchmarks.” ${p.first} got that email. Optionally show the Campaign in Salesforce (“Partner portal update: conversational analytics + anonymized benchmarks”) with ${p.company}’s people as members.`,
+    say: 'Apex announced two new things clients can’t get anywhere else: ask your data anything, and see how you compare to your peers.',
+    money: 'Marketing → product → revenue in one loop: every upgrade in the portal is attributed back to this Campaign in Salesforce, so Apex knows exactly what the launch earned.',
+    tech: ['salesforce'],
+    ask: [['How do you know the campaign worked?', 'Each upgrade Opportunity’s Primary Campaign Source is the launch Campaign, so Salesforce campaign influence shows the revenue it drove.']]
+  })),
   // ── Always ──────────────────────────────────────────────────────────────
   F('signin', 'core', null, (p) => ({
     title: 'Sign in',
@@ -124,7 +136,7 @@ const FEATURES = [
   F('agent', 'ai', 'Ask the Agent', (p) => ({
     title: 'Ask the Agent',
     where: 'Agent',
-    do: 'Ask “What are the Value Realization Rate trends?”, then click a follow-up chip; point at the insight cards and trend chart.',
+    do: `${agentFirst(p)}Ask “What are the Value Realization Rate trends?”, then click a follow-up chip; point at the insight cards and trend chart.${p.plan === 'standard' ? ' (Before upgrading, the Agent shows a Premium lock — a good upsell moment.)' : ''}`,
     say: 'Answers in plain language — from the same governed metrics as the dashboard.',
     money: 'Pulse AI is included with Tableau+ and unmetered — no tokens, no usage bill, however many questions clients ask.',
     tech: ['pulse', 'rls'],
@@ -141,10 +153,10 @@ const FEATURES = [
     tech: ['pulse'],
     ask: [['Why separate sources?', 'Each source is its own conversation, so answers never mix metrics from different data.']]
   }), onlyElena),
-  F('selectionAgent', 'ai', 'Ask the Agent about a selection', () => ({
+  F('selectionAgent', 'ai', 'Ask the Agent about a selection', (p) => ({
     title: 'Ask about what you selected',
     where: 'Any dashboard',
-    do: 'Select marks on a chart, then Ask the Agent — the question is written from your selection.',
+    do: `${agentFirst(p)}Select marks on a chart, then Ask the Agent — the question is written from your selection.`,
     say: 'Point at the data, ask why.',
     tech: ['embed', 'pulse'],
     ask: [['How is the question built?', 'From the selected marks’ fields and values, read through the Embedding API.']]
@@ -321,7 +333,24 @@ const FEATURES = [
     tech: ['portal', 'embed'],
     ask: [['Is the lock security?', 'It’s the upsell moment — the real enforcement is on the server, which gives Standard clients no Premium data.']]
   }), onlyStandard),
-  F('upgrade', 'money', 'Live upgrade to Premium', () => ({
+  F('upgrade', 'money', 'Live upgrade to Premium', (p) => p.seats ? ({
+    title: 'Upgrade the team — Premium seats',
+    where: 'Agent (locked) or the benchmarks tile → Upgrade your team',
+    do: 'Open the Agent (Premium lock) → Upgrade your team. The roster is Northstar’s 40 people from Salesforce; click “All managers (20)” — 20 seats × $5/user/month = $100/month · $1,200/yr — and confirm. Switch to Salesforce: the bell 🔔 shows “💰 Northstar Enterprises bought 20 Premium seats — +$1,200/yr”; click it → the Closed Won Opportunity (20 seats, Dana as decision maker, attributed to the launch Campaign). Then Switch user → Sam Patel: he’s one of the managers, so he’s Premium — the Agent and benchmarks are open. Dana herself stays Standard (she didn’t give herself a seat).',
+    say: 'Dana buys exactly what her team needs — the managers — in one step. Apex sees $1,200 of new annual revenue before she’s closed the dialog.',
+    money: 'Seat-based pricing scales with the client: 20 managers today, all 40 next quarter. Every seat is a Contact in Salesforce, every purchase a Closed Won Opportunity attributed to the launch campaign.',
+    tech: ['portal', 'salesforce', 'jwt'],
+    beats: [
+      ['The need', '“Northstar has 40 people in the portal. Dana wants her 20 managers to have benchmarks and the Agent — not everyone.”'],
+      ['The purchase', '“She picks All managers and confirms: 20 seats, $1,200 a year.”'],
+      ['The rep', '“Apex’s rep gets the bell in Salesforce — with the revenue and the campaign that drove it.”'],
+      ['The result', '“Sam is one of those managers. He signs in — Premium. Same portal, same data security, new features.”']
+    ],
+    ask: [
+      ['Where do the seats live?', 'On each person’s Contact in Salesforce (Apex Premium Seat). The portal reads it at sign-in and puts subscription tier = Premium in that person’s Tableau token — so Premium is per person, not per company.'],
+      ['How do I reset?', 'Presenter → Salesforce → Reset Northstar seats. The Opportunities stay as history.']
+    ]
+  }) : ({
     title: 'Upgrade to Premium — live',
     where: 'What’s included → Confirm upgrade',
     do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens. Then switch to Salesforce: the bell 🔔 shows “💰 <client> upgraded to Premium — +$60/yr” for the account owner; click it to open the new Closed Won Opportunity on the client’s Account (tier now Premium). Or use Presenter → Salesforce → Open ↗.',
@@ -413,6 +442,7 @@ const benchmarkAsk = [
 
 // Plain-English: what the audience will see — for presenters who have never seen the portal.
 const ABOUT = {
+  "campaign": "Open with why the client is here: Apex’s email announcing conversational analytics and anonymized benchmarks — a real Salesforce Campaign every upgrade is attributed to.",
   "signin": "Pick a person — you’re in. No password, no Tableau login.",
   "hood": "The secure token behind the sign-in.",
   "attention": "Pulse flags the metrics going the wrong way.",
@@ -451,7 +481,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['campaign', 'attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

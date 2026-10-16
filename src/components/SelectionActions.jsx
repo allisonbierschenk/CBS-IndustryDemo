@@ -7,6 +7,8 @@ import { Link, useNavigate } from 'react-router-dom';
 import { track } from '../lib/api.js';
 import { selectionSummary } from '../lib/tableau.js';
 import { useContact } from '../context/ContactContext.jsx';
+import { useSession } from '../context/SessionContext.jsx';
+import { useUpgrade } from './UpgradeButton.jsx';
 import Icon from './Icon.jsx';
 import SelectionInsight from './SelectionInsight.jsx';
 import SlackDialog from './SlackDialog.jsx';
@@ -25,6 +27,8 @@ export function describeSelection(sel) {
 // selection / onClear: a page-controlled selection { worksheet, count, columns, rows, dimensions, measure, question? }.
 // actions: extra page-specific buttons [{ label, icon, onClick }].
 export default function SelectionActions({ viz, title, ignoreWorksheets = [], extra, onDismissExtra, pulseSource, selection, onClear, actions = [] }) {
+  const { me } = useSession();
+  const upgrade = useUpgrade();
   const navigate = useNavigate();
   const contact = useContact();
   const [marks, setMarks] = useState(null);
@@ -72,6 +76,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
 
   const askAgent = () => {
     track('selection-action', { action: 'agent', worksheet: sel.worksheet, source: pulseSource || 'all' });
+    if (!me.features?.agent) return upgrade('upgrade'); // the Agent is Premium
     navigate(`/agent?q=${encodeURIComponent(question())}${pulseSource ? `&source=${encodeURIComponent(pulseSource)}` : ''}`);
   };
 
@@ -114,7 +119,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
                 </button>
               )}
               <button className={`btn ${pulseSource ? 'btn-sel' : 'btn-lime'} btn-sm`} onClick={askAgent}>
-                <Icon name="agent" />
+                <Icon name={me.features?.agent ? 'agent' : 'lock'} />
                 Ask the Agent
               </button>
               <button className="btn btn-sel btn-sm" onClick={() => setSlack(true)}>

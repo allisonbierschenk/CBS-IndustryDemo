@@ -6,5 +6,8 @@
     <fieldPermissions><field>Account.Apex_Client_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
     <fieldPermissions><field>Account.Apex_Subscription_Tier__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
     <fieldPermissions><field>Contact.Apex_Portal_User_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_Premium_Seat__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_People_Manager__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Opportunity.Apex_Premium_Seats__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
     <fieldPermissions><field>Opportunity.Apex_Portal_Upgrade__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
 </PermissionSet>

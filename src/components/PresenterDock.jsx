@@ -261,10 +261,39 @@ function CrmTab({ me }) {
       ) : (
         <p className="muted">None yet — use Contact Apex or Schedule with Apex.</p>
       )}
-      <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={load}>
-        Refresh
-      </button>
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="btn btn-ghost btn-sm" onClick={load}>
+          Refresh
+        </button>
+        {me.features?.seatRoster && <ResetSeats onDone={load} />}
+      </div>
     </div>
+  );
+}
+
+/** Demo clean-up: take back every Premium seat at this client (the Opportunities stay as history). */
+function ResetSeats({ onDone }) {
+  const { me, reload } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const reset = async () => {
+    if (!window.confirm(`Remove every Premium seat at ${me.tenant.clientName}? The upgrade Opportunities stay in Salesforce.`)) return;
+    setBusy(true);
+    try {
+      const r = await api('/api/seats/reset', { method: 'POST' });
+      toast(r.removed ? `Removed ${r.removed} seat${r.removed > 1 ? 's' : ''}` : 'No seats to remove');
+      await reload();
+      onDone?.();
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button className="btn btn-ghost btn-sm" onClick={reset} disabled={busy}>
+      {busy ? 'Resetting…' : `Reset ${me.tenant.shortName} seats`}
+    </button>
   );
 }
 

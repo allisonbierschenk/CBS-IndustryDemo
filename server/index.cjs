@@ -19,7 +19,7 @@ const { createSalesforceClient } = require('./lib/salesforce.cjs');
 const { createCrm } = require('./lib/crm.cjs');
 
 // Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
-const crm = createCrm(createSalesforceClient());
+const crm = createCrm(createSalesforceClient(), { campaign: store.content.crm?.campaign || null });
 
 const env = {
   server: (process.env.TABLEAU_SERVER || '').replace(/\/+$/, ''),
@@ -83,9 +83,13 @@ app.use((req, res, next) => {
 // else from tenants.json. Demo upgrade: a Standard client "buys" Premium during the demo — recorded in Salesforce
 // as a Closed Won Opportunity + tier change, and flagged in this portal session (signed cookie); signing out or
 // switching users puts the Account back on Standard (the Opportunity stays as the record of the upgrade). While Premium, the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+// A person is Premium if their company is, or if their company bought them a Premium seat (Contact.Apex_Premium_Seat__c).
 function crmTier(user) {
-  return user ? crm.tierFor(user.tenantId) : null;
+  if (!user) return null;
+  const company = crm.tierFor(user.tenantId);
+  return company !== 'premium' && crm.hasSeat(user.id) ? 'premium' : company;
 }
+const isSeatAdmin = (user) => (user?.roles || []).includes('seat-admin') && crm.enabled;
 function withUpgrade(user, s) {
   if (!user) return user;
   const tier = s?.upgraded ? 'premium' : crmTier(user);
@@ -260,6 +264,43 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
 });
 
 app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
+
+// ── Premium seats (portal admin, e.g. Dana at Northstar) ────────────────────
+app.get('/api/seats', requireUser, async (req, res) => {
+  if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
+  try {
+    res.json({ price: store.content.crm?.seatPrice || '', people: await crm.rosterFor(req.tenant) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.post('/api/seats', requireUser, async (req, res) => {
+  if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
+  const ids = Array.isArray(req.body?.contactIds) ? req.body.contactIds.map(String).slice(0, 500) : [];
+  if (!ids.length) return res.status(400).json({ error: 'Pick at least one person.' });
+  try {
+    const price = store.content.crm?.seatPrice || '';
+    const r = await crm.buySeats(req.user, req.tenant, ids, { price });
+    for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u); // next Tableau session carries their new tier
+    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium seats', seats: r.seats, price, opportunity: r.opportunityId });
+    console.log(`→ ${req.user.email} bought ${r.seats} Premium seats for ${req.tenant.clientName} · Salesforce Opportunity ${r.opportunityId}`);
+    res.json({ ok: true, ...r });
+  } catch (e) {
+    res.status(e.status || 502).json({ error: e.message });
+  }
+});
+// Presenter clean-up: take Northstar's seats back so the seat purchase can be demoed again.
+app.post('/api/seats/reset', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    const n = await crm.resetSeats(req.tenant);
+    for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u);
+    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Seats reset', seats: n });
+    res.json({ ok: true, removed: n });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
 // Presenter dock: this client's Salesforce Account and the records the portal wrote to it.
 app.get('/api/crm/records', requireUser, async (req, res) => {
   if (!crm.enabled) return res.json({ enabled: false });
@@ -307,6 +348,10 @@ app.get('/api/me', (req, res) => {
       activityLog: (user.roles || []).includes('activity'),
       slackChannels: store.slackChannelsFor(tenant),
       pulseGoals: ent.has('goals'),
+      agent: ent.has('agent'),
+      // Dana-style portal admin: buys Premium seats for named people instead of upgrading the whole company.
+      seats: isSeatAdmin(user) ? { price: store.content.crm?.seatPrice || store.content.benchmarks?.price || '' } : null,
+      seatRoster: crm.enabled && tenant.id === 'northstar' ? true : false,
       benchmarks: { price: store.content.benchmarks?.price || null, cover: store.content.benchmarks?.cover || null }
     }
   });
@@ -354,7 +399,10 @@ function orderMetrics(ctx) {
   return [...ctx].sort((a, b) => rank(a.item.metadata.name) - rank(b.item.metadata.name) || a.item.metadata.name.localeCompare(b.item.metadata.name));
 }
 
+// The Pulse Agent chat is Premium. "Explain this" (explain: true) uses the same Pulse brief and stays open to everyone.
+const agentAllowed = (req) => store.entitlementsFor(req.tenant).has('agent') || req.body?.explain === true;
 app.get('/api/agent/context', requireUser, async (req, res) => {
+  if (!agentAllowed(req)) return res.status(403).json({ error: 'The Agent is part of Premium.', premium: true });
   try {
     const ctx = orderMetrics(await pulse.metricContext(req.user, agentScope(req.tenant)));
     const metrics = ctx.map(({ source, item }) => ({ name: item.metadata.name, metricId: item.metadata.metric_id, source }));
@@ -379,6 +427,7 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 app.post('/api/agent/chat', requireUser, async (req, res) => {
+  if (!agentAllowed(req)) return res.status(403).json({ error: 'The Agent is part of Premium.', premium: true });
   const question = String(req.body?.question || '').trim().slice(0, 1000);
   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
   // source: a data source label (e.g. "Transportation") to ask only that source's metrics; default all.

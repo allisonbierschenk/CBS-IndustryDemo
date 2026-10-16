@@ -11,6 +11,7 @@ import InfoTip from '../components/InfoTip.jsx';
 import PulseAiNote from '../components/PulseAiNote.jsx';
 import PulseMarkup, { direction } from '../components/PulseMarkup.jsx';
 import TrendChart from '../components/TrendChart.jsx';
+import UpgradeButton from '../components/UpgradeButton.jsx';
 
 const plain = (s) => String(s || '').replace(/<[^>]+>/g, '');
 
@@ -65,6 +66,40 @@ function Answer({ msg }) {
 }
 
 export default function Agent() {
+  const { me } = useSession();
+  return me.features?.agent ? <AgentChat /> : <AgentLocked me={me} />;
+}
+
+/** Standard clients: the Agent is part of Premium. */
+function AgentLocked({ me }) {
+  return (
+    <div className="page">
+      <Crumbs items={[{ label: 'Agent' }]} />
+      <div className="agent-lock">
+        <span className="bench-lock-ic">
+          <Icon name="lock" />
+        </span>
+        <div className="kicker">Premium</div>
+        <h1>Ask your data anything</h1>
+        <p className="lead">
+          Ask questions about {me.tenant.shortName}’s metrics in plain English — what changed, why, and what to look at next — answered from your
+          governed data.
+        </p>
+        <ul className="agent-lock-list">
+          <li>“What are our Value Realization Rate trends?”</li>
+          <li>“Which engagement is furthest behind plan, and why?”</li>
+          <li>“Are we on track to hit our goal?”</li>
+        </ul>
+        <div className="bench-lock-actions">
+          <UpgradeButton className="btn btn-dark" label={me.features?.seats ? 'Upgrade your team' : 'Upgrade to Premium'} />
+          <UpgradeButton className="btn btn-ghost" label="What’s included" intent="learn" />
+        </div>
+      </div>
+    </div>
+  );
+}
+
+function AgentChat() {
   const { me } = useSession();
   const [prep, setPrep] = useState({ loading: true });
   const [messages, setMessages] = useState([]);

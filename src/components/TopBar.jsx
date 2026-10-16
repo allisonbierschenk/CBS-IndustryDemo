@@ -31,6 +31,7 @@ export default function TopBar() {
         <NavLink to="/agent">
           <Icon name="agent" className="nav-ic" />
           Agent
+          {!me.features?.agent && <Icon name="lock" className="lock" />}
         </NavLink>
         <Link to="/dashboards" aria-current={onDashboards ? 'page' : undefined}>
           Value Intelligence
