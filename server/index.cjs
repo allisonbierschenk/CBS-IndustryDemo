@@ -20,6 +20,7 @@ const { createCrm } = require('./lib/crm.cjs');
 
 // Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
 const crm = createCrm(createSalesforceClient(), { campaign: store.content.crm?.campaign || null });
+activity.onRecord((e, user, tenant) => crm.logActivity(e, user, tenant)); // portal engagement → Salesforce → Data 360
 
 const env = {
   server: (process.env.TABLEAU_SERVER || '').replace(/\/+$/, ''),
@@ -258,7 +259,7 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
   const s = jar.read(req, SESSION_COOKIE);
   jar.write(res, SESSION_COOKIE, { ...s, upgraded: true, upgradeOpp: salesforce?.opportunityId || null }, SESSION_TTL_MS);
   pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
-  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price, opportunity: salesforce?.opportunityId || null });
+  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price, amount: (Number(String(price).replace(/[^0-9.]/g, '')) || 0) * 12, opportunity: salesforce?.opportunityId || null });
   console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium${salesforce?.opportunityId ? ` · Salesforce Opportunity ${salesforce.opportunityId}` : ''}`);
   res.json({ ok: true, salesforce });
 });
@@ -282,7 +283,7 @@ app.post('/api/seats', requireUser, async (req, res) => {
     const price = store.content.crm?.seatPrice || '';
     const r = await crm.buySeats(req.user, req.tenant, ids, { price });
     for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u); // next Tableau session carries their new tier
-    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium seats', seats: r.seats, price, opportunity: r.opportunityId });
+    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium seats', seats: r.seats, amount: r.amount, price, opportunity: r.opportunityId });
     console.log(`→ ${req.user.email} bought ${r.seats} Premium seats for ${req.tenant.clientName} · Salesforce Opportunity ${r.opportunityId}`);
     res.json({ ok: true, ...r });
   } catch (e) {

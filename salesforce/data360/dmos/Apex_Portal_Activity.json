@@ -1,0 +1,15 @@
+{"name":"Apex_Portal_Activity","label":"Apex Portal Activity","category":"Engagement","dataSpaceName":"default","description":"Client engagement in the Apex client portal, harmonized from Salesforce (Apex Portal Activity).",
+ "fields":[
+  {"name":"Event_Id","label":"Event Id","dataType":"Text","isPrimaryKey":true},
+  {"name":"Event_Time","label":"Event Time","dataType":"DateTime","isPrimaryKey":false},
+  {"name":"Event_Type","label":"Event Type","dataType":"Text","isPrimaryKey":false},
+  {"name":"Client_Id","label":"Client Id","dataType":"Text","isPrimaryKey":false},
+  {"name":"Client_Name","label":"Client Name","dataType":"Text","isPrimaryKey":false},
+  {"name":"Portal_User_Id","label":"Portal User Id","dataType":"Text","isPrimaryKey":false},
+  {"name":"User_Name","label":"User Name","dataType":"Text","isPrimaryKey":false},
+  {"name":"Tier","label":"Tier","dataType":"Text","isPrimaryKey":false},
+  {"name":"Subject","label":"Subject","dataType":"Text","isPrimaryKey":false},
+  {"name":"Amount","label":"Amount","dataType":"Number","isPrimaryKey":false},
+  {"name":"Seats","label":"Seats","dataType":"Number","isPrimaryKey":false},
+  {"name":"Has_Premium_Seat","label":"Has Premium Seat","dataType":"Text","isPrimaryKey":false}
+ ]}

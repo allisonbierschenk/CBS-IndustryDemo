@@ -181,6 +181,51 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     return seated.length;
   }
 
+  // ── Portal activity → Salesforce (Apex_Portal_Activity__c) → Data 360 (CRM data stream) ──
+  // Client actions only; background work (attention pre-warm, embed token mints) is noise for engagement analytics.
+  const SKIP = new Set(['attention', 'dashboard-token']);
+  const queue = [];
+  const subjectOf = (type, d = {}) =>
+    String(d.question || d.view || d.metric || d.topic || d.plan || (d.action ? `${d.action}${d.worksheet ? ` · ${d.worksheet}` : ''}` : '') || d.name || d.channel || type).slice(0, 255);
+  function logActivity(e, user, tenant) {
+    if (!sf.enabled || !user || !tenant || SKIP.has(e.type)) return;
+    const a = accounts.get(tenant.id);
+    const d = e.detail || {};
+    queue.push({
+      attributes: { type: 'Apex_Portal_Activity__c' },
+      Event_Id__c: `${e.at}-${user.id}-${e.type}-${Math.random().toString(36).slice(2, 8)}`.slice(0, 64),
+      Event_Type__c: e.type,
+      Event_Time__c: e.at,
+      ...(a ? { Account__c: a.id } : {}),
+      ...(contacts.get(user.id) ? { Contact__c: contacts.get(user.id) } : {}),
+      Client_Id__c: tenant.id,
+      Client_Name__c: tenant.clientName,
+      Portal_User_Id__c: user.id,
+      User_Name__c: user.name,
+      Persona__c: user.persona || 'Executive',
+      Tier__c: tenant.tier === 'premium' ? 'Premium' : 'Standard',
+      Has_Premium_Seat__c: seats.has(user.id),
+      Subject__c: subjectOf(e.type, d),
+      ...(d.amount != null ? { Amount__c: Number(d.amount) || 0 } : {}),
+      ...(d.seats != null ? { Seats__c: Number(d.seats) || 0 } : {}),
+      Detail__c: JSON.stringify(d).slice(0, 4000)
+    });
+  }
+  async function flushActivity() {
+    while (queue.length) {
+      const batch = queue.splice(0, 200);
+      try {
+        const r = await sf.request('POST', '/composite/sobjects', { allOrNone: false, records: batch });
+        const bad = (r || []).filter((x) => !x.success);
+        if (bad.length) log.warn(`⚠ Salesforce activity: ${bad.length} not saved — ${JSON.stringify(bad[0].errors).slice(0, 200)}`);
+      } catch (err) {
+        log.warn(`⚠ Salesforce activity: ${err.message}`);
+        return;
+      }
+    }
+  }
+  if (sf.enabled) setInterval(flushActivity, 5000).unref();
+
   /** Presenter view: the client's Account and the records the portal wrote to it, live from Salesforce. */
   async function recordsFor(tenant) {
     const a = requireAccount(tenant);
@@ -201,7 +246,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     };
   }
 
-  return { enabled: sf.enabled, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
+  return { enabled: sf.enabled, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
 }
 
 module.exports = { createCrm };

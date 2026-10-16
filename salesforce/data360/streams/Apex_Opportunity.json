@@ -1,0 +1,106 @@
+{
+ "name": "Apex_Opportunity",
+ "label": "Apex Opportunity",
+ "datasource": "SalesforceDotCom_Home",
+ "connectorInfo": {
+  "connectorType": "SalesforceDotCom",
+  "connectorDetails": {
+   "name": "SalesforceDotCom_Home",
+   "sourceObject": "Opportunity"
+  }
+ },
+ "dataLakeObjectInfo": {
+  "name": "Apex_Opportunity",
+  "label": "Apex Opportunity",
+  "category": "Engagement",
+  "eventDateTimeFieldName": "CreatedDate",
+  "dataLakeFieldInputRepresentations": [
+   {
+    "name": "Id",
+    "label": "Opportunity ID",
+    "dataType": "Text",
+    "isPrimaryKey": true
+   },
+   {
+    "name": "AccountId",
+    "label": "Account ID",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Name",
+    "label": "Name",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "StageName",
+    "label": "Stage",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Amount",
+    "label": "Amount",
+    "dataType": "Number",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "CloseDate",
+    "label": "Close Date",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "CreatedDate",
+    "label": "Created Date",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "IsWon",
+    "label": "Won",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "CampaignId",
+    "label": "Campaign ID",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Apex_Portal_Upgrade_c",
+    "label": "Apex Portal Upgrade",
+    "dataType": "Boolean",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Apex_Premium_Seats_c",
+    "label": "Apex Premium Seats",
+    "dataType": "Number",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Apex_Client_Name_c",
+    "label": "Apex Client Name",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Apex_Client_Id_F_c",
+    "label": "Apex Client Id",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   }
+  ],
+  "dataspaceInfo": [
+   {
+    "name": "default"
+   }
+  ]
+ },
+ "refreshConfig": {
+  "refreshMode": "UPSERT"
+ }
+}

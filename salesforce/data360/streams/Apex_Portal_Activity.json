@@ -1,0 +1,124 @@
+{
+ "name": "Apex_Portal_Activity",
+ "label": "Apex Portal Activity",
+ "datasource": "SalesforceDotCom_Home",
+ "connectorInfo": {
+  "connectorType": "SalesforceDotCom",
+  "connectorDetails": {
+   "name": "SalesforceDotCom_Home",
+   "sourceObject": "Apex_Portal_Activity__c"
+  }
+ },
+ "dataLakeObjectInfo": {
+  "name": "Apex_Portal_Activity",
+  "label": "Apex Portal Activity",
+  "category": "Engagement",
+  "eventDateTimeFieldName": "Event_Time_c",
+  "dataspaceInfo": [
+   {
+    "name": "default"
+   }
+  ],
+  "dataLakeFieldInputRepresentations": [
+   {
+    "name": "Id",
+    "label": "Record ID",
+    "dataType": "Text",
+    "isPrimaryKey": true
+   },
+   {
+    "name": "Event_Time_c",
+    "label": "Event Time",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Event_Type_c",
+    "label": "Event Type",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Client_Id_c",
+    "label": "Client Id",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Client_Name_c",
+    "label": "Client Name",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Portal_User_Id_c",
+    "label": "Portal User Id",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "User_Name_c",
+    "label": "User Name",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Persona_c",
+    "label": "Persona",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Tier_c",
+    "label": "Tier",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Subject_c",
+    "label": "Subject",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Amount_c",
+    "label": "Amount",
+    "dataType": "CURRENCY",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Seats_c",
+    "label": "Seats",
+    "dataType": "Number",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Has_Premium_Seat_c",
+    "label": "Has Premium Seat",
+    "dataType": "Boolean",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Account_c",
+    "label": "Account",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Contact_c",
+    "label": "Contact",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "CreatedDate",
+    "label": "Created Date",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   }
+  ]
+ },
+ "refreshConfig": {
+  "refreshMode": "UPSERT"
+ }
+}
