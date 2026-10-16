@@ -72,7 +72,33 @@ function createCrm(sf, { log = console } = {}) {
     if (contactId) await sf.create('OpportunityContactRole', { OpportunityId: opp.id, ContactId: contactId, Role: 'Decision Maker', IsPrimary: true }).catch((e) => log.warn(`⚠ Salesforce contact role: ${e.message}`));
     await sf.update('Account', a.id, { Apex_Subscription_Tier__c: 'Premium' });
     a.tier = 'premium';
+    await notifyOwner(a, {
+      title: `💰 ${tenant.clientName} upgraded to Premium — +${usd(monthly * 12)}/yr`,
+      body: `${user.name} upgraded in the Apex client portal (${price}). Closed Won.`,
+      targetId: opp.id
+    });
     return { opportunityId: opp.id, url: sf.recordUrl(opp.id) };
+  }
+
+  const usd = (n) => `$${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
+  let notifTypeId = null;
+  /** Bell notification (Salesforce custom notification "Apex Portal Upgrade") to the Account owner — the rep. */
+  async function notifyOwner(a, { title, body, targetId }) {
+    try {
+      if (!notifTypeId) notifTypeId = (await sf.query("SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'Apex_Portal_Upgrade'"))[0]?.Id;
+      if (!notifTypeId) throw new Error('custom notification type Apex_Portal_Upgrade not found');
+      // Running total, so the rep sees what the portal has brought in.
+      const [sum] = await sf.query('SELECT SUM(Amount) total, COUNT(Id) n FROM Opportunity WHERE Apex_Portal_Upgrade__c = true AND IsWon = true AND CloseDate = THIS_YEAR');
+      const total = sum ? ` Portal upgrades this year: ${usd(sum.total)} from ${sum.n} upgrade${sum.n === 1 ? '' : 's'}.` : '';
+      const [r] = await sf.request('POST', '/actions/standard/customNotificationAction', {
+        inputs: [{ customNotifTypeId: notifTypeId, recipientIds: [a.ownerId], title: title.slice(0, 250), body: `${body}${total}`.slice(0, 750), targetId }]
+      });
+      // The action answers HTTP 200 either way — the outcome is in the body.
+      if (!r?.isSuccess) throw new Error(JSON.stringify(r?.errors || r));
+      log.log(`🔔 Salesforce notification to the ${a.name} owner: ${title}`);
+    } catch (e) {
+      log.warn(`⚠ Salesforce notification: ${e.message}`);
+    }
   }
 
   /** Demo reset: put the Account back on Standard so the next demo can upgrade again. The Closed Won Opportunity

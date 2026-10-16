@@ -324,7 +324,7 @@ const FEATURES = [
   F('upgrade', 'money', 'Live upgrade to Premium', () => ({
     title: 'Upgrade to Premium — live',
     where: 'What’s included → Confirm upgrade',
-    do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens. Then open Presenter → Salesforce: the new Closed Won Opportunity is on the client’s Account, and the Account’s tier is Premium — click Open ↗ to show it in Salesforce.',
+    do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens. Then switch to Salesforce: the bell 🔔 shows “💰 <client> upgraded to Premium — +$60/yr” for the account owner; click it to open the new Closed Won Opportunity on the client’s Account (tier now Premium). Or use Presenter → Salesforce → Open ↗.',
     say: 'Clients upgrade themselves, right inside the experience — and it’s booked revenue in Salesforce the moment they click.',
     money: 'A Standard client becomes Premium in one click ($5/month in this demo): benchmarks, their own Pulse goals and build-your-own reports. The account team sees it as a Closed Won Opportunity. Resets when you sign out.',
     tech: ['portal', 'salesforce', 'jwt'],

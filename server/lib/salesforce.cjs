@@ -60,7 +60,7 @@ function createSalesforceClient(env = process.env) {
   const remove = (sobject, id) => request('DELETE', `/sobjects/${sobject}/${id}`);
   const recordUrl = (id) => (auth ? `${auth.instanceUrl.replace('.my.salesforce.com', '.lightning.force.com')}/lightning/r/${id}/view` : null);
 
-  return { enabled: Boolean(mode), mode, query, create, update, remove, recordUrl };
+  return { enabled: Boolean(mode), mode, request, query, create, update, remove, recordUrl };
 }
 
 module.exports = { createSalesforceClient };
