@@ -5,5 +5,6 @@
     <hasActivationRequired>false</hasActivationRequired>
     <fieldPermissions><field>Account.Apex_Client_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
     <fieldPermissions><field>Account.Apex_Subscription_Tier__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_Portal_User_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
     <fieldPermissions><field>Opportunity.Apex_Portal_Upgrade__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
 </PermissionSet>

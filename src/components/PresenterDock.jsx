@@ -228,6 +228,13 @@ function CrmTab({ me }) {
           Open ↗
         </a>
       </div>
+      <h4>Portal users (Contacts)</h4>
+      {(d.contacts || []).map((c) => (
+        <a key={c.id} className="crm-row" href={c.url} target="_blank" rel="noreferrer">
+          <span>{c.name}</span>
+          <span className="muted">{c.title}</span>
+        </a>
+      ))}
       <h4>Upgrade opportunities</h4>
       {d.opportunities.length ? (
         d.opportunities.map((o) => (

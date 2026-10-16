@@ -439,6 +439,7 @@ app.post('/api/messages', requireUser, async (req, res) => {
   if (crm.enabled) {
     try {
       salesforce = await crm.createTask(req.tenant, {
+        user: req.user,
         subject: `${topic} — ${req.user.name} (${ref})`,
         description: `From ${req.user.name} <${req.user.email}> via the Apex client portal.${to ? ` Account manager: ${to.name}.` : ''}\n\n${body}`,
         dueInDays: topic === 'Schedule a review' ? 1 : 2
