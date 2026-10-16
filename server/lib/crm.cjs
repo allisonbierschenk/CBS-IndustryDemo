@@ -81,12 +81,25 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     if (contactId) await sf.create('OpportunityContactRole', { OpportunityId: opp.id, ContactId: contactId, Role: 'Decision Maker', IsPrimary: true }).catch((e) => log.warn(`⚠ Salesforce contact role: ${e.message}`));
     await sf.update('Account', a.id, { Apex_Subscription_Tier__c: 'Premium' });
     a.tier = 'premium';
+    await markResponded(user);
     await notifyOwner(a, {
       title: `💰 ${tenant.clientName} upgraded to Premium — +${usd(monthly * 12)}/yr`,
       body: `${user.name} upgraded in the Apex client portal (${price}). Closed Won.`,
       targetId: opp.id
     });
     return { opportunityId: opp.id, url: sf.recordUrl(opp.id) };
+  }
+
+  /** The buyer answered the launch campaign: their Campaign Member → Responded (Salesforce campaign funnel / ROI). */
+  async function markResponded(user) {
+    const contactId = contacts.get(user.id);
+    if (!campaignId || !contactId) return;
+    try {
+      const [m] = await sf.query(`SELECT Id FROM CampaignMember WHERE CampaignId = '${campaignId}' AND ContactId = '${contactId}' LIMIT 1`);
+      if (m) await sf.update('CampaignMember', m.Id, { Status: 'Responded' });
+    } catch (e) {
+      log.warn(`⚠ Salesforce campaign response: ${e.message.slice(0, 160)}`);
+    }
   }
 
   const usd = (n) => `$${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
@@ -162,6 +175,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
       await sf.request('PATCH', '/composite/sobjects', { allOrNone: true, records: chosen.slice(i, i + 200).map((p) => ({ attributes: { type: 'Contact' }, id: p.contactId, Apex_Premium_Seat__c: true })) });
     }
     for (const p of chosen) seats.add(p.userId);
+    await markResponded(user);
     await notifyOwner(a, {
       title: `💰 ${tenant.clientName} bought ${chosen.length} Premium seat${chosen.length === 1 ? '' : 's'} — +${usd(amount)}/yr`,
       body: `${user.name} upgraded ${chosen.length} ${chosen.every((p) => p.manager) ? 'managers' : 'people'} in the Apex client portal (${price} per user). Closed Won.`,
