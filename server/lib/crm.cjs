@@ -190,6 +190,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   function logActivity(e, user, tenant) {
     if (!sf.enabled || !user || !tenant || SKIP.has(e.type)) return;
     const a = accounts.get(tenant.id);
+    if (!a) return; // Apex staff (no client Account) — not client engagement
     const d = e.detail || {};
     queue.push({
       attributes: { type: 'Apex_Portal_Activity__c' },

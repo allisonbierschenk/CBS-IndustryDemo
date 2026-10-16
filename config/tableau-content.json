@@ -109,6 +109,20 @@
           "transportation"
         ],
         "view": "transportation"
+      },
+      {
+        "name": "Apex Client Growth – Portal Activity (Data 360)",
+        "label": "Data 360 · Portal engagement",
+        "requires": [
+          "apex-growth"
+        ]
+      },
+      {
+        "name": "Apex Client Growth – Premium Upgrades (Data 360)",
+        "label": "Data 360 · Premium revenue",
+        "requires": [
+          "apex-growth"
+        ]
       }
     ]
   },
