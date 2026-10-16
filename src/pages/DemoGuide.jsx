@@ -63,7 +63,7 @@ const FEATURES = [
     title: 'Set the scene: the launch campaign',
     where: 'Salesforce → Campaigns (optional)',
     do: `Open with the story: last week Apex emailed every client — “Our partner portal now includes conversational analytics and anonymized industry benchmarks.” ${p.first} got that email. Optionally show the Campaign in Salesforce (“Partner portal update: conversational analytics + anonymized benchmarks”) with ${p.company}’s people as members.`,
-    say: 'Apex announced two new things clients can’t get anywhere else: ask your data anything, and see how you compare to your peers.',
+    say: 'Apex told every client — 141 people across five companies — about two things they can’t get anywhere else: ask your data anything, and see how you compare to your peers. Now watch what one of them does with it.',
     money: 'Marketing → product → revenue in one loop: every upgrade in the portal is attributed back to this Campaign in Salesforce, so Apex knows exactly what the launch earned.',
     tech: ['salesforce'],
     ask: [['How do you know the campaign worked?', 'Each upgrade Opportunity’s Primary Campaign Source is the launch Campaign, so Salesforce campaign influence shows the revenue it drove.']]
@@ -561,6 +561,50 @@ export default function DemoGuide() {
                 <b>Follow the script.</b> Every step tells you what it is, what to click and what to say.
               </li>
             </ol>
+          </section>
+
+          <section className="guide-story" aria-labelledby="story-title">
+            <div className="kicker">The story</div>
+            <h2 id="story-title">The client portal is now a revenue-generating machine — and everyone wins</h2>
+            <p>
+              Apex Consulting runs on Salesforce and Tableau. Its client portal used to be a cost center — a place to send reports. Now Salesforce, Data 360 and
+              Tableau work together so that every client visit can become value for the client <i>and</i> revenue for Apex.
+            </p>
+            <div className="story-wins">
+              <div>
+                <b>Apex’s clients win</b>
+                <span>
+                  Proof of the value Apex delivers, how they compare to their peers, their own goals — and an AI agent that answers their questions. At a predictable price:
+                  $5 per user per month.
+                </span>
+              </div>
+              <div>
+                <b>Apex wins</b>
+                <span>
+                  One campaign email reached 141 client people. A client upgrades in one click and it’s booked revenue in Salesforce before the dialog closes. Data 360 shows
+                  which campaign drove it and who’s next — and the reps already have the follow-up.
+                </span>
+              </div>
+              <div>
+                <b>Salesforce and Tableau win</b>
+                <span>
+                  The AI is included with Tableau+ and unmetered, so Apex can offer it to every client with no per-question bill — a predictable cost for Apex and a
+                  predictable price for its clients. More clients, more seats, more of the platform in use.
+                </span>
+              </div>
+            </div>
+            <ol className="story-loop" aria-label="The loop">
+              <li>Campaign</li>
+              <li>Client experience</li>
+              <li>Upgrade</li>
+              <li>Revenue in Salesforce</li>
+              <li>Data 360 insight</li>
+              <li>Next campaign</li>
+            </ol>
+            <blockquote>
+              “One click by a client became revenue in Salesforce, Data 360 told Apex who to call next, and the AI behind it costs the same no matter how much clients use it.
+              Apex’s portal isn’t a cost center anymore — it’s a revenue-generating machine.”
+            </blockquote>
           </section>
 
           <section className="guide-personas" aria-label="Who to sign in as">
