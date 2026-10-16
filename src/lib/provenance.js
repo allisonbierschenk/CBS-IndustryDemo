@@ -95,10 +95,10 @@ export function provenance(key, me, extra = {}) {
     case 'premium':
       return {
         tag: 'Data monetization',
-        freshness: 'Checked on every request, so what a client can open always matches their current plan in Apex’s system.',
+        freshness: 'Your plan comes from Apex’s CRM (Salesforce, refreshed every minute) and is checked on every request, so what you can open always matches your current subscription.',
         source: 'Premium content — Industry Benchmarks, your own Pulse metrics with goals, and build-your-own reports — uses the same published data source as everything else; clients’ own goal metrics are created on it through the Pulse REST API. Nothing extra to build or copy.',
         security: `Entitlements are enforced on the server: content outside a client’s subscription never gets a token or data. Your subscription tier (${[].concat(me.user.attributes?.['subscription tier'] || []).join(', ') || 'none'}) also travels in your sign-in token, so Tableau can act on it too.`,
-        why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project.'
+        why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project. And it’s connected to how Apex runs its business: the plan lives on the client’s Salesforce Account, and a self-service upgrade lands in Salesforce as a Closed Won Opportunity — revenue the account team sees immediately.'
       };
     case 'goals':
       return {

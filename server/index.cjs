@@ -15,6 +15,11 @@ const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const activity = require('./lib/activity.cjs');
 const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
+const { createSalesforceClient } = require('./lib/salesforce.cjs');
+const { createCrm } = require('./lib/crm.cjs');
+
+// Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
+const crm = createCrm(createSalesforceClient());
 
 const env = {
   server: (process.env.TABLEAU_SERVER || '').replace(/\/+$/, ''),
@@ -74,16 +79,36 @@ app.use((req, res, next) => {
 });
 
 // ── Session helpers ─────────────────────────────────────────────────────────
-// Demo upgrade: a Standard client can "buy" Premium during the demo. It lives only in this portal session
-// (signed cookie), so signing out or switching users resets it. While upgraded, the tenant is treated as
-// Premium and the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+// A client's tier comes from their Salesforce Account (Apex_Subscription_Tier__c) when Salesforce is configured,
+// else from tenants.json. Demo upgrade: a Standard client "buys" Premium during the demo — recorded in Salesforce
+// as a Closed Won Opportunity + tier change, and flagged in this portal session (signed cookie); signing out or
+// switching users reverts both. While Premium, the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+function crmTier(user) {
+  return user ? crm.tierFor(user.tenantId) : null;
+}
 function withUpgrade(user, s) {
-  if (!user || !s?.upgraded) return user;
-  return { ...user, attributes: { ...user.attributes, 'subscription tier': ['Premium'] }, upgradedInSession: true };
+  if (!user) return user;
+  const tier = s?.upgraded ? 'premium' : crmTier(user);
+  if (!tier) return user;
+  return { ...user, attributes: { ...user.attributes, 'subscription tier': [tier === 'premium' ? 'Premium' : 'Standard'] }, upgradedInSession: Boolean(s?.upgraded), crmTier: tier };
 }
 function tenantForSession(user) {
   const t = store.tenantFor(user);
-  return t && user?.upgradedInSession ? { ...t, tier: 'premium', upgradedInSession: true } : t;
+  if (!t) return t;
+  if (user?.upgradedInSession) return { ...t, tier: 'premium', upgradedInSession: true };
+  return user?.crmTier ? { ...t, tier: user.crmTier } : t;
+}
+// Sign-out / user switch: undo this session's demo upgrade in Salesforce too.
+async function revertSessionUpgrade(s) {
+  if (!s?.upgraded) return;
+  const tenant = store.tenantFor(store.findUserById(s.uid));
+  if (!tenant || !crm.enabled) return;
+  try {
+    await crm.revertUpgrade(tenant, s.upgradeOpp);
+    console.log(`→ demo upgrade reverted in Salesforce: ${tenant.clientName} → Standard`);
+  } catch (e) {
+    console.warn(`⚠ could not revert ${tenant.clientName}'s upgrade in Salesforce: ${e.message}`);
+  }
 }
 
 function currentUser(req) {
@@ -186,6 +211,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
   const user = store.findUserById(req.body?.userId);
   if (!user) return res.status(404).json({ error: 'Unknown user' });
 
+  revertSessionUpgrade(jar.read(req, SESSION_COOKIE)); // switching users resets the previous demo upgrade
   startSession(res, user);
   pulse.forgetSession(user); // a fresh sign-in never inherits an earlier session's (e.g. upgraded) attributes
   console.log(`→ signed in ${user.id} (${user.email})`);
@@ -202,22 +228,46 @@ app.post('/api/auth/login', throttle, (req, res) => {
   }
 });
 
-app.post('/api/auth/logout', (req, res) => {
+app.post('/api/auth/logout', async (req, res) => {
   const user = currentUser(req);
   if (user) pulse.forgetSession(user); // next Tableau session uses the stored (non-upgraded) attributes
+  await revertSessionUpgrade(jar.read(req, SESSION_COOKIE));
   jar.clear(res, SESSION_COOKIE);
   res.json({ ok: true });
 });
 
 // Demo checkout: upgrade this session to Premium (reset by signing out / switching users).
-app.post('/api/upgrade', requireUser, (req, res) => {
+app.post('/api/upgrade', requireUser, async (req, res) => {
   if (req.tenant.tier === 'premium') return res.json({ ok: true, already: true });
+  const price = store.content.benchmarks?.price || '';
+  // Record it in Apex's CRM: Closed Won Opportunity + Account tier → Premium. If Salesforce is unreachable the
+  // demo still upgrades this session, and says so.
+  let salesforce = null;
+  if (crm.enabled) {
+    try {
+      salesforce = await crm.recordUpgrade(req.user, req.tenant, { price });
+    } catch (e) {
+      console.warn(`⚠ Salesforce upgrade not recorded: ${e.message}`);
+      salesforce = { error: 'The upgrade worked, but it could not be recorded in Salesforce.' };
+    }
+  }
   const s = jar.read(req, SESSION_COOKIE);
-  jar.write(res, SESSION_COOKIE, { ...s, upgraded: true }, SESSION_TTL_MS);
+  jar.write(res, SESSION_COOKIE, { ...s, upgraded: true, upgradeOpp: salesforce?.opportunityId || null }, SESSION_TTL_MS);
   pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
-  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price: store.content.benchmarks?.price || '' });
-  console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium for this session`);
-  res.json({ ok: true });
+  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price, opportunity: salesforce?.opportunityId || null });
+  console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium${salesforce?.opportunityId ? ` · Salesforce Opportunity ${salesforce.opportunityId}` : ''}`);
+  res.json({ ok: true, salesforce });
+});
+
+app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
+// Presenter dock: this client's Salesforce Account and the records the portal wrote to it.
+app.get('/api/crm/records', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.json({ enabled: false });
+  try {
+    res.json({ enabled: true, ...(await crm.recordsFor(req.tenant)) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
 });
 
 // ── Customer context ────────────────────────────────────────────────────────
@@ -378,22 +428,35 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
 // Demo: messages are kept in memory and written to the server log for the Apex team.
 const messages = [];
 const TOPICS = ['General question', 'Engagement update', 'Data or dashboard question', 'Schedule a review', 'Premium subscription', 'Billing'];
-app.post('/api/messages', requireUser, (req, res) => {
+// A client's message becomes a follow-up Task on their Salesforce Account for the Apex account team.
+app.post('/api/messages', requireUser, async (req, res) => {
   const topic = TOPICS.includes(req.body?.topic) ? req.body.topic : 'General question';
   const body = String(req.body?.message || '').trim().slice(0, 2000);
   if (!body) return res.status(400).json({ error: 'Please enter a message.' });
   const ref = `APX-${Date.now().toString(36).toUpperCase().slice(-6)}`;
   const to = req.tenant.accountManager || null;
-  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, to: to?.email || null, topic, body };
+  let salesforce = null;
+  if (crm.enabled) {
+    try {
+      salesforce = await crm.createTask(req.tenant, {
+        subject: `${topic} — ${req.user.name} (${ref})`,
+        description: `From ${req.user.name} <${req.user.email}> via the Apex client portal.${to ? ` Account manager: ${to.name}.` : ''}\n\n${body}`,
+        dueInDays: topic === 'Schedule a review' ? 1 : 2
+      });
+    } catch (e) {
+      console.warn(`⚠ Salesforce task not created: ${e.message}`);
+    }
+  }
+  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, to: to?.email || null, topic, body, task: salesforce?.taskId || null };
   messages.push(entry);
   console.log('✉ message for Apex team', entry);
-  activity.record(req.user, req.tenant, 'message', { topic, to: to?.email || '', ref });
-  res.json({ ok: true, ref, topic, to });
+  activity.record(req.user, req.tenant, 'message', { topic, to: to?.email || '', ref, task: salesforce?.taskId || null });
+  res.json({ ok: true, ref, topic, to, salesforce: salesforce ? { taskId: salesforce.taskId } : null });
 });
 app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TOPICS }));
 
 // ── Portal capabilities (library, subscriptions, attention, links, authoring, feeds, activity) ──
-const features = registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret });
+const features = registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret, crm });
 
 // ── React build (production) — BrowserRouter fallback to index.html ─────────
 const DIST = path.join(__dirname, '..', 'dist');

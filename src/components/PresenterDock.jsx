@@ -11,7 +11,8 @@ import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 const TABS = [
   ['switch', 'Switch account'],
   ['talk', 'Talk track'],
-  ['hood', 'Under the hood']
+  ['hood', 'Under the hood'],
+  ['crm', 'Salesforce']
 ];
 
 export default function PresenterDock() {
@@ -90,6 +91,7 @@ export default function PresenterDock() {
           {tab === 'switch' && <SwitchTab personas={personas} currentId={me.user.id} onPick={go} />}
           {tab === 'talk' && <TalkTab tenant={t} />}
           {tab === 'hood' && <HoodTab me={me} token={token} />}
+          {tab === 'crm' && <CrmTab me={me} />}
         </div>
       </section>
     </>
@@ -192,6 +194,70 @@ function HoodTab({ me, token }) {
           : 'Standard only — no add-on entitlements.'}
       </p>
     </>
+  );
+}
+
+/** Apex's side of the story: the client's Salesforce Account and what the portal just wrote to it. */
+function CrmTab({ me }) {
+  const [d, setD] = useState(null);
+  const load = () => {
+    setD(null);
+    api('/api/crm/records')
+      .then(setD)
+      .catch((e) => setD({ error: e.message }));
+  };
+  useEffect(load, [me.user.id, me.tenant.tier]);
+  if (!d) return <p className="muted">Loading from Salesforce…</p>;
+  if (d.error) return <div className="error-msg">{d.error}</div>;
+  if (!d.enabled) return <p className="muted">Salesforce isn’t connected (set SF_ORG_ALIAS, or SF_CLIENT_ID / SF_CLIENT_SECRET / SF_LOGIN_URL).</p>;
+  const money = (n) => (n == null ? '' : `$${Number(n).toLocaleString('en-US')}`);
+  return (
+    <div className="crm-tab">
+      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+        Apex’s CRM is the system of record: the client’s tier comes from this Account. Upgrades land as Closed Won Opportunities;
+        messages and “Schedule with Apex” as Tasks for the account team.
+      </p>
+      <div className="crm-card">
+        <div>
+          <b>{d.account.name}</b>
+          <span>
+            Account · Apex Subscription Tier: <span className={`mini-tier ${String(d.account.tier).toLowerCase()}`}>{d.account.tier}</span> · Owner {d.account.owner}
+          </span>
+        </div>
+        <a className="btn btn-ghost btn-sm" href={d.account.url} target="_blank" rel="noreferrer">
+          Open ↗
+        </a>
+      </div>
+      <h4>Upgrade opportunities</h4>
+      {d.opportunities.length ? (
+        d.opportunities.map((o) => (
+          <a key={o.id} className="crm-row" href={o.url} target="_blank" rel="noreferrer">
+            <span>{o.name}</span>
+            <span className="muted">
+              {o.stage} · {money(o.amount)} · {o.closeDate}
+            </span>
+          </a>
+        ))
+      ) : (
+        <p className="muted">None yet — upgrade a Standard client to create one.</p>
+      )}
+      <h4>Follow-up tasks</h4>
+      {d.tasks.length ? (
+        d.tasks.map((t) => (
+          <a key={t.id} className="crm-row" href={t.url} target="_blank" rel="noreferrer">
+            <span>{t.subject}</span>
+            <span className="muted">
+              {t.status} · due {t.due} · {t.owner}
+            </span>
+          </a>
+        ))
+      ) : (
+        <p className="muted">None yet — use Contact Apex or Schedule with Apex.</p>
+      )}
+      <button className="btn btn-ghost btn-sm" style={{ marginTop: 10 }} onClick={load}>
+        Refresh
+      </button>
+    </div>
   );
 }
 

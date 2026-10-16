@@ -13,6 +13,7 @@ const TECH = {
   rls: { label: 'Data security', color: '#1f8a5b', note: 'Row-level security: user attributes in the JWT and a filter on the published data source decide which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
+  salesforce: { label: 'Salesforce CRM', color: '#0b5cab', note: 'Apex’s Sales Cloud org is the system of record: client tier on the Account, upgrades as Opportunities, follow-ups as Tasks.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
   author: { label: 'Web authoring', color: '#c0398a', note: 'Tableau’s editor embedded on the governed data source.' },
@@ -323,11 +324,14 @@ const FEATURES = [
   F('upgrade', 'money', 'Live upgrade to Premium', () => ({
     title: 'Upgrade to Premium — live',
     where: 'What’s included → Confirm upgrade',
-    do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens.',
-    say: 'Clients upgrade themselves, right inside the experience.',
-    money: 'A Standard client becomes Premium in one click ($5/month in this demo): benchmarks, their own Pulse goals and build-your-own reports. Resets when you sign out.',
-    tech: ['portal', 'jwt'],
-    ask: [['What changed when they upgraded?', 'The session became Premium on the server; the next Tableau token carries subscription tier = Premium. Sign out to reset.']]
+    do: 'Confirm upgrade: the tile unlocks, the badge turns Premium and Industry Benchmarks opens. Then open Presenter → Salesforce: the new Closed Won Opportunity is on the client’s Account, and the Account’s tier is Premium — click Open ↗ to show it in Salesforce.',
+    say: 'Clients upgrade themselves, right inside the experience — and it’s booked revenue in Salesforce the moment they click.',
+    money: 'A Standard client becomes Premium in one click ($5/month in this demo): benchmarks, their own Pulse goals and build-your-own reports. The account team sees it as a Closed Won Opportunity. Resets when you sign out.',
+    tech: ['portal', 'salesforce', 'jwt'],
+    ask: [
+      ['What changed when they upgraded?', 'Salesforce got a Closed Won Opportunity ($60/yr) and the Account’s Apex Subscription Tier became Premium; the portal reads the tier from that Account, so the next Tableau token carries subscription tier = Premium. Signing out deletes the demo Opportunity and puts the Account back on Standard.'],
+      ['Where does a client’s plan come from?', 'Their Salesforce Account (Apex Subscription Tier) — change it in Salesforce and the portal follows within a minute.']
+    ]
   }), onlyStandard),
   F('benchmarks', 'money', 'Industry Benchmarks page', (p) => ({
     title: 'Industry Benchmarks',
@@ -351,11 +355,11 @@ const FEATURES = [
   F('contact', 'money', 'Contact your account manager', () => ({
     title: 'Talk to Apex',
     where: 'Contact Apex',
-    do: 'Open Contact Apex: the client’s account manager, with a topic and message.',
-    say: 'Your Apex team is one click away.',
-    money: 'Every insight in the portal can start a paid conversation.',
-    tech: ['portal'],
-    ask: [['Is this sent anywhere?', 'In the demo it’s logged on the server with a reference number.']]
+    do: 'Open Contact Apex (or Schedule with Apex on any selection): pick a topic, send. Then Presenter → Salesforce: it’s a Task on the client’s Account for the account team, with the reference number.',
+    say: 'Your Apex team is one click away — and the request lands in their Salesforce, not an inbox.',
+    money: 'Every insight in the portal can start a paid conversation, and it’s tracked in Apex’s CRM.',
+    tech: ['portal', 'salesforce'],
+    ask: [['Is this sent anywhere?', 'Yes — it creates a Task on the client’s Salesforce Account, assigned to the account owner (due tomorrow for review requests), with the message and a reference number.']]
   })),
   F('activity', 'money', 'Activity log', () => ({
     title: 'See how clients use the portal',
