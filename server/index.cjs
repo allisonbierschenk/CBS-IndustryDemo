@@ -274,6 +274,23 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
 
 app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
 
+// Presenter: put the whole demo back to its starting point (Salesforce, Data 360 on its next refresh, Pulse goals).
+app.post('/api/demo/reset', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    const b = store.content.crm?.baseline || {};
+    const tiers = Object.fromEntries(store.tenants.map((t) => [t.id, t.tier === 'premium' ? 'Premium' : 'Standard']));
+    const sfOut = await crm.resetDemo({ baselineOpportunities: b.opportunities || [], respondedUsers: b.respondedUsers || [], tiers });
+    const goals = await features.resetAllGoals();
+    for (const u of store.users) pulse.forgetSession(u); // next Tableau session carries the reset tier
+    d360.requestSync('demo reset', 1000);
+    console.log('→ demo reset', { ...sfOut, goals });
+    res.json({ ok: true, ...sfOut, goals });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
 // ── Apex client growth (Apex staff, e.g. Alex Morgan) — Data 360 ────────────
 // Harmonized in Data 360: Premium upgrades (CRM Opportunities), portal engagement (Apex Portal Activity) and launch
 // campaign reach (Campaign Members), one row per client; "next best upsell" = engaged Standard clients the campaign reached.

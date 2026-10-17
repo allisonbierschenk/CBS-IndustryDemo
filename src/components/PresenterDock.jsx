@@ -105,6 +105,7 @@ function SwitchTab({ personas, currentId, onPick }) {
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
         with the new user's email as <span className="code-inline">sub</span>.
       </p>
+      <ResetDemo />
       <ResetGoals />
       <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact />
     </>
@@ -267,6 +268,41 @@ function CrmTab({ me }) {
         </button>
         {me.features?.seatRoster && <ResetSeats onDone={load} />}
       </div>
+    </div>
+  );
+}
+
+/** Start-over button: the whole demo back to its baseline, in Salesforce, Data 360 and Tableau. */
+function ResetDemo() {
+  const { me, reload } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const reset = async () => {
+    if (
+      !window.confirm(
+        'Reset the demo?\n\n• Northstar back to Standard, all Premium seats removed\n• Upgrades made during demos deleted (Data 360 follows on its next refresh)\n• Campaign responses back to the start (Dana: Clicked)\n• Follow-up tasks, clients’ own goal metrics and live portal activity removed'
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      const r = await api('/api/demo/reset', { method: 'POST' });
+      await reload();
+      toast(`Demo reset — ${r.opportunities} upgrade${r.opportunities === 1 ? '' : 's'}, ${r.seats} seat${r.seats === 1 ? '' : 's'}, ${r.tasks} task${r.tasks === 1 ? '' : 's'}, ${r.goals} goal${r.goals === 1 ? '' : 's'} removed`);
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="dock-reset is-primary">
+      <span>
+        <b>Start over</b> Back to the starting point in Salesforce, Data 360 and Tableau.
+      </span>
+      <button className="btn btn-dark btn-sm" onClick={reset} disabled={busy}>
+        {busy ? 'Resetting…' : 'Reset demo'}
+      </button>
     </div>
   );
 }

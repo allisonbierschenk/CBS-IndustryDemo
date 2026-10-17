@@ -251,6 +251,49 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     return rows.map((o) => ({ id: o.Id, name: o.Name, clientId: o.Account?.Apex_Client_Id__c, client: o.Account?.Name, amount: Number(o.Amount || 0), seats: Number(o.Apex_Premium_Seats__c || 0), closed: o.CloseDate, campaign: Boolean(o.CampaignId) }));
   }
 
+  /** DELETE up to 200 records per call (composite). */
+  async function removeAll(ids) {
+    let n = 0;
+    for (let i = 0; i < ids.length; i += 200) {
+      const r = await sf.request('DELETE', `/composite/sobjects?allOrNone=false&ids=${ids.slice(i, i + 200).join(',')}`);
+      n += (r || []).filter((x) => x.success).length;
+    }
+    return n;
+  }
+  async function patchAll(type, records) {
+    for (let i = 0; i < records.length; i += 200) {
+      await sf.request('PATCH', '/composite/sobjects', { allOrNone: false, records: records.slice(i, i + 200).map((r) => ({ attributes: { type }, ...r })) });
+    }
+    return records.length;
+  }
+
+  /** Presenter "Reset demo": back to the baseline — tiers, no seats, only baseline upgrades, campaign funnel as it was,
+   *  no portal Tasks, no live (non-seeded) portal activity. Opportunities etc. leave Data 360 on its next refresh. */
+  async function resetDemo({ baselineOpportunities = [], respondedUsers = [], tiers = {} }) {
+    const out = {};
+    const seated = await sf.query('SELECT Id FROM Contact WHERE Apex_Premium_Seat__c = true');
+    out.seats = await patchAll('Contact', seated.map((c) => ({ id: c.Id, Apex_Premium_Seat__c: false })));
+    seats.clear();
+    const keep = new Set(baselineOpportunities);
+    const opps = (await sf.query('SELECT Id FROM Opportunity WHERE Apex_Portal_Upgrade__c = true')).filter((o) => !keep.has(o.Id));
+    out.opportunities = await removeAll(opps.map((o) => o.Id));
+    const accts = await sf.query('SELECT Id, Apex_Client_Id__c, Apex_Subscription_Tier__c FROM Account WHERE Apex_Client_Id__c != null');
+    const tierFix = accts.filter((a) => tiers[a.Apex_Client_Id__c] && a.Apex_Subscription_Tier__c !== tiers[a.Apex_Client_Id__c]);
+    out.tiers = await patchAll('Account', tierFix.map((a) => ({ id: a.Id, Apex_Subscription_Tier__c: tiers[a.Apex_Client_Id__c] })));
+    for (const a of accts) if (accounts.get(a.Apex_Client_Id__c)) accounts.get(a.Apex_Client_Id__c).tier = String(tiers[a.Apex_Client_Id__c] || a.Apex_Subscription_Tier__c).toLowerCase();
+    if (campaignId) {
+      const responded = await sf.query(`SELECT Id, Contact.Apex_Portal_User_Id__c FROM CampaignMember WHERE CampaignId = '${campaignId}' AND Status = 'Responded'`);
+      const undo = responded.filter((m) => !respondedUsers.includes(m.Contact?.Apex_Portal_User_Id__c));
+      out.campaignResponses = await patchAll('CampaignMember', undo.map((m) => ({ id: m.Id, Status: 'Clicked' })));
+    }
+    const tasks = await sf.query("SELECT Id FROM Task WHERE What.Type = 'Account' AND (Subject LIKE '%(APX-%' OR Subject LIKE 'Upsell Premium%')");
+    out.tasks = await removeAll(tasks.map((t) => t.Id));
+    queue.length = 0;
+    const live = await sf.query("SELECT Id FROM Apex_Portal_Activity__c WHERE (NOT Event_Id__c LIKE 'seed-%')");
+    out.activity = await removeAll(live.map((x) => x.Id));
+    return out;
+  }
+
   /** Presenter view: the client's Account and the records the portal wrote to it, live from Salesforce. */
   async function recordsFor(tenant) {
     const a = requireAccount(tenant);
@@ -271,7 +314,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     };
   }
 
-  return { enabled: sf.enabled, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
+  return { enabled: sf.enabled, resetDemo, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
 }
 
 module.exports = { createCrm };
