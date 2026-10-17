@@ -102,8 +102,15 @@ function createData360(sf, { log = console } = {}) {
       const landed = states.every((d) => d && d.lastRunStatus !== 'PENDING' && d.lastRunStatus !== 'PROCESSING' && Date.parse(d.lastRefreshDate || 0) >= startedAt - 60000);
       if (!landed) return;
       clearInterval(watching);
-      const r = await Promise.all(INSIGHTS.map((ci) => sf.request('POST', `/ssot/calculated-insights/${ci}/actions/run`, {}).then(() => ci, () => null)));
-      log.log(`↻ Data 360 streams landed — recomputing insights: ${r.filter(Boolean).join(', ')}`);
+      const r = await Promise.all(
+        INSIGHTS.map((ci) =>
+          sf.request('POST', `/ssot/calculated-insights/${ci}/actions/run`, {}).then(
+            () => `${ci} ✓`,
+            (e) => (/ALREADY_IN_PROCESS/.test(e.message) ? `${ci} (already running)` : `${ci} ✗ ${e.message.replace(/^.*failed \(HTTP/, '(HTTP').slice(0, 140)}`)
+          )
+        )
+      );
+      log.log(`↻ Data 360 streams landed — recomputing insights: ${r.join(' · ')}`);
     }, 60000);
     watching.unref?.();
   }
