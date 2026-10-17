@@ -62,29 +62,32 @@ const SCENES = [
     captions: ['Tableau Pulse Agent', 'Einstein Trust Layer', 'Included with Tableau+ · unmetered']
   },
   {
-    time: '3:00–4:15',
+    time: '3:00–4:25',
     title: 'The decision that changes for Apex',
     as: 'Alex Morgan · Apex portfolio partner',
     click: [
+      'Optional (5 seconds): a simple “Without Data 360” graphic — three boxes (Portal usage · Salesforce revenue · Marketing response) with a spreadsheet in the middle. See “Without vs. with Data 360” below.',
       'Switch user → Alex Morgan → Client growth: point at “From the launch campaign” (Northstar’s $1,200, marked syncing if Data 360 is still processing).',
+      'Switch to the Data Cloud app → Data Explorer → Calculated Insight “Apex Client Premium ARR”: one row per client — the same numbers, in Data 360 itself. (Optional, 3 seconds: Data Streams list — Apex Portal Activity, Apex Opportunity, Apex Campaign Member.)',
       'Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → show a Task on the Account.',
       'Agent → “Data 360 · Premium revenue” → “How much Premium revenue have we booked this year, and which clients drove it?”'
     ],
     say: [
-      'Now Apex’s side. This is Alex, a portfolio partner. Before, three systems knew three different things: the portal knew usage, Salesforce knew revenue, the campaign knew reach. Nobody could connect them.',
-      'Data 360 connects them — one view per client. So Alex can see what that one email earned: Northstar’s $1,200, already here.',
+      'Now Apex’s side. This is Alex, a portfolio partner, and Alex has one question: who do we call next?',
+      'Without Data 360, that answer lives in three places. Who’s using the portal is in the portal’s logs. Who bought is in Salesforce. Who opened the campaign is in Marketing. Someone exports all three every month, stitches them together in a spreadsheet — and by the time it’s done, the moment has passed.',
+      'With Data 360, all three land in one place, per client, all the time. That’s this page: what the email earned — Northstar’s $1,200, already here — and who to call next.',
+      'And this is Data 360 itself: one model, and Data 360 calculates every client’s Premium revenue once — so the portal, Tableau and the AI all use the same numbers.',
       'And here’s the decision that changes: who do we call next? Meridian and Helix are engaged, the campaign reached them, and they’re still on Standard. One click — and their reps have it in Salesforce, with the numbers to make the call.',
       'Apex’s leaders ask the same AI the same way: how much Premium revenue have we booked, and who drove it? Tableau answers — from Data 360.'
     ],
-    captions: ['Data 360 · streams → data model → calculated insights', 'Activated to Salesforce · Tasks', 'Tableau Pulse on Data 360']
+    captions: ['Without Data 360: 3 systems · 1 spreadsheet · monthly', 'Data 360 · one model per client · always current', 'Data 360 · Data Explorer', 'Activated to Salesforce · Tasks', 'Tableau Pulse on Data 360']
   },
   {
-    time: '4:15–5:00',
+    time: '4:25–5:00',
     title: 'The result — and why it scales',
     as: 'Closing frame',
     click: ['The “everyone wins” graphic (The story, top of /guide) — or back to Client growth.'],
     say: [
-      'Here’s what changed in five minutes.',
       'Apex’s clients got proof of value, peer benchmarks and an AI analyst — at a price they can plan for.',
       'Apex got booked revenue, measured campaign return, and its next deals on reps’ lists — without adding headcount. Every 100 seats is $6,000 a year of new recurring revenue, from software it already pays for.',
       'And this isn’t one firm. Every Tableau customer with a client portal can do this — Salesforce, Data 360 and Tableau, working as one. An account team could pitch it tomorrow.',
@@ -97,7 +100,7 @@ const SCENES = [
 
 const PREP = [
   ['Reset', 'Presenter (⌥P) → Switch account → Reset demo. Every take starts from the same baseline.'],
-  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console on the Northstar Enterprises Account · Salesforce Campaigns (the launch campaign).'],
+  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console on the Northstar Enterprises Account · Salesforce Campaigns (the launch campaign) · Data Cloud app → Data Explorer, Calculated Insight “Apex Client Premium ARR” already selected.'],
   ['Warm up', 'Sign in as Dana, Sam and Alex once before recording so Needs attention and the Agent are cached and answer fast.'],
   ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.']
 ];
@@ -109,6 +112,7 @@ const TIPS = [
   ['Say value, show technology', 'Don’t name the products out loud — add them as on-screen captions (below). Judges credit every name they see without costing you seconds.'],
   ['Land the numbers', '141 people · 5 clients · 20 seats · $5/user · $1,200/yr · every 100 seats = $6,000/yr. Pause a beat after each.'],
   ['The closing line', 'Record the last two sentences until they’re perfect — it’s what judges remember.'],
+  ['Data 360 screen timing', 'The portal starts the Data 360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
   ['Live final backup', 'Keep a screen recording of Scenes 4–6 in case a live system is slow on the day.']
 ];
 
@@ -198,6 +202,40 @@ export default function CompetitionGuide() {
               </li>
             ))}
           </ol>
+
+          <section className="comp-block comp-d360">
+            <h2>Without vs. with Data 360 — the role in plain words</h2>
+            <p className="muted">Use this to explain Data 360 to anyone — including yourself before you record. The question is Alex’s: “Who do we call next, and why?”</p>
+            <div className="comp-vs">
+              <div className="is-without">
+                <b>Without Data 360</b>
+                <ul>
+                  <li>
+                    <i>Usage</i> is in the portal’s logs
+                  </li>
+                  <li>
+                    <i>Revenue</i> is in Salesforce
+                  </li>
+                  <li>
+                    <i>Campaign response</i> is in Marketing
+                  </li>
+                </ul>
+                <p>Someone exports all three, stitches them in a spreadsheet once a month. It’s stale on arrival, nobody trusts the numbers, and the AI can’t answer across them — no single place has them all.</p>
+              </div>
+              <div className="is-with">
+                <b>With Data 360</b>
+                <ul>
+                  <li>All three land in one model per client — continuously</li>
+                  <li>Data 360 calculates the answers once: Premium revenue, engagement, campaign reach</li>
+                  <li>Everyone uses the same numbers: the portal, Tableau, the Pulse Agent</li>
+                  <li>And it acts: the next-best upsell becomes a Task for the rep in Salesforce</li>
+                </ul>
+                <p>The decision — who to call next — is made the day the signal appears, not at month-end.</p>
+              </div>
+            </div>
+            <h3>One-line version</h3>
+            <p className="comp-oneliner">“Salesforce knows who bought. The portal knows who’s using it. Marketing knows who was reached. Data 360 is the only place that knows all three — so it’s the only place that can tell you who to call next.”</p>
+          </section>
 
           <section className="comp-block">
             <h2>Caption sheet (for editing)</h2>

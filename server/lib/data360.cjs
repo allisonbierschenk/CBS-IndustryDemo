@@ -81,11 +81,33 @@ function createData360(sf, { log = console } = {}) {
     if (!sf.enabled) return;
     clearTimeout(timer);
     timer = setTimeout(() => {
-      sync().then((r) => log.log(`↻ Data 360 sync started (${reason}): ${r.filter((x) => x.ok).map((x) => x.stream).join(', ') || 'none'}`));
+      const startedAt = Date.now();
+      sync().then((r) => {
+        log.log(`↻ Data 360 sync started (${reason}): ${r.filter((x) => x.ok).map((x) => x.stream).join(', ') || 'none'}`);
+        watchThenRecompute(startedAt);
+      });
       activityDirty = false;
     }, delayMs);
     timer.unref?.();
   }
+  // Once the streams have landed, recompute the calculated insights now instead of waiting for their hourly schedule,
+  // so Data 360's own screens (Data Explorer) match the portal within minutes.
+  let watching = null;
+  function watchThenRecompute(startedAt) {
+    clearInterval(watching);
+    const deadline = startedAt + 45 * 60 * 1000;
+    watching = setInterval(async () => {
+      if (Date.now() > deadline) return clearInterval(watching);
+      const states = await Promise.all(STREAMS.map((n) => sf.request('GET', `/ssot/data-streams/${n}`).catch(() => null)));
+      const landed = states.every((d) => d && d.lastRunStatus !== 'PENDING' && d.lastRunStatus !== 'PROCESSING' && Date.parse(d.lastRefreshDate || 0) >= startedAt - 60000);
+      if (!landed) return;
+      clearInterval(watching);
+      const r = await Promise.all(INSIGHTS.map((ci) => sf.request('POST', `/ssot/calculated-insights/${ci}/actions/run`, {}).then(() => ci, () => null)));
+      log.log(`↻ Data 360 streams landed — recomputing insights: ${r.filter(Boolean).join(', ')}`);
+    }, 60000);
+    watching.unref?.();
+  }
+
   // Ordinary portal activity: refresh at most every 15 minutes while there's something new.
   const markActivity = () => (activityDirty = true);
   if (sf.enabled) setInterval(() => activityDirty && requestSync('portal activity', 1000), 15 * 60 * 1000).unref();
