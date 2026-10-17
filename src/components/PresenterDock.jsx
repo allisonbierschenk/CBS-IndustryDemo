@@ -78,6 +78,9 @@ export default function PresenterDock() {
             <a href="/guide" target="_blank" rel="noreferrer" className="dock-guide">
               Demo guide ↗
             </a>
+            <a href="/guide/competition" target="_blank" rel="noreferrer" className="dock-guide">
+              5-min script ↗
+            </a>
           </div>
         </div>
         <div className="tabs" role="tablist">

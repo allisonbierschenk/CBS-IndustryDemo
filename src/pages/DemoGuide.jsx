@@ -550,6 +550,10 @@ export default function DemoGuide() {
             <div className="kicker">Presenter guide</div>
             <h1>Share live proof of value — and get paid for it</h1>
             <p className="lead">A step-by-step script for demoing the Apex client portal — even if you’ve never seen it.</p>
+            <Link className="btn btn-lime btn-sm comp-link" to="/guide/competition">
+              <Icon name="star" />
+              Competition cut: the 5-minute video script
+            </Link>
             <ol className="guide-how">
               <li>
                 <b>Pick a person.</b> Each one is a different client with different data and plan.
