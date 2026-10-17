@@ -17,29 +17,33 @@ const SCENES = [
     captions: ['Apex Consulting · Salesforce + Tableau customer']
   },
   {
-    time: '0:25–0:50',
+    time: '0:25–0:45',
     title: 'The problem',
     as: 'Salesforce',
     click: ['Salesforce → Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.', 'Show the 141 Campaign Members and the Sent / Opened / Clicked funnel.'],
     say: [
-      'Apex had two problems. Its clients couldn’t see the value Apex delivers. And Apex couldn’t tell which clients would pay for more — or what its marketing actually earned.',
       'So Apex upgraded its portal, and sent one email to 141 people across its five clients: you can now ask your data anything, and see how you compare to your peers.'
     ],
     captions: ['Salesforce Marketing · Campaign']
   },
   {
-    time: '0:50–1:35',
+    time: '0:45–1:40',
     title: 'The client’s decision',
     as: 'Dana Whitfield · Northstar (Standard)',
-    click: ['Sign in as Dana → Home: point at Needs attention (Operational Transformation off track).', 'Hover the locked Agent icon on a Take action row.', 'Show the blurred Industry Benchmarks tile.'],
+    click: [
+      'Sign in as Dana → Home: point at Needs attention (Operational Transformation off track).',
+      'Open Value Intelligence — the embedded Tableau dashboard: Northstar’s numbers only. Scroll to the Industry Benchmarks tile, blurred and locked inside the dashboard.',
+      'Hover the locked Agent icon (on Home or in the nav).'
+    ],
     say: [
-      'This is Dana, VP of Operations at Northstar. She logs in and doesn’t have to go looking — the portal tells her Operational Transformation is off track, why, and what was expected.',
-      'Now she wants to ask why — and know how Northstar compares to its peers. That’s Premium. And the decision she’s making is simple: is this worth paying for?'
+      'This is Dana, VP of Operations at Northstar. Without going looking, the portal tells her Operational Transformation is off track — and why.',
+      'Here’s her own dashboard, inside Apex’s portal — Northstar’s numbers and nobody else’s. And right there in it, the benchmarks she can’t see yet.',
+      'She wants to ask why, and know how Northstar compares to its peers. That’s Premium. Her decision: is this worth paying for?'
     ],
     captions: ['Tableau Pulse · Needs attention', 'Tableau Embedded · row-level security']
   },
   {
-    time: '1:35–2:20',
+    time: '1:40–2:20',
     title: 'One click, booked revenue',
     as: 'Dana → Salesforce',
     click: ['Agent (locked) → Upgrade your team → All managers (20) → $1,200/yr → Upgrade 20 people.', 'Switch to Salesforce → the bell 🔔 “Northstar Enterprises bought 20 Premium seats — +$1,200/yr” → click it → the Closed Won Opportunity (20 seats, Dana as decision maker, campaign).'],
@@ -51,22 +55,21 @@ const SCENES = [
     captions: ['Salesforce Sales Cloud · Opportunity', 'Campaign attribution', 'Salesforce notification']
   },
   {
-    time: '2:20–3:00',
+    time: '2:20–2:55',
     title: 'The client gets the value — at a predictable cost',
     as: 'Sam Patel · Northstar manager (now Premium)',
     click: ['Switch user → Sam Patel → Agent → “Which engagement is furthest behind plan, and why?” → the answer.'],
     say: [
       'Sam is one of those managers. He just got an analyst — plain-English answers from Northstar’s own governed numbers.',
-      'And this is why Apex can offer it to every client: the AI is included with Tableau+ and unmetered. No per-question bill. A predictable cost for Apex — and a predictable price for its clients.'
+      'And Apex can offer it to every client: the AI is included with Tableau+ and unmetered — a predictable cost for Apex, and a predictable price for its clients.'
     ],
     captions: ['Tableau Pulse Agent', 'Einstein Trust Layer', 'Included with Tableau+ · unmetered']
   },
   {
-    time: '3:00–4:25',
+    time: '2:55–4:25',
     title: 'The decision that changes for Apex',
     as: 'Alex Morgan · Apex portfolio partner',
     click: [
-      'Optional (5 seconds): a simple “Without Data 360” graphic — three boxes (Portal usage · Salesforce revenue · Marketing response) with a spreadsheet in the middle. See “Without vs. with Data 360” below.',
       'Switch user → Alex Morgan → Client growth: point at “From the launch campaign” (Northstar’s $1,200, marked syncing if Data 360 is still processing).',
       'Switch to the Data Cloud app → Data Explorer → Calculated Insight “Apex Client Premium ARR”: one row per client — the same numbers, in Data 360 itself. (Optional, 3 seconds: Data Streams list — Apex Portal Activity, Apex Opportunity, Apex Campaign Member.)',
       'Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → show a Task on the Account.',
@@ -78,7 +81,7 @@ const SCENES = [
       'With Data 360, all three land in one place, per client, all the time. That’s this page: what the email earned — Northstar’s $1,200, already here — and who to call next.',
       'And this is Data 360 itself: one model, and Data 360 calculates every client’s Premium revenue once — so the portal, Tableau and the AI all use the same numbers.',
       'And here’s the decision that changes: who do we call next? Meridian and Helix are engaged, the campaign reached them, and they’re still on Standard. One click — and their reps have it in Salesforce, with the numbers to make the call.',
-      'Apex’s leaders ask the same AI the same way: how much Premium revenue have we booked, and who drove it? Tableau answers — from Data 360.'
+      'And Apex’s leaders ask the same AI: how much Premium revenue have we booked, and who drove it? Answered from Data 360.'
     ],
     captions: ['Without Data 360: 3 systems · 1 spreadsheet · monthly', 'Data 360 · one model per client · always current', 'Data 360 · Data Explorer', 'Activated to Salesforce · Tasks', 'Tableau Pulse on Data 360']
   },
@@ -91,7 +94,7 @@ const SCENES = [
       'Apex’s clients got proof of value, peer benchmarks and an AI analyst — at a price they can plan for.',
       'Apex got booked revenue, measured campaign return, and its next deals on reps’ lists — without adding headcount. Every 100 seats is $6,000 a year of new recurring revenue, from software it already pays for.',
       'And this isn’t one firm. Every Tableau customer with a client portal can do this — Salesforce, Data 360 and Tableau, working as one. An account team could pitch it tomorrow.',
-      'One click by a client became revenue in Salesforce. Data 360 told Apex who to call next. And the AI behind it costs the same no matter how much it’s used.',
+      'One click became revenue in Salesforce. Data 360 told Apex who to call next. And the AI behind it costs the same however much it’s used.',
       'Apex’s portal isn’t a cost center anymore. It’s a revenue-generating machine.'
     ],
     captions: ['Salesforce · Data 360 · Tableau — one platform']
