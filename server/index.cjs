@@ -23,7 +23,10 @@ const { createData360 } = require('./lib/data360.cjs');
 const sfClient = createSalesforceClient();
 const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
 const d360 = createData360(sfClient); // Data 360 Query API — Apex's client growth view
-activity.onRecord((e, user, tenant) => crm.logActivity(e, user, tenant)); // portal engagement → Salesforce → Data 360
+activity.onRecord((e, user, tenant) => {
+  crm.logActivity(e, user, tenant); // portal engagement → Salesforce → Data 360
+  d360.markActivity();
+});
 
 const env = {
   server: (process.env.TABLEAU_SERVER || '').replace(/\/+$/, ''),
@@ -265,6 +268,7 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
   pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
   activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price, amount: (Number(String(price).replace(/[^0-9.]/g, '')) || 0) * 12, opportunity: salesforce?.opportunityId || null });
   console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium${salesforce?.opportunityId ? ` · Salesforce Opportunity ${salesforce.opportunityId}` : ''}`);
+  if (salesforce?.opportunityId) d360.requestSync('upgrade');
   res.json({ ok: true, salesforce });
 });
 
@@ -276,9 +280,18 @@ app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
 app.get('/api/apex/growth', requireUser, async (req, res) => {
   if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
   try {
-    const g = await d360.growth();
+    const [g, refreshedAt] = await Promise.all([d360.growth(), d360.upgradesRefreshedAt()]);
+    // Upgrades already in Salesforce but not yet processed by Data 360 — shown at once, labeled "syncing".
+    const fresh = await crm.upgradesSince(refreshedAt).catch(() => []);
     const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
     const arr = by(g.arr.rows);
+    for (const u of fresh) {
+      const a = (arr[u.clientId] = arr[u.clientId] || { client_id__c: u.clientId, premium_arr__c: 0, premium_seats__c: 0, upgrades__c: 0 });
+      a.premium_arr__c = Number(a.premium_arr__c || 0) + u.amount;
+      a.premium_seats__c = Number(a.premium_seats__c || 0) + u.seats;
+      a.upgrades__c = Number(a.upgrades__c || 0) + 1;
+      a.syncing = true;
+    }
     const eng = by(g.engagement.rows);
     const reach = by(g.reach.rows);
     const num = (v) => Number(v || 0);
@@ -299,6 +312,7 @@ app.get('/api/apex/growth', requireUser, async (req, res) => {
           arr: num(a.premium_arr__c),
           seats: num(a.premium_seats__c),
           upgrades: num(a.upgrades__c),
+          syncing: Boolean(a.syncing),
           events,
           people,
           recipients,
@@ -309,7 +323,10 @@ app.get('/api/apex/growth', requireUser, async (req, res) => {
       })
       .sort((x, y) => y.arr - x.arr || y.events - x.events);
     const campaignId = g.upgrades.find((u) => u.Campaign_Id__c)?.Campaign_Id__c || null;
-    const upgrades = g.upgrades.map((u) => ({ name: u.Name__c, client: u.Client_Name__c, amount: num(u.Amount__c), seats: num(u.Seats__c), closed: String(u.Close_Date__c || '').slice(0, 10), campaign: Boolean(u.Campaign_Id__c) }));
+    const upgrades = [
+      ...fresh.map((u) => ({ name: u.name, client: u.client, amount: u.amount, seats: u.seats, closed: String(u.closed || '').slice(0, 10), campaign: u.campaign, syncing: true })),
+      ...g.upgrades.map((u) => ({ name: u.Name__c, client: u.Client_Name__c, amount: num(u.Amount__c), seats: num(u.Seats__c), closed: String(u.Close_Date__c || '').slice(0, 10), campaign: Boolean(u.Campaign_Id__c) }))
+    ];
     res.json({
       sources: { arr: g.arr.from, engagement: g.engagement.from, reach: g.reach.from },
       totals: {
@@ -322,7 +339,9 @@ app.get('/api/apex/growth', requireUser, async (req, res) => {
       upsell: clients.filter((c) => c.upsell > 0).sort((a, b) => b.upsell - a.upsell),
       upgrades,
       campaign: store.content.crm?.campaign || null,
-      campaignId
+      campaignId,
+      syncing: fresh.length,
+      dataRefreshedAt: refreshedAt
     });
   } catch (e) {
     res.status(502).json({ error: e.message });
@@ -345,6 +364,7 @@ app.post('/api/apex/followups', requireUser, async (req, res) => {
       out.push({ client: tenant.clientName, taskId: t.taskId });
     }
     activity.record(req.user, store.tenantFor(req.user), 'message', { topic: 'Upsell follow-ups', count: out.length });
+    d360.requestSync('follow-ups');
     res.json({ ok: true, created: out });
   } catch (e) {
     res.status(502).json({ error: e.message });
@@ -387,6 +407,7 @@ app.post('/api/seats', requireUser, async (req, res) => {
     for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u); // next Tableau session carries their new tier
     activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium seats', seats: r.seats, amount: r.amount, price, opportunity: r.opportunityId });
     console.log(`→ ${req.user.email} bought ${r.seats} Premium seats for ${req.tenant.clientName} · Salesforce Opportunity ${r.opportunityId}`);
+    d360.requestSync('seat purchase');
     res.json({ ok: true, ...r });
   } catch (e) {
     res.status(e.status || 502).json({ error: e.message });

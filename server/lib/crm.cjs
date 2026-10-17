@@ -241,6 +241,16 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   }
   if (sf.enabled) setInterval(flushActivity, 5000).unref();
 
+  /** Portal upgrades created in Salesforce after `since` — not in Data 360 yet. */
+  async function upgradesSince(since) {
+    if (!since) return [];
+    const iso = new Date(since).toISOString().replace(/\.\d{3}Z$/, 'Z');
+    const rows = await sf.query(
+      `SELECT Id, Name, Amount, Apex_Premium_Seats__c, CloseDate, CampaignId, Account.Apex_Client_Id__c, Account.Name FROM Opportunity WHERE Apex_Portal_Upgrade__c = true AND IsWon = true AND CreatedDate > ${iso} ORDER BY CreatedDate DESC`
+    );
+    return rows.map((o) => ({ id: o.Id, name: o.Name, clientId: o.Account?.Apex_Client_Id__c, client: o.Account?.Name, amount: Number(o.Amount || 0), seats: Number(o.Apex_Premium_Seats__c || 0), closed: o.CloseDate, campaign: Boolean(o.CampaignId) }));
+  }
+
   /** Presenter view: the client's Account and the records the portal wrote to it, live from Salesforce. */
   async function recordsFor(tenant) {
     const a = requireAccount(tenant);
@@ -261,7 +271,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     };
   }
 
-  return { enabled: sf.enabled, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
+  return { enabled: sf.enabled, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
 }
 
 module.exports = { createCrm };

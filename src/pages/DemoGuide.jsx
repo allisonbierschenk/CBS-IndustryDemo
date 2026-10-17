@@ -388,7 +388,7 @@ const FEATURES = [
     ],
     ask: [
       ['What’s in Data 360 exactly?', 'CRM data streams for Opportunity, Campaign, Campaign Member and Apex Portal Activity (every portal sign-in, Agent question, goal, request and upgrade, written to Salesforce by the portal); mapped to three data model objects; calculated insights for Premium ARR and seats, engagement and campaign reach. The page reads them with the Data 360 Query API.'],
-      ['How fresh is it?', 'Data 360 refreshes the Salesforce streams on its schedule (minutes); Sync to Data 360 starts a refresh now. Insights recompute hourly.'],
+      ['How fresh is it?', 'Automatic: every upgrade starts a Data 360 refresh. A new purchase shows on Client growth at once, marked “syncing”, and the label clears by itself when Data 360 has processed it (usually minutes). Calculated insights recompute hourly; until then the page reads the data model, so numbers never go backwards.'],
       ['Where does Tableau come in?', 'Tableau Cloud connects to the same Data 360 model, and Pulse metrics on it (Premium ARR, portal engagement) alert Apex leaders — the same governed numbers.']
     ]
   }), (p) => (p.id === 'alex' ? null : 'Alex Morgan (Apex)')),

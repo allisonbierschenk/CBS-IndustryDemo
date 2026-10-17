@@ -26,6 +26,12 @@ export default function ApexGrowth() {
       .catch((e) => setState({ error: e.message }));
   }, []);
   useEffect(load, [load]);
+  // While an upgrade is still syncing, re-check every 30 s so the label clears on its own.
+  useEffect(() => {
+    if (!state.data?.syncing) return;
+    const t = setInterval(load, 30000);
+    return () => clearInterval(t);
+  }, [state.data?.syncing, load]);
 
   const followUp = async () => {
     setBusy('followups');
@@ -39,18 +45,6 @@ export default function ApexGrowth() {
       setBusy(null);
     }
   };
-  const sync = async () => {
-    setBusy('sync');
-    try {
-      await api('/api/apex/sync', { method: 'POST' });
-      toast('Data 360 refresh started — new activity and upgrades land in a few minutes');
-    } catch (e) {
-      toast(e.message);
-    } finally {
-      setBusy(null);
-    }
-  };
-
   const d = state.data;
   return (
     <div className="container">
@@ -64,10 +58,12 @@ export default function ApexGrowth() {
           </div>
           <p className="lead">Premium revenue, portal engagement and campaign reach for every client — harmonized in Data 360 from Salesforce and the portal.</p>
         </div>
-        <button className="btn btn-ghost btn-sm" onClick={sync} disabled={busy === 'sync'}>
-          <Icon name="spark" />
-          {busy === 'sync' ? 'Syncing…' : 'Sync to Data 360'}
-        </button>
+        {d?.syncing > 0 && (
+          <span className="gr-syncing" title="Already in Salesforce; Data 360 is processing the refresh the portal started automatically">
+            <span className="gr-dot" />
+            {d.syncing} new upgrade{d.syncing === 1 ? '' : 's'} syncing to Data 360
+          </span>
+        )}
       </div>
       {state.loading && !d && <div className="bm-panel bm-loading">Loading from Data 360…</div>}
       {state.error && <div className="error-msg">{state.error}</div>}
@@ -144,7 +140,10 @@ export default function ApexGrowth() {
                     <td>
                       <span className={`mini-tier ${c.tier}`}>{c.tier === 'premium' ? 'Premium' : 'Standard'}</span>
                     </td>
-                    <td className="num">{money(c.arr)}</td>
+                    <td className="num">
+                      {money(c.arr)}
+                      {c.syncing && <span className="gr-sync-chip">syncing</span>}
+                    </td>
                     <td className="num">{c.seats || '—'}</td>
                     <td className="num">{c.events}</td>
                     <td className="num">{c.people}</td>
@@ -173,6 +172,7 @@ export default function ApexGrowth() {
                       {u.seats ? ` · ${u.seats} seats` : ''}
                     </small>
                   </span>
+                  {u.syncing && <span className="gr-sync-chip">Syncing to Data 360</span>}
                   {u.campaign && <span className="persona-chip">Launch campaign</span>}
                   <b className="gr-amt">{money(u.amount)}/yr</b>
                 </li>

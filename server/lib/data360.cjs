@@ -12,13 +12,20 @@ function createData360(sf, { log = console } = {}) {
     const cols = (r.metadata || []).map((m) => m.name);
     return (r.data || []).map((row) => Object.fromEntries(cols.map((c, i) => [c, row[i]])));
   }
-  // Calculated insight, else the DMO aggregate (same columns).
-  async function insightOr(ciSql, dmoSql) {
-    try {
-      const rows = await query(ciSql);
-      if (rows.length) return { rows, from: 'calculated insight' };
-    } catch (e) {
-      log.warn(`⚠ Data 360 insight: ${e.message.slice(0, 160)}`);
+  const at = (v) => (v ? Date.parse(v) : 0);
+  const get = (path) => sf.request('GET', path).catch(() => null);
+  // Calculated insight when it's at least as fresh as its source stream; otherwise (it recomputes on a schedule) the
+  // same numbers aggregated from the data model, which is current as soon as the stream lands. Never goes backwards.
+  async function insightOr(ci, stream, ciSql, dmoSql) {
+    const [c, st] = await Promise.all([get(`/ssot/calculated-insights/${ci}`), get(`/ssot/data-streams/${stream}`)]);
+    // A run in progress (PENDING / PROCESSING) still serves the previous run's rows — only trust a finished run.
+    if (c?.lastRunStatus === 'SUCCESS' && at(c.lastRunDateTime) >= at(st?.lastRefreshDate)) {
+      try {
+        const rows = await query(ciSql);
+        if (rows.length) return { rows, from: 'calculated insight' };
+      } catch (e) {
+        log.warn(`⚠ Data 360 insight: ${e.message.slice(0, 160)}`);
+      }
     }
     return { rows: await query(dmoSql), from: 'data model' };
   }
@@ -26,14 +33,20 @@ function createData360(sf, { log = console } = {}) {
   async function growth() {
     const [arr, engagement, reach, upgrades, weekly] = await Promise.all([
       insightOr(
+        'Apex_Client_ARR__cio',
+        'Apex_Opportunity',
         'SELECT client_id__c, premium_arr__c, premium_seats__c, upgrades__c FROM Apex_Client_ARR__cio',
         'SELECT Client_Id__c AS client_id__c, SUM(Amount__c) AS premium_arr__c, SUM(Seats__c) AS premium_seats__c, COUNT(Opportunity_Id__c) AS upgrades__c FROM Apex_Premium_Upgrade__dlm WHERE Portal_Upgrade__c = true GROUP BY Client_Id__c'
       ),
       insightOr(
+        'Apex_Client_Engagement__cio',
+        'Apex_Portal_Activity',
         'SELECT client_id__c, events__c, active_people__c FROM Apex_Client_Engagement__cio',
         'SELECT Client_Id__c AS client_id__c, COUNT(Event_Id__c) AS events__c, APPROX_COUNT_DISTINCT(Portal_User_Id__c) AS active_people__c FROM Apex_Portal_Activity__dlm GROUP BY Client_Id__c'
       ),
       insightOr(
+        'Apex_Campaign_Reach__cio',
+        'Apex_CampaignMember',
         'SELECT client_id__c, recipients__c FROM Apex_Campaign_Reach__cio',
         'SELECT Client_Id__c AS client_id__c, COUNT(Member_Id__c) AS recipients__c FROM Apex_Campaign_Response__dlm GROUP BY Client_Id__c'
       ),
@@ -60,6 +73,29 @@ function createData360(sf, { log = console } = {}) {
     return results;
   }
 
+  // Automatic sync: the portal calls requestSync() whenever it writes something Data 360 should see (an upgrade,
+  // seats, follow-ups). Debounced, so a burst of writes starts one refresh. Data 360 then processes it on its queue.
+  let timer = null;
+  let activityDirty = false;
+  function requestSync(reason = 'portal change', delayMs = 15000) {
+    if (!sf.enabled) return;
+    clearTimeout(timer);
+    timer = setTimeout(() => {
+      sync().then((r) => log.log(`↻ Data 360 sync started (${reason}): ${r.filter((x) => x.ok).map((x) => x.stream).join(', ') || 'none'}`));
+      activityDirty = false;
+    }, delayMs);
+    timer.unref?.();
+  }
+  // Ordinary portal activity: refresh at most every 15 minutes while there's something new.
+  const markActivity = () => (activityDirty = true);
+  if (sf.enabled) setInterval(() => activityDirty && requestSync('portal activity', 1000), 15 * 60 * 1000).unref();
+
+  /** When the Opportunity stream last landed in Data 360 (to show newer CRM upgrades as "syncing"). */
+  async function upgradesRefreshedAt() {
+    const d = await sf.request('GET', '/ssot/data-streams/Apex_Opportunity').catch(() => null);
+    return d?.lastRefreshDate || null;
+  }
+
   /** When each stream / insight last refreshed. */
   async function freshness() {
     const streams = await Promise.all(
@@ -81,7 +117,7 @@ function createData360(sf, { log = console } = {}) {
     return { streams, insights };
   }
 
-  return { enabled: sf.enabled, query, growth, sync, freshness };
+  return { enabled: sf.enabled, query, growth, sync, requestSync, markActivity, upgradesRefreshedAt, freshness };
 }
 
 module.exports = { createData360 };
