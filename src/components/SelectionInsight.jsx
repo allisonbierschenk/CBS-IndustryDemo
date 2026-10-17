@@ -12,7 +12,7 @@ export default function SelectionInsight({ question, source, what, worksheet, on
 
   useEffect(() => {
     let alive = true;
-    api('/api/agent/chat', { method: 'POST', body: { question, source } })
+    api('/api/agent/chat', { method: 'POST', body: { question, source, explain: true } })
       .then((d) => alive && setState(d))
       .catch((e) => alive && setState({ error: e.message }));
     const onKey = (e) => e.key === 'Escape' && onClose();

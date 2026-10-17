@@ -1,0 +1,685 @@
+{
+ "_comment": "Seeded client rosters (Salesforce Contacts on each client Account) — the people Apex's launch campaign reached. Northstar's roster is in northstar-team.json.",
+ "teams": {
+  "vantage": [
+   {
+    "id": "va-001",
+    "firstName": "Reese",
+    "lastName": "Underwood",
+    "title": "Fleet Manager",
+    "manager": true
+   },
+   {
+    "id": "va-002",
+    "firstName": "Kendall",
+    "lastName": "Moreau",
+    "title": "Freight Planning Manager",
+    "manager": true
+   },
+   {
+    "id": "va-003",
+    "firstName": "Pat",
+    "lastName": "Kerr",
+    "title": "Distribution Manager",
+    "manager": true
+   },
+   {
+    "id": "va-004",
+    "firstName": "Nico",
+    "lastName": "Lindgren",
+    "title": "Distribution Manager",
+    "manager": true
+   },
+   {
+    "id": "va-005",
+    "firstName": "Logan",
+    "lastName": "Alvarez",
+    "title": "Fleet Manager",
+    "manager": true
+   },
+   {
+    "id": "va-006",
+    "firstName": "Reese",
+    "lastName": "Santos",
+    "title": "Fleet Manager",
+    "manager": true
+   },
+   {
+    "id": "va-007",
+    "firstName": "Oakley",
+    "lastName": "Alvarez",
+    "title": "Distribution Manager",
+    "manager": true
+   },
+   {
+    "id": "va-008",
+    "firstName": "Indy",
+    "lastName": "Underwood",
+    "title": "Warehouse Manager",
+    "manager": true
+   },
+   {
+    "id": "va-009",
+    "firstName": "Lane",
+    "lastName": "Quinn",
+    "title": "Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "va-010",
+    "firstName": "Harper",
+    "lastName": "Yilmaz",
+    "title": "Fleet Manager",
+    "manager": true
+   },
+   {
+    "id": "va-011",
+    "firstName": "Lee",
+    "lastName": "Varga",
+    "title": "Fleet Manager",
+    "manager": true
+   },
+   {
+    "id": "va-012",
+    "firstName": "Ari",
+    "lastName": "Ivanova",
+    "title": "Carrier Manager",
+    "manager": true
+   },
+   {
+    "id": "va-013",
+    "firstName": "Cameron",
+    "lastName": "Dawson",
+    "title": "Logistics Manager – Midwest",
+    "manager": true
+   },
+   {
+    "id": "va-014",
+    "firstName": "Gray",
+    "lastName": "Kerr",
+    "title": "Carrier Manager",
+    "manager": true
+   },
+   {
+    "id": "va-015",
+    "firstName": "Jordan",
+    "lastName": "Xu",
+    "title": "Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "va-016",
+    "firstName": "Peyton",
+    "lastName": "Brennan",
+    "title": "Logistics Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-017",
+    "firstName": "Lane",
+    "lastName": "Lindgren",
+    "title": "Operations Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-018",
+    "firstName": "Sage",
+    "lastName": "Hughes",
+    "title": "Freight Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-019",
+    "firstName": "Shay",
+    "lastName": "Moreau",
+    "title": "Freight Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-020",
+    "firstName": "Lane",
+    "lastName": "Hart",
+    "title": "Dispatch Coordinator",
+    "manager": false
+   },
+   {
+    "id": "va-021",
+    "firstName": "Val",
+    "lastName": "Abbott",
+    "title": "Operations Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-022",
+    "firstName": "River",
+    "lastName": "Goldman",
+    "title": "Operations Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-023",
+    "firstName": "Robin",
+    "lastName": "Bennett",
+    "title": "Operations Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-024",
+    "firstName": "Kendall",
+    "lastName": "Ibrahim",
+    "title": "Logistics Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-025",
+    "firstName": "Kit",
+    "lastName": "Hart",
+    "title": "Supply Chain Coordinator",
+    "manager": false
+   },
+   {
+    "id": "va-026",
+    "firstName": "Quinn",
+    "lastName": "Novak",
+    "title": "Freight Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-027",
+    "firstName": "River",
+    "lastName": "Jensen",
+    "title": "Freight Analyst",
+    "manager": false
+   },
+   {
+    "id": "va-028",
+    "firstName": "Kendall",
+    "lastName": "Hughes",
+    "title": "Supply Chain Coordinator",
+    "manager": false
+   },
+   {
+    "id": "va-029",
+    "firstName": "Jules",
+    "lastName": "Dawson",
+    "title": "Supply Chain Coordinator",
+    "manager": false
+   },
+   {
+    "id": "va-030",
+    "firstName": "River",
+    "lastName": "Ivanova",
+    "title": "Dispatch Coordinator",
+    "manager": false
+   }
+  ],
+  "crestline": [
+   {
+    "id": "cr-001",
+    "firstName": "Ari",
+    "lastName": "Zhou",
+    "title": "Delivery Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-002",
+    "firstName": "Dakota",
+    "lastName": "Jovanovic",
+    "title": "Delivery Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-003",
+    "firstName": "Shay",
+    "lastName": "Ellison",
+    "title": "Program Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-004",
+    "firstName": "Noel",
+    "lastName": "Mensah",
+    "title": "IT Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-005",
+    "firstName": "Tatum",
+    "lastName": "Ramirez",
+    "title": "Engineering Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-006",
+    "firstName": "Riley",
+    "lastName": "Jensen",
+    "title": "Delivery Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-007",
+    "firstName": "Devon",
+    "lastName": "Dawson",
+    "title": "Data Platform Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-008",
+    "firstName": "Sage",
+    "lastName": "Xu",
+    "title": "Product Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-009",
+    "firstName": "Skyler",
+    "lastName": "Ferreira",
+    "title": "Program Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-010",
+    "firstName": "Shay",
+    "lastName": "Ferreira",
+    "title": "Program Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-011",
+    "firstName": "Ari",
+    "lastName": "Choi",
+    "title": "IT Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-012",
+    "firstName": "Elliot",
+    "lastName": "Dawson",
+    "title": "Engineering Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-013",
+    "firstName": "Oakley",
+    "lastName": "Goldman",
+    "title": "IT Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "cr-014",
+    "firstName": "Oakley",
+    "lastName": "Lopez",
+    "title": "Solutions Architect",
+    "manager": false
+   },
+   {
+    "id": "cr-015",
+    "firstName": "Tatum",
+    "lastName": "Ellison",
+    "title": "Software Engineer",
+    "manager": false
+   },
+   {
+    "id": "cr-016",
+    "firstName": "Gray",
+    "lastName": "Ramirez",
+    "title": "Solutions Architect",
+    "manager": false
+   },
+   {
+    "id": "cr-017",
+    "firstName": "Jamie",
+    "lastName": "Garcia",
+    "title": "Business Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-018",
+    "firstName": "Marlowe",
+    "lastName": "Abbott",
+    "title": "Business Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-019",
+    "firstName": "Taylor",
+    "lastName": "Alvarez",
+    "title": "Solutions Architect",
+    "manager": false
+   },
+   {
+    "id": "cr-020",
+    "firstName": "Charlie",
+    "lastName": "Ivanova",
+    "title": "Software Engineer",
+    "manager": false
+   },
+   {
+    "id": "cr-021",
+    "firstName": "Ellis",
+    "lastName": "Mensah",
+    "title": "Business Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-022",
+    "firstName": "Reese",
+    "lastName": "Novak",
+    "title": "Software Engineer",
+    "manager": false
+   },
+   {
+    "id": "cr-023",
+    "firstName": "Nico",
+    "lastName": "Ivanova",
+    "title": "Data Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-024",
+    "firstName": "Hollis",
+    "lastName": "Weber",
+    "title": "Business Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-025",
+    "firstName": "Avery",
+    "lastName": "Underwood",
+    "title": "Product Analyst",
+    "manager": false
+   },
+   {
+    "id": "cr-026",
+    "firstName": "Bailey",
+    "lastName": "Ferreira",
+    "title": "Business Analyst",
+    "manager": false
+   }
+  ],
+  "meridian": [
+   {
+    "id": "me-001",
+    "firstName": "Wren",
+    "lastName": "Olsen",
+    "title": "Practice Manager",
+    "manager": true
+   },
+   {
+    "id": "me-002",
+    "firstName": "Charlie",
+    "lastName": "Ibrahim",
+    "title": "Supply Chain Manager",
+    "manager": true
+   },
+   {
+    "id": "me-003",
+    "firstName": "Jules",
+    "lastName": "Goldman",
+    "title": "ERP Program Manager",
+    "manager": true
+   },
+   {
+    "id": "me-004",
+    "firstName": "Taylor",
+    "lastName": "Abbott",
+    "title": "Quality Manager",
+    "manager": true
+   },
+   {
+    "id": "me-005",
+    "firstName": "Rowan",
+    "lastName": "Ibrahim",
+    "title": "Supply Chain Manager",
+    "manager": true
+   },
+   {
+    "id": "me-006",
+    "firstName": "Dakota",
+    "lastName": "Goldman",
+    "title": "Practice Manager",
+    "manager": true
+   },
+   {
+    "id": "me-007",
+    "firstName": "Kai",
+    "lastName": "Jensen",
+    "title": "Supply Chain Manager",
+    "manager": true
+   },
+   {
+    "id": "me-008",
+    "firstName": "Robin",
+    "lastName": "Mensah",
+    "title": "Practice Manager",
+    "manager": true
+   },
+   {
+    "id": "me-009",
+    "firstName": "Avery",
+    "lastName": "Garcia",
+    "title": "Practice Manager",
+    "manager": true
+   },
+   {
+    "id": "me-010",
+    "firstName": "Casey",
+    "lastName": "Dubois",
+    "title": "ERP Program Manager",
+    "manager": true
+   },
+   {
+    "id": "me-011",
+    "firstName": "Gray",
+    "lastName": "Weber",
+    "title": "Clinical Operations Manager",
+    "manager": true
+   },
+   {
+    "id": "me-012",
+    "firstName": "Jordan",
+    "lastName": "Goldman",
+    "title": "Practice Manager",
+    "manager": true
+   },
+   {
+    "id": "me-013",
+    "firstName": "Elliot",
+    "lastName": "Tanaka",
+    "title": "Clinical Data Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-014",
+    "firstName": "Elliot",
+    "lastName": "Hughes",
+    "title": "Clinical Data Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-015",
+    "firstName": "Peyton",
+    "lastName": "Kerr",
+    "title": "Billing Specialist",
+    "manager": false
+   },
+   {
+    "id": "me-016",
+    "firstName": "Robin",
+    "lastName": "Kowalski",
+    "title": "ERP Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-017",
+    "firstName": "Charlie",
+    "lastName": "Hart",
+    "title": "ERP Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-018",
+    "firstName": "Noel",
+    "lastName": "Novak",
+    "title": "Operations Coordinator",
+    "manager": false
+   },
+   {
+    "id": "me-019",
+    "firstName": "Peyton",
+    "lastName": "Moreau",
+    "title": "ERP Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-020",
+    "firstName": "Indy",
+    "lastName": "Edwards",
+    "title": "Billing Specialist",
+    "manager": false
+   },
+   {
+    "id": "me-021",
+    "firstName": "Lane",
+    "lastName": "Choi",
+    "title": "ERP Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-022",
+    "firstName": "Gray",
+    "lastName": "Lopez",
+    "title": "Financial Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-023",
+    "firstName": "Gray",
+    "lastName": "Ivanova",
+    "title": "Financial Analyst",
+    "manager": false
+   },
+   {
+    "id": "me-024",
+    "firstName": "Oakley",
+    "lastName": "Mensah",
+    "title": "Clinical Data Analyst",
+    "manager": false
+   }
+  ],
+  "helix": [
+   {
+    "id": "he-001",
+    "firstName": "Kit",
+    "lastName": "Bennett",
+    "title": "Sustainability Manager",
+    "manager": true
+   },
+   {
+    "id": "he-002",
+    "firstName": "Gray",
+    "lastName": "Hart",
+    "title": "Sustainability Manager",
+    "manager": true
+   },
+   {
+    "id": "he-003",
+    "firstName": "Pat",
+    "lastName": "Hart",
+    "title": "Sustainability Manager",
+    "manager": true
+   },
+   {
+    "id": "he-004",
+    "firstName": "Rowan",
+    "lastName": "Lopez",
+    "title": "Asset Manager",
+    "manager": true
+   },
+   {
+    "id": "he-005",
+    "firstName": "Blake",
+    "lastName": "Brennan",
+    "title": "Asset Manager",
+    "manager": true
+   },
+   {
+    "id": "he-006",
+    "firstName": "Taylor",
+    "lastName": "Yilmaz",
+    "title": "Maintenance Manager",
+    "manager": true
+   },
+   {
+    "id": "he-007",
+    "firstName": "Sasha",
+    "lastName": "Weber",
+    "title": "Sustainability Manager",
+    "manager": true
+   },
+   {
+    "id": "he-008",
+    "firstName": "Skyler",
+    "lastName": "Dawson",
+    "title": "Asset Manager",
+    "manager": true
+   },
+   {
+    "id": "he-009",
+    "firstName": "Oren",
+    "lastName": "Abbott",
+    "title": "Operations Coordinator",
+    "manager": false
+   },
+   {
+    "id": "he-010",
+    "firstName": "Peyton",
+    "lastName": "Lopez",
+    "title": "Operations Coordinator",
+    "manager": false
+   },
+   {
+    "id": "he-011",
+    "firstName": "Toby",
+    "lastName": "Ellison",
+    "title": "HSE Specialist",
+    "manager": false
+   },
+   {
+    "id": "he-012",
+    "firstName": "Reese",
+    "lastName": "Hart",
+    "title": "Operations Coordinator",
+    "manager": false
+   },
+   {
+    "id": "he-013",
+    "firstName": "Sam",
+    "lastName": "Garcia",
+    "title": "Energy Analyst",
+    "manager": false
+   },
+   {
+    "id": "he-014",
+    "firstName": "Kendall",
+    "lastName": "Alvarez",
+    "title": "Reliability Engineer",
+    "manager": false
+   },
+   {
+    "id": "he-015",
+    "firstName": "Peyton",
+    "lastName": "Varga",
+    "title": "HSE Specialist",
+    "manager": false
+   },
+   {
+    "id": "he-016",
+    "firstName": "Wren",
+    "lastName": "Lopez",
+    "title": "Reliability Engineer",
+    "manager": false
+   }
+  ]
+ }
+}

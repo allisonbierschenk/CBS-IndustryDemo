@@ -104,8 +104,19 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
 
   async function resolveDatasource(user, name) {
     if (datasourceIds.has(name)) return datasourceIds.get(name);
-    const j = await request(user, 'GET', `/datasources?filter=name:eq:${encodeURIComponent(name)}&pageSize=10`, null, { base: 'rest' });
-    const list = j.datasources?.datasource || [];
+    const j = await request(user, 'GET', `/datasources?filter=name:eq:${encodeURIComponent(name)}&pageSize=10`, null, { base: 'rest' }).catch(() => ({}));
+    let list = j.datasources?.datasource || [];
+    // No exact filter match (e.g. the published name has a non-breaking space) — list and compare with
+    // whitespace normalized.
+    const norm = (x) => String(x).replace(/\s+/g, ' ').trim();
+    if (!list.length) {
+      for (let page = 1; page <= 10 && !list.length; page++) {
+        const all = await request(user, 'GET', `/datasources?pageSize=1000&pageNumber=${page}&sort=updatedAt:desc`, null, { base: 'rest' });
+        const batch = all.datasources?.datasource || [];
+        list = batch.filter((d) => norm(d.name) === norm(name));
+        if (batch.length < 1000) break;
+      }
+    }
     if (list.length > 1) console.warn(`⚠ ${list.length} data sources are named "${name}" — using the most recently updated. Rename duplicates to avoid surprises.`);
     const pick = list.sort((a, b) => String(b.updatedAt).localeCompare(String(a.updatedAt)))[0];
     if (!pick) throw new Error(`Pulse data source "${name}" not found on the site (or not visible to ${user.email}).`);

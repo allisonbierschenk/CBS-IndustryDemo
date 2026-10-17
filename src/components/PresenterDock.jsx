@@ -11,7 +11,8 @@ import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 const TABS = [
   ['switch', 'Switch account'],
   ['talk', 'Talk track'],
-  ['hood', 'Under the hood']
+  ['hood', 'Under the hood'],
+  ['crm', 'Salesforce']
 ];
 
 export default function PresenterDock() {
@@ -77,6 +78,9 @@ export default function PresenterDock() {
             <a href="/guide" target="_blank" rel="noreferrer" className="dock-guide">
               Demo guide ↗
             </a>
+            <a href="/guide/competition" target="_blank" rel="noreferrer" className="dock-guide">
+              5-min script ↗
+            </a>
           </div>
         </div>
         <div className="tabs" role="tablist">
@@ -90,6 +94,7 @@ export default function PresenterDock() {
           {tab === 'switch' && <SwitchTab personas={personas} currentId={me.user.id} onPick={go} />}
           {tab === 'talk' && <TalkTab tenant={t} />}
           {tab === 'hood' && <HoodTab me={me} token={token} />}
+          {tab === 'crm' && <CrmTab me={me} />}
         </div>
       </section>
     </>
@@ -103,6 +108,7 @@ function SwitchTab({ personas, currentId, onPick }) {
         Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
         with the new user's email as <span className="code-inline">sub</span>.
       </p>
+      <ResetDemo />
       <ResetGoals />
       <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact />
     </>
@@ -192,6 +198,141 @@ function HoodTab({ me, token }) {
           : 'Standard only — no add-on entitlements.'}
       </p>
     </>
+  );
+}
+
+/** Apex's side of the story: the client's Salesforce Account and what the portal just wrote to it. */
+function CrmTab({ me }) {
+  const [d, setD] = useState(null);
+  const load = () => {
+    setD(null);
+    api('/api/crm/records')
+      .then(setD)
+      .catch((e) => setD({ error: e.message }));
+  };
+  useEffect(load, [me.user.id, me.tenant.tier]);
+  if (!d) return <p className="muted">Loading from Salesforce…</p>;
+  if (d.error) return <div className="error-msg">{d.error}</div>;
+  if (!d.enabled) return <p className="muted">Salesforce isn’t connected (set SF_ORG_ALIAS, or SF_CLIENT_ID / SF_CLIENT_SECRET / SF_LOGIN_URL).</p>;
+  const money = (n) => (n == null ? '' : `$${Number(n).toLocaleString('en-US')}`);
+  return (
+    <div className="crm-tab">
+      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 10px' }}>
+        Apex’s CRM is the system of record: the client’s tier comes from this Account. Upgrades land as Closed Won Opportunities;
+        messages and “Schedule with Apex” as Tasks for the account team.
+      </p>
+      <div className="crm-card">
+        <div>
+          <b>{d.account.name}</b>
+          <span>
+            Account · Apex Subscription Tier: <span className={`mini-tier ${String(d.account.tier).toLowerCase()}`}>{d.account.tier}</span> · Owner {d.account.owner}
+          </span>
+        </div>
+        <a className="btn btn-ghost btn-sm" href={d.account.url} target="_blank" rel="noreferrer">
+          Open ↗
+        </a>
+      </div>
+      <h4>Portal users (Contacts)</h4>
+      {(d.contacts || []).map((c) => (
+        <a key={c.id} className="crm-row" href={c.url} target="_blank" rel="noreferrer">
+          <span>{c.name}</span>
+          <span className="muted">{c.title}</span>
+        </a>
+      ))}
+      <h4>Upgrade opportunities</h4>
+      {d.opportunities.length ? (
+        d.opportunities.map((o) => (
+          <a key={o.id} className="crm-row" href={o.url} target="_blank" rel="noreferrer">
+            <span>{o.name}</span>
+            <span className="muted">
+              {o.stage} · {money(o.amount)} · {o.closeDate}
+            </span>
+          </a>
+        ))
+      ) : (
+        <p className="muted">None yet — upgrade a Standard client to create one.</p>
+      )}
+      <h4>Follow-up tasks</h4>
+      {d.tasks.length ? (
+        d.tasks.map((t) => (
+          <a key={t.id} className="crm-row" href={t.url} target="_blank" rel="noreferrer">
+            <span>{t.subject}</span>
+            <span className="muted">
+              {t.status} · due {t.due} · {t.owner}
+            </span>
+          </a>
+        ))
+      ) : (
+        <p className="muted">None yet — use Contact Apex or Schedule with Apex.</p>
+      )}
+      <div style={{ display: 'flex', gap: 8, marginTop: 10 }}>
+        <button className="btn btn-ghost btn-sm" onClick={load}>
+          Refresh
+        </button>
+        {me.features?.seatRoster && <ResetSeats onDone={load} />}
+      </div>
+    </div>
+  );
+}
+
+/** Start-over button: the whole demo back to its baseline, in Salesforce, Data 360 and Tableau. */
+function ResetDemo() {
+  const { me, reload } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const reset = async () => {
+    if (
+      !window.confirm(
+        'Reset the demo?\n\n• Northstar back to Standard, all Premium seats removed\n• Upgrades made during demos deleted (Data 360 follows on its next refresh)\n• Campaign responses back to the start (Dana: Clicked)\n• Follow-up tasks, clients’ own goal metrics and live portal activity removed'
+      )
+    )
+      return;
+    setBusy(true);
+    try {
+      const r = await api('/api/demo/reset', { method: 'POST' });
+      await reload();
+      toast(`Demo reset — ${r.opportunities} upgrade${r.opportunities === 1 ? '' : 's'}, ${r.seats} seat${r.seats === 1 ? '' : 's'}, ${r.tasks} task${r.tasks === 1 ? '' : 's'}, ${r.goals} goal${r.goals === 1 ? '' : 's'} removed`);
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <div className="dock-reset is-primary">
+      <span>
+        <b>Start over</b> Back to the starting point in Salesforce, Data 360 and Tableau.
+      </span>
+      <button className="btn btn-dark btn-sm" onClick={reset} disabled={busy}>
+        {busy ? 'Resetting…' : 'Reset demo'}
+      </button>
+    </div>
+  );
+}
+
+/** Demo clean-up: take back every Premium seat at this client (the Opportunities stay as history). */
+function ResetSeats({ onDone }) {
+  const { me, reload } = useSession();
+  const toast = useToast();
+  const [busy, setBusy] = useState(false);
+  const reset = async () => {
+    if (!window.confirm(`Remove every Premium seat at ${me.tenant.clientName}? The upgrade Opportunities stay in Salesforce.`)) return;
+    setBusy(true);
+    try {
+      const r = await api('/api/seats/reset', { method: 'POST' });
+      toast(r.removed ? `Removed ${r.removed} seat${r.removed > 1 ? 's' : ''}` : 'No seats to remove');
+      await reload();
+      onDone?.();
+    } catch (e) {
+      toast(e.message);
+    } finally {
+      setBusy(false);
+    }
+  };
+  return (
+    <button className="btn btn-ghost btn-sm" onClick={reset} disabled={busy}>
+      {busy ? 'Resetting…' : `Reset ${me.tenant.shortName} seats`}
+    </button>
   );
 }
 

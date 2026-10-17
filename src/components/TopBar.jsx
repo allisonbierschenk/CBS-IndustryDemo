@@ -31,12 +31,14 @@ export default function TopBar() {
         <NavLink to="/agent">
           <Icon name="agent" className="nav-ic" />
           Agent
+          {!me.features?.agent && <Icon name="lock" className="lock" />}
         </NavLink>
         <Link to="/dashboards" aria-current={onDashboards ? 'page' : undefined}>
           Value Intelligence
         </Link>
         {me.views.transportation?.entitled && <NavLink to="/transportation">Transportation</NavLink>}
         <NavLink to="/reports">Reports</NavLink>
+        {me.features?.apexGrowth && <NavLink to="/growth">Client growth</NavLink>}
         <NavLink to="/benchmarks">
           Industry Benchmarks
           {!me.entitlements.includes('benchmarks') && <Icon name="lock" className="lock" />}

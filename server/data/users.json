@@ -24,7 +24,10 @@
           "Technology Modernization"
         ]
       },
-      "persona": "Executive"
+      "persona": "Executive",
+      "roles": [
+        "seat-admin"
+      ]
     },
     {
       "id": "u-crestline",
@@ -208,7 +211,8 @@
         ]
       },
       "roles": [
-        "activity"
+        "activity",
+        "apex-growth"
       ]
     }
   ]
