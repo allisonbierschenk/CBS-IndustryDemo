@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'In this demo, Apex Consulting represents our Salesforce customers. Like most of them, Apex has clients of its own, and serves them through a portal. Add Tableau, and that portal gives Apex’s clients insights and AI worth paying for, so it stops being a cost center and becomes a revenue-generating investment. Add D360, and everything those clients do in the portal connects with what Apex already knows in Salesforce, so Apex can see which clients are ready to buy, and act on it, without anyone pulling reports by hand. And Salesforce turns each of those moments into booked revenue for Apex.',
+        say: 'In this demo, Apex Consulting represents our Salesforce customers. Like most of them, Apex has clients of its own, and serves them through a portal. Add Tableau, and that portal gives Apex’s clients insights and AI worth paying for, so it stops being a cost center and becomes a revenue-generating investment. Behind the scenes, D360 connects everything those clients do in the portal with what Apex already knows in Salesforce, so Apex can see which clients are ready to buy without anyone pulling reports by hand. And Salesforce turns each of those moments into booked revenue for Apex.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
