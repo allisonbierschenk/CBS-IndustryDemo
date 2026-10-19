@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and Data 360 connects them so Apex knows who to call next.',
+        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine, and give Apex’s people time back: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and Data 360 connects them so Apex knows who to call next.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · Data 360']
       }
     ]
@@ -145,7 +145,7 @@ const SCENES = [
       },
       {
         do: 'Hold on the graphic.',
-        say: 'Apex got booked revenue, a measurable return on its campaign, and its next deals already on reps’ lists, without adding headcount.'
+        say: 'Apex got booked revenue and a measurable return on its campaign. And its people got time back: clients answer their own questions instead of waiting on an analyst, nobody stitches spreadsheets together at month-end, and reps get their next call handed to them.'
       },
       {
         do: 'Hold on the graphic.',
