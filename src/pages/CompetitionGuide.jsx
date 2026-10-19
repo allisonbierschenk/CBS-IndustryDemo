@@ -18,8 +18,8 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and Data 360 connects them, so Apex’s teams stop pulling reports together and spend that time with the clients most ready to buy.',
-        cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · Data 360']
+        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s teams stop pulling reports together and spend that time with the clients most ready to buy.',
+        cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
   },
@@ -66,13 +66,13 @@ const SCENES = [
     as: 'Dana → Salesforce',
     beats: [
       {
-        do: 'Click Agent → Upgrade your team → point at the purple “visits” next to each name → click All managers (20) → Upgrade 20 people.',
-        say: 'Dana decides it is, but only for her 20 managers. Data 360 shows her how much each person uses the portal, so she knows who’ll get value. At five dollars per user per month, that’s $1,200 a year, in one click.',
-        cap: ['Data 360 · portal visits per person']
+        do: 'Click Agent → Upgrade your team → point at “Used … times” next to each name → click All managers (20) → Upgrade 20 people.',
+        say: 'Dana decides it is, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it. At five dollars per user per month, that’s $1,200 a year, in one click.',
+        cap: ['D360 · portal use per person']
       },
       {
-        do: 'Switch to Salesforce → click the bell 🔔 (“Northstar Enterprises bought 20 Premium seats — +$1,200/yr”, with the Data 360 line underneath) → it opens the Opportunity.',
-        say: 'Now look at Salesforce. Apex’s account rep has already been notified, and Data 360 adds what’s behind the sale: forty Northstar people have been active in the portal this month, and the campaign reached all of them. In Sales Cloud the opportunity is closed-won and credited to the campaign, before Dana has even closed the window.',
+        do: 'Switch to Salesforce → click the bell 🔔 (“Northstar Enterprises bought 20 Premium seats — +$1,200/yr”, with the D360 line underneath) → it opens the Opportunity.',
+        say: 'Now look at Salesforce. Apex’s account rep has already been notified, and D360 adds what’s behind the sale: forty Northstar people have been active in the portal this month, and the campaign reached all of them. In Sales Cloud the opportunity is closed-won and credited to the campaign, before Dana has even closed the window.',
         cap: ['Salesforce notification', 'Salesforce Sales Cloud · Opportunity · campaign attribution']
       },
       {
@@ -109,18 +109,18 @@ const SCENES = [
       },
       {
         do: 'Stay on Client growth (optionally cut to a simple three-boxes graphic: portal usage · Salesforce revenue · Marketing response).',
-        say: 'Without Data 360, the answer is spread across three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone has to combine all three in a spreadsheet each month, and by then the moment has passed.',
-        cap: ['Without Data 360: 3 systems · 1 spreadsheet · monthly']
+        say: 'Without D360, the answer is spread across three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone has to combine all three in a spreadsheet each month, and by then the moment has passed.',
+        cap: ['Without D360: 3 systems · 1 spreadsheet · monthly']
       },
       {
-        do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if Data 360 is still processing).',
-        say: 'With Data 360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
-        cap: ['Data 360 · one model per client · always current']
+        do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if D360 is still processing).',
+        say: 'With D360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
+        cap: ['D360 · one model per client · always current']
       },
       {
         do: 'Switch to the Data Cloud tab → Data Explorer → Calculated Insight “Apex Client Premium ARR”.',
-        say: 'This is Data 360 itself. It calculates each client’s Premium revenue once, so the portal, Tableau and the AI all work from the same numbers.',
-        cap: ['Data 360 · Data Explorer · calculated insight']
+        say: 'This is D360 itself. It calculates each client’s Premium revenue once, so the portal, Tableau and the AI all work from the same numbers.',
+        cap: ['D360 · Data Explorer · calculated insight']
       },
       {
         do: 'Back to Client growth → Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → switch to Salesforce → Meridian’s Account → Activity: the new Task.',
@@ -128,9 +128,9 @@ const SCENES = [
         cap: ['Activated to Salesforce · Tasks']
       },
       {
-        do: 'Portal → Agent → pick “Data 360 · Premium revenue” → ask “How much Premium revenue have we booked this year, and which clients drove it?”',
-        say: 'Apex’s leaders can ask the same Tableau AI how much Premium revenue the portal has brought in, and Tableau answers straight from the Data 360 data.',
-        cap: ['Tableau Pulse on Data 360']
+        do: 'Portal → Agent → pick “D360 · Premium revenue” → ask “How much Premium revenue have we booked this year, and which clients drove it?”',
+        say: 'Apex’s leaders can ask the same Tableau AI how much Premium revenue the portal has brought in, and Tableau answers straight from the D360 data.',
+        cap: ['Tableau Pulse on D360']
       }
     ]
   },
@@ -149,8 +149,8 @@ const SCENES = [
       },
       {
         do: 'Hold on the graphic.',
-        say: 'And most Tableau customers with a client portal could do the same, with Salesforce, Data 360 and Tableau working as one platform.',
-        cap: ['Salesforce · Data 360 · Tableau — one platform']
+        say: 'And most Tableau customers with a client portal could do the same, with Salesforce, D360 and Tableau working as one platform.',
+        cap: ['Salesforce · D360 · Tableau — one platform']
       },
       {
         do: 'Hold — end on the line.',
@@ -171,10 +171,10 @@ const TIPS = [
   ['Record scene by scene', 'One clip per scene, in order, then stitch. Retakes become cheap and the pacing stays tight.'],
   ['Load before you record', 'Open each page first, then start recording. Cut any Agent “thinking” time in the edit — it’s fine to say “answers in seconds”.'],
   ['Voiceover separately', 'Record the voiceover from this script on its own track; match the clicks to it. At a natural ~140 words a minute it runs about 3:45 — the rest of the 5:00 is clicks and pauses, so don’t rush.'],
-  ['Name the product as it works', 'Each line names its product at the moment it does something — “Tableau Pulse tells her…”, “Data 360 brings all three together…”. Say the name clearly; don’t stop to explain it. The dark chips under each click are the product for that step, and double as optional on-screen captions.'],
+  ['Name the product as it works', 'Each line names its product at the moment it does something — “Tableau Pulse tells her…”, “D360 brings all three together…”. Say the name clearly; don’t stop to explain it. The dark chips under each click are the product for that step, and double as optional on-screen captions.'],
   ['Land the numbers', '141 people · 5 clients · 20 seats · $5/user · $1,200/yr · every 100 seats = $6,000/yr. Pause a beat after each.'],
   ['The closing line', 'Record the last two sentences until they’re perfect — it’s what judges remember.'],
-  ['Data 360 screen timing', 'The portal starts the Data 360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
+  ['D360 screen timing', 'The portal starts the D360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
   ['Dates stay current', 'The portal’s demo clock keeps the story fresh by itself: the campaign is always “sent last week” and in progress, and the seeded 30-day history always ends today. Nothing to update before a take.'],
   ['Check what needs attention', 'Needs attention is live Tableau Pulse output, so its wording can change as the data moves. Sign in as Dana before recording and make sure the Scene 3 line still matches the summary (currently: On-Time Milestone Rate, Value Realization Rate and Engagement Health trending down; Consulting Investment trending up). Say only what’s on screen.'],
   ['Live final backup', 'Keep a screen recording of Scenes 4–6 in case a live system is slow on the day.']
@@ -183,7 +183,7 @@ const TIPS = [
 const CAPTION_STYLE = [
   'Lower-third, bottom-left, white text on a dark translucent bar (or Apex lime on near-black to match the portal).',
   'Show each caption for 3–4 seconds, appearing the moment that piece is on screen.',
-  'Short: product name first, then what it’s doing (e.g. “Data 360 · calculated insights”).',
+  'Short: product name first, then what it’s doing (e.g. “D360 · calculated insights”).',
   'Never more than two captions on screen at once.'
 ];
 
@@ -272,11 +272,11 @@ export default function CompetitionGuide() {
           </ol>
 
           <section className="comp-block comp-d360">
-            <h2>Without vs. with Data 360 — the role in plain words</h2>
-            <p className="muted">Use this to explain Data 360 to anyone — including yourself before you record. The question is Alex’s: “Who do we call next, and why?”</p>
+            <h2>Without vs. with D360 — the role in plain words</h2>
+            <p className="muted">Use this to explain D360 to anyone — including yourself before you record. The question is Alex’s: “Who do we call next, and why?”</p>
             <div className="comp-vs">
               <div className="is-without">
-                <b>Without Data 360</b>
+                <b>Without D360</b>
                 <ul>
                   <li>
                     <i>Usage</i> is in the portal’s logs
@@ -291,10 +291,10 @@ export default function CompetitionGuide() {
                 <p>Someone exports all three, stitches them in a spreadsheet once a month. It’s stale on arrival, nobody trusts the numbers, and the AI can’t answer across them — no single place has them all.</p>
               </div>
               <div className="is-with">
-                <b>With Data 360</b>
+                <b>With D360</b>
                 <ul>
                   <li>All three land in one model per client — continuously</li>
-                  <li>Data 360 calculates the answers once: Premium revenue, engagement, campaign reach</li>
+                  <li>D360 calculates the answers once: Premium revenue, engagement, campaign reach</li>
                   <li>Everyone uses the same numbers: the portal, Tableau, the Pulse Agent</li>
                   <li>And it acts: the next-best upsell becomes a Task for the rep in Salesforce</li>
                 </ul>
@@ -302,7 +302,7 @@ export default function CompetitionGuide() {
               </div>
             </div>
             <h3>One-line version</h3>
-            <p className="comp-oneliner">“Salesforce knows who bought. The portal knows who’s using it. Marketing knows who was reached. Data 360 is the only place that knows all three — so it’s the only place that can tell you who to call next.”</p>
+            <p className="comp-oneliner">“Salesforce knows who bought. The portal knows who’s using it. Marketing knows who was reached. D360 is the only place that knows all three — so it’s the only place that can tell you who to call next.”</p>
           </section>
 
           <section className="comp-block">
@@ -358,10 +358,10 @@ export default function CompetitionGuide() {
             <h2>If a judge asks “is it real?”</h2>
             <ul className="comp-list">
               <li>
-                <b>Data 360</b>Data Cloud app → Data Streams (Apex Portal Activity, Opportunity, Campaign Member) → Data Model → Calculated Insights.
+                <b>D360</b>Data Cloud app → Data Streams (Apex Portal Activity, Opportunity, Campaign Member) → Data Model → Calculated Insights.
               </li>
               <li>
-                <b>Pulse on Data 360</b>Tableau Cloud → the “Apex Client Growth … (Data 360)” data sources and the Apex Premium Revenue / Portal Engagement metrics.
+                <b>Pulse on D360</b>Tableau Cloud → the “Apex Client Growth … (Data 360)” data sources and the Apex Premium Revenue / Portal Engagement metrics.
               </li>
               <li>
                 <b>Who sees what</b>Presenter → Under the hood: each person’s sign-in token, with their company and their own tier.

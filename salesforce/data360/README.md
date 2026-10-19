@@ -1,10 +1,10 @@
-# Data 360 setup (Apex client portal)
+# D360 setup (Apex client portal)
 
-Created through the Data 360 Connect REST API (`/services/data/v62.0/ssot/...`) as the org admin.
+Created through the D360 Connect REST API (`/services/data/v62.0/ssot/...`) as the org admin.
 Each JSON file here is the exact request body used. Re-create in another org, in this order:
 
 1. **Streams** — `POST /ssot/data-streams` with `streams/*.json` (CRM connector `SalesforceDotCom_Home`).
-   CRM custom fields appear in Data 360 as `<Name>_c`; types must match what Data 360 expects (it says which on error).
+   CRM custom fields appear in D360 as `<Name>_c`; types must match what D360 expects (it says which on error).
    Then `POST /ssot/data-streams/<name>/actions/run` to refresh.
 2. **Data model objects** — `POST /ssot/data-model-objects` with `dmos/*.json`.
 3. **Mappings** — `POST /ssot/data-model-object-mappings?dataspace=default` with `mappings/*.json` (stream DLO → DMO).

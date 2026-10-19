@@ -1,6 +1,6 @@
-// Data 360 (Data Cloud) for Apex's own business: the client growth view reads harmonized data — Premium upgrades
+// D360 (Data Cloud) for Apex's own business: the client growth view reads harmonized data — Premium upgrades
 // (Salesforce Opportunities), portal engagement (Apex Portal Activity) and launch-campaign reach (Campaign Members) —
-// through the Data 360 Query API (/ssot/query-sql). Calculated insights first; if they haven't run yet, the same
+// through the D360 Query API (/ssot/query-sql). Calculated insights first; if they haven't run yet, the same
 // numbers aggregated from the data model objects. Definitions: salesforce/data360/.
 const STREAMS = ['Apex_Opportunity', 'Apex_Portal_Activity', 'Apex_CampaignMember', 'Apex_Campaign'];
 const INSIGHTS = ['Apex_Client_ARR__cio', 'Apex_Client_Engagement__cio', 'Apex_Campaign_Reach__cio'];
@@ -24,7 +24,7 @@ function createData360(sf, { log = console } = {}) {
         const rows = await query(ciSql);
         if (rows.length) return { rows, from: 'calculated insight' };
       } catch (e) {
-        log.warn(`⚠ Data 360 insight: ${e.message.slice(0, 160)}`);
+        log.warn(`⚠ D360 insight: ${e.message.slice(0, 160)}`);
       }
     }
     return { rows: await query(dmoSql), from: 'data model' };
@@ -60,7 +60,7 @@ function createData360(sf, { log = console } = {}) {
     return { arr, engagement, reach, upgrades, weekly };
   }
 
-  /** Refresh the CRM → Data 360 streams now (the presenter's "Sync to Data 360"); insights follow on their schedule. */
+  /** Refresh the CRM → D360 streams now (the presenter's "Sync to D360"); insights follow on their schedule. */
   async function sync() {
     const results = await Promise.all(
       STREAMS.map((s) =>
@@ -73,8 +73,8 @@ function createData360(sf, { log = console } = {}) {
     return results;
   }
 
-  // Automatic sync: the portal calls requestSync() whenever it writes something Data 360 should see (an upgrade,
-  // seats, follow-ups). Debounced, so a burst of writes starts one refresh. Data 360 then processes it on its queue.
+  // Automatic sync: the portal calls requestSync() whenever it writes something D360 should see (an upgrade,
+  // seats, follow-ups). Debounced, so a burst of writes starts one refresh. D360 then processes it on its queue.
   let timer = null;
   let activityDirty = false;
   function requestSync(reason = 'portal change', delayMs = 15000) {
@@ -83,7 +83,7 @@ function createData360(sf, { log = console } = {}) {
     timer = setTimeout(() => {
       const startedAt = Date.now();
       sync().then((r) => {
-        log.log(`↻ Data 360 sync started (${reason}): ${r.filter((x) => x.ok).map((x) => x.stream).join(', ') || 'none'}`);
+        log.log(`↻ D360 sync started (${reason}): ${r.filter((x) => x.ok).map((x) => x.stream).join(', ') || 'none'}`);
         watchThenRecompute(startedAt);
       });
       activityDirty = false;
@@ -91,7 +91,7 @@ function createData360(sf, { log = console } = {}) {
     timer.unref?.();
   }
   // Once the streams have landed, recompute the calculated insights now instead of waiting for their hourly schedule,
-  // so Data 360's own screens (Data Explorer) match the portal within minutes.
+  // so D360's own screens (Data Explorer) match the portal within minutes.
   let watching = null;
   function watchThenRecompute(startedAt) {
     clearInterval(watching);
@@ -110,7 +110,7 @@ function createData360(sf, { log = console } = {}) {
           )
         )
       );
-      log.log(`↻ Data 360 streams landed — recomputing insights: ${r.join(' · ')}`);
+      log.log(`↻ D360 streams landed — recomputing insights: ${r.join(' · ')}`);
     }, 60000);
     watching.unref?.();
   }
@@ -119,21 +119,21 @@ function createData360(sf, { log = console } = {}) {
   const markActivity = () => (activityDirty = true);
   if (sf.enabled) setInterval(() => activityDirty && requestSync('portal activity', 1000), 15 * 60 * 1000).unref();
 
-  /** When the Opportunity stream last landed in Data 360 (to show newer CRM upgrades as "syncing"). */
+  /** When the Opportunity stream last landed in D360 (to show newer CRM upgrades as "syncing"). */
   async function upgradesRefreshedAt() {
     const d = await sf.request('GET', '/ssot/data-streams/Apex_Opportunity').catch(() => null);
     return d?.lastRefreshDate || null;
   }
 
   const safe = (id) => String(id).replace(/[^a-z0-9_-]/gi, '');
-  /** Portal events per person at one client, last 30 days (Data 360 · Apex Portal Activity). */
+  /** Portal events per person at one client, last 30 days (D360 · Apex Portal Activity). */
   async function peopleActivity(clientId) {
     const rows = await query(
       `SELECT Portal_User_Id__c AS uid, COUNT(Event_Id__c) AS events FROM Apex_Portal_Activity__dlm WHERE Client_Id__c = '${safe(clientId)}' AND Event_Time__c >= current_date - INTERVAL '30' DAY GROUP BY Portal_User_Id__c`
     );
     return Object.fromEntries(rows.map((r) => [r.uid, Number(r.events || 0)]));
   }
-  /** One client's engagement and campaign reach, from Data 360 — the context behind a purchase. */
+  /** One client's engagement and campaign reach, from D360 — the context behind a purchase. */
   async function clientContext(clientId) {
     const [eng, reach] = await Promise.all([
       query(`SELECT COUNT(Event_Id__c) AS events, APPROX_COUNT_DISTINCT(Portal_User_Id__c) AS people FROM Apex_Portal_Activity__dlm WHERE Client_Id__c = '${safe(clientId)}' AND Event_Time__c >= current_date - INTERVAL '30' DAY`),

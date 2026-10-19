@@ -18,7 +18,7 @@ function createDemoClock(sf, { campaign, baselineOpportunities = [], onShift = (
   async function removeAll(ids) {
     for (let i = 0; i < ids.length; i += 200) await sf.request('DELETE', `/composite/sobjects?allOrNone=false&ids=${ids.slice(i, i + 200).join(',')}`);
   }
-  // Seeded portal activity is moved by deleting and recreating it, not by editing the time: in Data 360 the event time is
+  // Seeded portal activity is moved by deleting and recreating it, not by editing the time: in D360 the event time is
   // part of an engagement record's identity, so an edited time arrives as a second row (deletes do carry through).
   const ACTIVITY_FIELDS = ['Event_Id__c', 'Event_Type__c', 'Event_Time__c', 'Account__c', 'Contact__c', 'Client_Id__c', 'Client_Name__c', 'Portal_User_Id__c', 'User_Name__c', 'Persona__c', 'Tier__c', 'Subject__c', 'Amount__c', 'Seats__c', 'Has_Premium_Seat__c', 'Detail__c'];
   async function moveActivity(days) {

@@ -148,7 +148,7 @@ function SeatsDialog({ onClose }) {
                     </button>
                     <input className="input seats-search" placeholder="Search people or titles" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search people" />
                   </div>
-                  {data.activityFrom && <p className="seats-note">Portal visits in the last 30 days, from {data.activityFrom}.</p>}
+                  {data.activityFrom && <p className="seats-note">How often each person used the portal in the last 30 days, from {data.activityFrom}.</p>}
                   <ul className="seats-list">
                     {shown.map((p) => (
                       <li key={p.contactId}>
@@ -159,8 +159,8 @@ function SeatsDialog({ onClose }) {
                             <small>{p.title}</small>
                           </span>
                           {p.visits != null && (
-                            <span className={`seats-visits${p.visits ? '' : ' is-zero'}`} title="Portal visits in the last 30 days, from Data 360">
-                              {p.visits} visit{p.visits === 1 ? '' : 's'}
+                            <span className={`seats-visits${p.visits ? '' : ' is-zero'}`} title="How often this person used the portal in the last 30 days, from D360">
+                              {p.visits ? `Used ${p.visits} time${p.visits === 1 ? '' : 's'}` : 'Not used yet'}
                             </span>
                           )}
                           {p.manager && <span className="persona-chip">Manager</span>}

@@ -1,4 +1,4 @@
-// Apex's own view (Apex staff, e.g. Alex Morgan): client growth from Data 360 — Premium revenue (Salesforce
+// Apex's own view (Apex staff, e.g. Alex Morgan): client growth from D360 — Premium revenue (Salesforce
 // Opportunities), portal engagement (Apex Portal Activity) and launch-campaign reach, harmonized per client.
 // "Create follow-ups" activates the upsell list back into Salesforce as Tasks for each client's rep.
 import { useCallback, useEffect, useState } from 'react';
@@ -51,21 +51,21 @@ export default function ApexGrowth() {
       <Crumbs items={[{ label: 'Apex' }, { label: 'Client growth' }]} />
       <div className="page-head">
         <div>
-          <div className="kicker">Apex · Data 360</div>
+          <div className="kicker">Apex · D360</div>
           <div className="title-row">
             <h1>Client growth</h1>
             <InfoTip kind="data360" label="About Client growth" />
           </div>
-          <p className="lead">Premium revenue, portal engagement and campaign reach for every client — harmonized in Data 360 from Salesforce and the portal.</p>
+          <p className="lead">Premium revenue, portal engagement and campaign reach for every client — harmonized in D360 from Salesforce and the portal.</p>
         </div>
         {d?.syncing > 0 && (
-          <span className="gr-syncing" title="Already in Salesforce; Data 360 is processing the refresh the portal started automatically">
+          <span className="gr-syncing" title="Already in Salesforce; D360 is processing the refresh the portal started automatically">
             <span className="gr-dot" />
-            {d.syncing} new upgrade{d.syncing === 1 ? '' : 's'} syncing to Data 360
+            {d.syncing} new upgrade{d.syncing === 1 ? '' : 's'} syncing to D360
           </span>
         )}
       </div>
-      {state.loading && !d && <div className="bm-panel bm-loading">Loading from Data 360…</div>}
+      {state.loading && !d && <div className="bm-panel bm-loading">Loading from D360…</div>}
       {state.error && <div className="error-msg">{state.error}</div>}
       {d && (
         <div className="gr-grid">
@@ -160,7 +160,7 @@ export default function ApexGrowth() {
           <section className="bm-panel gr-upgrades" aria-labelledby="gr-upg-title">
             <div className="bm-panel-head">
               <h3 id="gr-upg-title">Recent Premium upgrades</h3>
-              <span>Salesforce Opportunities, via Data 360</span>
+              <span>Salesforce Opportunities, via D360</span>
             </div>
             <ul className="gr-list">
               {d.upgrades.map((u, i) => (
@@ -172,7 +172,7 @@ export default function ApexGrowth() {
                       {u.seats ? ` · ${u.seats} seats` : ''}
                     </small>
                   </span>
-                  {u.syncing && <span className="gr-sync-chip">Syncing to Data 360</span>}
+                  {u.syncing && <span className="gr-sync-chip">Syncing to D360</span>}
                   {u.campaign && <span className="persona-chip">Launch campaign</span>}
                   <b className="gr-amt">{money(u.amount)}/yr</b>
                 </li>

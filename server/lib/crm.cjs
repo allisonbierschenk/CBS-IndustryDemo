@@ -8,7 +8,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   const contacts = new Map(); // portal user id → Contact Id (Apex_Portal_User_Id__c)
   const seats = new Set(); // portal user ids with a Premium seat (Contact.Apex_Premium_Seat__c)
   let campaignId = null; // the launch campaign upgrades are attributed to (Opportunity.CampaignId)
-  let enrich = null; // async (tenant) => extra line for the rep's notification (Data 360 context)
+  let enrich = null; // async (tenant) => extra line for the rep's notification (D360 context)
   const setEnricher = (fn) => (enrich = fn);
   let lastError = null;
 
@@ -110,7 +110,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   /** Bell notification (Salesforce custom notification "Apex Portal Upgrade") to the Account owner — the rep. */
   async function notifyOwner(a, { title, body, targetId, tenant }) {
     try {
-      // Data 360 adds what's behind the sale: how engaged the client is and whether the campaign reached them.
+      // D360 adds what's behind the sale: how engaged the client is and whether the campaign reached them.
       const extra = enrich && tenant ? await enrich(tenant).catch(() => '') : '';
       if (extra) body = `${body} ${extra}`;
       if (!notifTypeId) notifTypeId = (await sf.query("SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'Apex_Portal_Upgrade'"))[0]?.Id;
@@ -130,7 +130,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   }
 
   /** Demo reset: put the Account back on Standard so the next demo can upgrade again. The Closed Won Opportunity
-   *  stays — it's the record of the upgrade (and the history Data 360 / Tableau report on). */
+   *  stays — it's the record of the upgrade (and the history D360 / Tableau report on). */
   async function revertUpgrade(tenant) {
     const a = requireAccount(tenant);
     await sf.update('Account', a.id, { Apex_Subscription_Tier__c: 'Standard' });
@@ -202,7 +202,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     return seated.length;
   }
 
-  // ── Portal activity → Salesforce (Apex_Portal_Activity__c) → Data 360 (CRM data stream) ──
+  // ── Portal activity → Salesforce (Apex_Portal_Activity__c) → D360 (CRM data stream) ──
   // Client actions only; background work (attention pre-warm, embed token mints) is noise for engagement analytics.
   const SKIP = new Set(['attention', 'dashboard-token']);
   const queue = [];
@@ -248,7 +248,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   }
   if (sf.enabled) setInterval(flushActivity, 5000).unref();
 
-  /** Portal upgrades created in Salesforce after `since` — not in Data 360 yet. */
+  /** Portal upgrades created in Salesforce after `since` — not in D360 yet. */
   async function upgradesSince(since) {
     if (!since) return [];
     const iso = new Date(since).toISOString().replace(/\.\d{3}Z$/, 'Z');
@@ -275,7 +275,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   }
 
   /** Presenter "Reset demo": back to the baseline — tiers, no seats, only baseline upgrades, campaign funnel as it was,
-   *  no portal Tasks, no live (non-seeded) portal activity. Opportunities etc. leave Data 360 on its next refresh. */
+   *  no portal Tasks, no live (non-seeded) portal activity. Opportunities etc. leave D360 on its next refresh. */
   async function resetDemo({ baselineOpportunities = [], respondedUsers = [], tiers = {} }) {
     const out = {};
     const seated = await sf.query('SELECT Id FROM Contact WHERE Apex_Premium_Seat__c = true');

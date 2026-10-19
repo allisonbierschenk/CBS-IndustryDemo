@@ -275,7 +275,7 @@ function CrmTab({ me }) {
   );
 }
 
-/** Start-over button: the whole demo back to its baseline, in Salesforce, Data 360 and Tableau. */
+/** Start-over button: the whole demo back to its baseline, in Salesforce, D360 and Tableau. */
 function ResetDemo() {
   const { me, reload } = useSession();
   const toast = useToast();
@@ -283,7 +283,7 @@ function ResetDemo() {
   const reset = async () => {
     if (
       !window.confirm(
-        'Reset the demo?\n\n• Northstar back to Standard, all Premium seats removed\n• Upgrades made during demos deleted (Data 360 follows on its next refresh)\n• Campaign responses back to the start (Dana: Clicked)\n• Follow-up tasks, clients’ own goal metrics and live portal activity removed'
+        'Reset the demo?\n\n• Northstar back to Standard, all Premium seats removed\n• Upgrades made during demos deleted (D360 follows on its next refresh)\n• Campaign responses back to the start (Dana: Clicked)\n• Follow-up tasks, clients’ own goal metrics and live portal activity removed'
       )
     )
       return;
@@ -301,7 +301,7 @@ function ResetDemo() {
   return (
     <div className="dock-reset is-primary">
       <span>
-        <b>Start over</b> Back to the starting point in Salesforce, Data 360 and Tableau.
+        <b>Start over</b> Back to the starting point in Salesforce, D360 and Tableau.
       </span>
       <button className="btn btn-dark btn-sm" onClick={reset} disabled={busy}>
         {busy ? 'Resetting…' : 'Reset demo'}

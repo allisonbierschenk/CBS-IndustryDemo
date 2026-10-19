@@ -22,11 +22,11 @@ const { createData360 } = require('./lib/data360.cjs');
 // Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
 const sfClient = createSalesforceClient();
 const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
-const d360 = createData360(sfClient); // Data 360 Query API — Apex's client growth view
-// The rep's upgrade notification carries Data 360's view of the client (engagement + campaign reach).
+const d360 = createData360(sfClient); // D360 Query API — Apex's client growth view
+// The rep's upgrade notification carries D360's view of the client (engagement + campaign reach).
 crm.setEnricher(async (tenant) => {
   const c = await d360.clientContext(tenant.id);
-  return c.events ? `Data 360: ${c.people} people active in the portal in the last 30 days (${c.events} visits)${c.recipients ? `; the launch campaign reached ${c.recipients}` : ''}.` : '';
+  return c.events ? `D360: ${c.people} people used the portal ${c.events} times in the last 30 days${c.recipients ? `, and the launch campaign reached ${c.recipients} of them` : ''}.` : '';
 });
 // Keeps the long-running demo current: campaign "last week" and in progress, seeded history ending today.
 const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
@@ -35,7 +35,7 @@ const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
   onShift: () => d360.requestSync('demo clock', 1000)
 });
 activity.onRecord((e, user, tenant) => {
-  crm.logActivity(e, user, tenant); // portal engagement → Salesforce → Data 360
+  crm.logActivity(e, user, tenant); // portal engagement → Salesforce → D360
   d360.markActivity();
 });
 
@@ -285,7 +285,7 @@ app.post('/api/upgrade', requireUser, async (req, res) => {
 
 app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
 
-// Presenter: put the whole demo back to its starting point (Salesforce, Data 360 on its next refresh, Pulse goals).
+// Presenter: put the whole demo back to its starting point (Salesforce, D360 on its next refresh, Pulse goals).
 app.post('/api/demo/reset', requireUser, async (req, res) => {
   if (!crm.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
   try {
@@ -302,14 +302,14 @@ app.post('/api/demo/reset', requireUser, async (req, res) => {
   }
 });
 
-// ── Apex client growth (Apex staff, e.g. Alex Morgan) — Data 360 ────────────
-// Harmonized in Data 360: Premium upgrades (CRM Opportunities), portal engagement (Apex Portal Activity) and launch
+// ── Apex client growth (Apex staff, e.g. Alex Morgan) — D360 ────────────
+// Harmonized in D360: Premium upgrades (CRM Opportunities), portal engagement (Apex Portal Activity) and launch
 // campaign reach (Campaign Members), one row per client; "next best upsell" = engaged Standard clients the campaign reached.
 app.get('/api/apex/growth', requireUser, async (req, res) => {
   if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
   try {
     const [g, refreshedAt] = await Promise.all([d360.growth(), d360.upgradesRefreshedAt()]);
-    // Upgrades already in Salesforce but not yet processed by Data 360 — shown at once, labeled "syncing".
+    // Upgrades already in Salesforce but not yet processed by D360 — shown at once, labeled "syncing".
     const fresh = await crm.upgradesSince(refreshedAt).catch(() => []);
     const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
     const arr = by(g.arr.rows);
@@ -375,7 +375,7 @@ app.get('/api/apex/growth', requireUser, async (req, res) => {
     res.status(502).json({ error: e.message });
   }
 });
-// Activation: the Data 360 upsell list → follow-up Tasks for each client's Apex rep in Salesforce.
+// Activation: the D360 upsell list → follow-up Tasks for each client's Apex rep in Salesforce.
 app.post('/api/apex/followups', requireUser, async (req, res) => {
   if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
   const picks = Array.isArray(req.body?.clients) ? req.body.clients.slice(0, 20) : [];
@@ -386,7 +386,7 @@ app.post('/api/apex/followups', requireUser, async (req, res) => {
       if (!tenant) continue;
       const t = await crm.createTask(tenant, {
         subject: `Upsell Premium — ${tenant.clientName} is engaged and on Standard`,
-        description: `From Data 360 (Apex client growth): ${p.events} portal events by ${p.people} people in the last 30 days; the launch campaign reached ${p.recipients} of their people; still on Standard. Suggest: Premium seats for their managers.\nRequested by ${req.user.name}.`,
+        description: `From D360 (Apex client growth): ${p.events} portal events by ${p.people} people in the last 30 days; the launch campaign reached ${p.recipients} of their people; still on Standard. Suggest: Premium seats for their managers.\nRequested by ${req.user.name}.`,
         dueInDays: 2
       });
       out.push({ client: tenant.clientName, taskId: t.taskId });
@@ -420,9 +420,9 @@ app.get('/api/apex/freshness', requireUser, async (req, res) => {
 app.get('/api/seats', requireUser, async (req, res) => {
   if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
   try {
-    // Each person's portal use in the last 30 days comes from Data 360, so the admin can see who actually uses it.
+    // Each person's portal use in the last 30 days comes from D360, so the admin can see who actually uses it.
     const [people, activity] = await Promise.all([crm.rosterFor(req.tenant), d360.peopleActivity(req.tenant.id).catch(() => null)]);
-    res.json({ price: store.content.crm?.seatPrice || '', activityFrom: activity ? 'Data 360' : null, people: people.map((p) => ({ ...p, visits: activity ? activity[p.userId] || 0 : null })) });
+    res.json({ price: store.content.crm?.seatPrice || '', activityFrom: activity ? 'D360' : null, people: people.map((p) => ({ ...p, visits: activity ? activity[p.userId] || 0 : null })) });
   } catch (e) {
     res.status(502).json({ error: e.message });
   }

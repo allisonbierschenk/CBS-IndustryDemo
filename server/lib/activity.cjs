@@ -8,7 +8,7 @@ const path = require('path');
 const MAX = 2000;
 const FILE = path.join(__dirname, '..', '..', 'data', 'activity.jsonl');
 const entries = [];
-const listeners = []; // e.g. Salesforce: every entry also becomes an Apex Portal Activity record (→ Data 360)
+const listeners = []; // e.g. Salesforce: every entry also becomes an Apex Portal Activity record (→ D360)
 
 try {
   const lines = fs.readFileSync(FILE, 'utf8').trim().split('\n').filter(Boolean).slice(-MAX);

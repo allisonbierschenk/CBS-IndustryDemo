@@ -102,11 +102,11 @@ export function provenance(key, me, extra = {}) {
       };
     case 'data360':
       return {
-        tag: 'Data 360',
-        freshness: 'Automatic: every upgrade, seat purchase or follow-up starts a Data 360 refresh. New upgrades show here at once, marked “syncing”, until Data 360 has processed them; numbers come from calculated insights once they’ve recomputed, else straight from the data model.',
-        source: 'Data 360 harmonizes three sources into one model per client: Premium upgrades (Salesforce Opportunities), portal engagement (every sign-in, Agent question, goal and request the portal records in Salesforce) and the launch campaign (Campaign Members). Calculated insights compute Premium ARR, seats, engagement and campaign reach; this page reads them with the Data 360 Query API.',
+        tag: 'D360',
+        freshness: 'Automatic: every upgrade, seat purchase or follow-up starts a D360 refresh. New upgrades show here at once, marked “syncing”, until D360 has processed them; numbers come from calculated insights once they’ve recomputed, else straight from the data model.',
+        source: 'D360 harmonizes three sources into one model per client: Premium upgrades (Salesforce Opportunities), portal engagement (every sign-in, Agent question, goal and request the portal records in Salesforce) and the launch campaign (Campaign Members). Calculated insights compute Premium ARR, seats, engagement and campaign reach; this page reads them with the D360 Query API.',
         security: 'Apex staff only — enforced on the server. Clients never see this page or each other’s data.',
-        why: 'Data 360 is what makes CRM, the portal and Tableau one system: the portal’s usage, the CRM’s revenue and the campaign’s reach land in one harmonized model, so Apex can see which campaign drove which upgrade and who to call next — and Create follow-ups sends that back to Salesforce as Tasks for the reps. Without it, each system only knows its own piece.'
+        why: 'D360 is what makes CRM, the portal and Tableau one system: the portal’s usage, the CRM’s revenue and the campaign’s reach land in one harmonized model, so Apex can see which campaign drove which upgrade and who to call next — and Create follow-ups sends that back to Salesforce as Tasks for the reps. Without it, each system only knows its own piece.'
       };
     case 'goals':
       return {

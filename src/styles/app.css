@@ -1211,7 +1211,7 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .seats-total { justify-content: space-between; margin-top: 12px; }
 .seats-total small { font-weight: 400; color: var(--muted, #66706b); }
 
-/* Apex client growth (Data 360) */
+/* Apex client growth (D360) */
 .gr-grid { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; }
 .gr-kpis, .gr-clients { grid-column: 1 / -1; }
 .gr-kpis { display: grid; grid-template-columns: repeat(4, minmax(0, 1fr)); gap: 16px; }

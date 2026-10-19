@@ -13,7 +13,7 @@ const TECH = {
   rls: { label: 'Data security', color: '#1f8a5b', note: 'Row-level security: user attributes in the JWT and a filter on the published data source decide which rows each user sees.' },
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
-  d360: { label: 'Data 360', color: '#5a2fd6', note: 'Harmonizes CRM revenue, portal engagement and campaign reach into one model per client; calculated insights + Query API; activates back to Salesforce.' },
+  d360: { label: 'D360', color: '#5a2fd6', note: 'Harmonizes CRM revenue, portal engagement and campaign reach into one model per client; calculated insights + Query API; activates back to Salesforce.' },
   salesforce: { label: 'Salesforce CRM', color: '#0b5cab', note: 'Apex’s Sales Cloud org is the system of record: client tier on the Account, upgrades as Opportunities, follow-ups as Tasks.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
@@ -373,23 +373,23 @@ const FEATURES = [
     beats: benchmarkBeats(p),
     ask: benchmarkAsk
   }), (p) => (p.plan === 'premium' || p.plan === 'standard' ? null : 'Premium')),
-  F('growth', 'money', 'Apex client growth (Data 360)', () => ({
-    title: 'Close the loop: Apex’s view in Data 360',
+  F('growth', 'money', 'Apex client growth (D360)', () => ({
+    title: 'Close the loop: Apex’s view in D360',
     where: 'Switch user → Alex Morgan → Client growth',
-    do: 'Switch to Alex Morgan (Apex portfolio partner) → Client growth. Point at Premium ARR and “From the launch campaign” — Northstar’s $1,200 seat purchase is there, attributed to the campaign. Then Next best upsell: engaged Standard clients the campaign reached, ranked by portal engagement (the activity every client generates in the portal). Tick the top two → Create follow-ups in Salesforce → switch to Salesforce: Tasks for each client’s rep, with the Data 360 numbers in them. Then Agent → pick “Data 360 · Premium revenue” and ask “How much Premium revenue have we booked this year, and which clients drove it?” — Tableau Pulse answers from the Data 360 data (or “Data 360 · Portal engagement”: “Which clients are most engaged?”). Hover the (i) for the Data 360 story.',
-    say: 'Every click in the portal, every deal in Salesforce and every campaign email lands in Data 360 — one model per client. That’s how Apex knows which campaign paid off and who to call next.',
-    money: 'Data 360 turns the portal into a growth engine: usage signals become the next upsell, and the campaign’s ROI is measured, not guessed.',
+    do: 'Switch to Alex Morgan (Apex portfolio partner) → Client growth. Point at Premium ARR and “From the launch campaign” — Northstar’s $1,200 seat purchase is there, attributed to the campaign. Then Next best upsell: engaged Standard clients the campaign reached, ranked by portal engagement (the activity every client generates in the portal). Tick the top two → Create follow-ups in Salesforce → switch to Salesforce: Tasks for each client’s rep, with the D360 numbers in them. Then Agent → pick “D360 · Premium revenue” and ask “How much Premium revenue have we booked this year, and which clients drove it?” — Tableau Pulse answers from the D360 data (or “D360 · Portal engagement”: “Which clients are most engaged?”). Hover the (i) for the D360 story.',
+    say: 'Every click in the portal, every deal in Salesforce and every campaign email lands in D360 — one model per client. That’s how Apex knows which campaign paid off and who to call next.',
+    money: 'D360 turns the portal into a growth engine: usage signals become the next upsell, and the campaign’s ROI is measured, not guessed.',
     tech: ['d360', 'salesforce', 'portal'],
     beats: [
-      ['Three systems, one model', '“The portal knows usage, Salesforce knows revenue, the campaign knows reach. Data 360 harmonizes all three per client.”'],
+      ['Three systems, one model', '“The portal knows usage, Salesforce knows revenue, the campaign knows reach. D360 harmonizes all three per client.”'],
       ['Measured', '“$1,200 of new ARR from the launch campaign — attributed, not guessed.”'],
       ['Next', '“Northstar’s managers are using it heavily; Meridian is engaged and still on Standard — that’s the next call.”'],
       ['Activated', '“One click: the reps have Tasks in Salesforce with the numbers to make the call.”']
     ],
     ask: [
-      ['What’s in Data 360 exactly?', 'CRM data streams for Opportunity, Campaign, Campaign Member and Apex Portal Activity (every portal sign-in, Agent question, goal, request and upgrade, written to Salesforce by the portal); mapped to three data model objects; calculated insights for Premium ARR and seats, engagement and campaign reach. The page reads them with the Data 360 Query API.'],
-      ['How fresh is it?', 'Automatic: every upgrade starts a Data 360 refresh. A new purchase shows on Client growth at once, marked “syncing”, and the label clears by itself when Data 360 has processed it (usually minutes). Calculated insights recompute hourly; until then the page reads the data model, so numbers never go backwards.'],
-      ['Where does Tableau come in?', 'Tableau Cloud connects to the same Data 360 model, and Pulse metrics on it (Premium ARR, portal engagement) alert Apex leaders — the same governed numbers.']
+      ['What’s in D360 exactly?', 'CRM data streams for Opportunity, Campaign, Campaign Member and Apex Portal Activity (every portal sign-in, Agent question, goal, request and upgrade, written to Salesforce by the portal); mapped to three data model objects; calculated insights for Premium ARR and seats, engagement and campaign reach. The page reads them with the D360 Query API.'],
+      ['How fresh is it?', 'Automatic: every upgrade starts a D360 refresh. A new purchase shows on Client growth at once, marked “syncing”, and the label clears by itself when D360 has processed it (usually minutes). Calculated insights recompute hourly; until then the page reads the data model, so numbers never go backwards.'],
+      ['Where does Tableau come in?', 'Tableau Cloud connects to the same D360 model, and Pulse metrics on it (Premium ARR, portal engagement) alert Apex leaders — the same governed numbers.']
     ]
   }), (p) => (p.id === 'alex' ? null : 'Alex Morgan (Apex)')),
   F('build', 'money', 'Build your own report', () => ({
@@ -462,7 +462,7 @@ const benchmarkAsk = [
 
 // Plain-English: what the audience will see — for presenters who have never seen the portal.
 const ABOUT = {
-  "growth": "Alex (Apex) sees every client’s Premium revenue, portal engagement and campaign reach — harmonized in Data 360 — and turns the next-best upsell into Salesforce Tasks.",
+  "growth": "Alex (Apex) sees every client’s Premium revenue, portal engagement and campaign reach — harmonized in D360 — and turns the next-best upsell into Salesforce Tasks.",
   "campaign": "Open with why the client is here: Apex’s email announcing conversational analytics and anonymized benchmarks — a real Salesforce Campaign every upgrade is attributed to.",
   "signin": "Pick a person — you’re in. No password, no Tableau login.",
   "hood": "The secure token behind the sign-in.",
@@ -571,7 +571,7 @@ export default function DemoGuide() {
             <div className="kicker">The story</div>
             <h2 id="story-title">The client portal is now a revenue-generating machine — and everyone wins</h2>
             <p>
-              Apex Consulting runs on Salesforce and Tableau. Its client portal used to be a cost center — a place to send reports. Now Salesforce, Data 360 and
+              Apex Consulting runs on Salesforce and Tableau. Its client portal used to be a cost center — a place to send reports. Now Salesforce, D360 and
               Tableau work together so that every client visit can become value for the client <i>and</i> revenue for Apex.
             </p>
             <div className="story-wins">
@@ -585,7 +585,7 @@ export default function DemoGuide() {
               <div>
                 <b>Apex wins</b>
                 <span>
-                  One campaign email reached 141 client people. A client upgrades in one click and it’s booked revenue in Salesforce before the dialog closes. Data 360 shows
+                  One campaign email reached 141 client people. A client upgrades in one click and it’s booked revenue in Salesforce before the dialog closes. D360 shows
                   which campaign drove it and who’s next — and the reps already have the follow-up.
                 </span>
               </div>
@@ -602,11 +602,11 @@ export default function DemoGuide() {
               <li>Client experience</li>
               <li>Upgrade</li>
               <li>Revenue in Salesforce</li>
-              <li>Data 360 insight</li>
+              <li>D360 insight</li>
               <li>Next campaign</li>
             </ol>
             <blockquote>
-              “One click by a client became revenue in Salesforce, Data 360 told Apex who to call next, and the AI behind it costs the same no matter how much clients use it.
+              “One click by a client became revenue in Salesforce, D360 told Apex who to call next, and the AI behind it costs the same no matter how much clients use it.
               Apex’s portal isn’t a cost center anymore — it’s a revenue-generating machine.”
             </blockquote>
           </section>
