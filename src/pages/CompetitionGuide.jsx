@@ -30,7 +30,7 @@ const SCENES = [
     beats: [
       {
         do: 'Switch to the Salesforce tab: Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.',
-        say: 'Apex added two things clients wanted: asking questions about their data in plain English, and anonymized benchmarks against their peers.'
+        say: 'Apex recently added two things clients have been asking for to its portal: the ability to ask questions about their own data, which clients now expect, and anonymized benchmarks that show how they compare to their peers.'
       },
       {
         do: 'Scroll to Campaign Members (141) and the Sent / Opened / Clicked numbers.',
