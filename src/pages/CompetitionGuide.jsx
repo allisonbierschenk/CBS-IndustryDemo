@@ -109,8 +109,8 @@ const SCENES = [
         cap: ['Tableau Next on D360 · embedded in Salesforce']
       },
       {
-        do: 'Point at the top two charts side by side: Premium Revenue by Client (left) and Portal Engagement by Client (right).',
-        say: 'Look at these two charts side by side. Northstar is Apex’s most engaged client, and until a minute ago it didn’t pay for Premium. Meridian is next: it uses the portal heavily, the campaign reached it, and it’s still on Standard.'
+        do: 'Point at the top chart, Engagement vs. Premium Revenue by Client: each client’s portal use next to what it pays for Premium.',
+        say: 'This chart puts each client’s portal use right next to what it pays for Premium. Northstar is Apex’s most engaged client, and until a minute ago it didn’t pay for Premium. Meridian is next: it uses the portal heavily, the campaign reached it, and it’s still on Standard.'
       },
       {
         do: 'Switch to the Tableau Next tab → the semantic model “Apex Client Growth”: its canvas shows Portal Activity, Premium Upgrade and Campaign Response, linked by Client Id.',
