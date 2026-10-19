@@ -118,9 +118,9 @@ const SCENES = [
         cap: ['D360 · one model per client · always current']
       },
       {
-        do: 'Switch to the Data Cloud tab → Data Streams (search “Apex”): Apex_Portal_Activity, Apex_Opportunity, Apex_CampaignMember side by side → then the Data Explorer tab, already showing Calculated Insight “Apex Client Premium ARR” (one row per client).',
-        say: 'This is D360 itself. The portal, Salesforce and the campaign flow in here as three streams, and D360 calculates each client’s Premium revenue once, so the portal, Tableau and the AI all work from the same numbers.',
-        cap: ['D360 · Data Explorer · calculated insight']
+        do: 'Switch to the Data Cloud tab → Data Streams (search “Apex”): Apex_Portal_Activity, Apex_Opportunity, Apex_CampaignMember side by side → then the Data Explorer tab, already showing Data Model Object “Apex Premium Upgrade” (one row per Premium purchase: client, amount, seats, campaign).',
+        say: 'This is D360 itself. The portal, Salesforce and the campaign flow in here as three streams and land in one model: here’s every Premium purchase, by client, ready for the portal, Tableau and the AI to use.',
+        cap: ['D360 · Data Explorer · data model']
       },
       {
         do: 'Back to Client growth → Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → switch to Salesforce → Meridian’s Account → Activity: the new Task.',
@@ -162,7 +162,7 @@ const SCENES = [
 
 const PREP = [
   ['Reset', 'Presenter (⌥P) → Switch account → Reset demo. Every take starts from the same baseline.'],
-  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console on the Northstar Enterprises Account · Salesforce Campaigns (the launch campaign) · Data Cloud → Data Streams, searched for “Apex” · Data Cloud → Data Explorer: Data Space default → Object Type “Calculated Insight” → Object “Apex Client Premium ARR” (Edit Columns: client id, Premium ARR, seats).'],
+  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console on the Northstar Enterprises Account · Salesforce Campaigns (the launch campaign) · Data Cloud → Data Streams, searched for “Apex” · Data Cloud → Data Explorer: Data Space default → Object Type “Data Model Object” → type “Apex” → “Apex Premium Upgrade” (Edit Columns: Client Name, Amount, Seats, Close Date, Campaign Id).'],
   ['Warm up', 'Sign in as Dana, Sam and Alex once before recording so Needs attention and the Agent are cached and answer fast.'],
   ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.']
 ];
