@@ -56,7 +56,7 @@ const SCENES = [
       },
       {
         do: 'Hover the Agent icon with the lock badge (nav or a Take action row on Home).',
-        say: 'To ask questions about her data or compare Northstar to its peers, she needs Premium. So her decision is simple: is it worth paying for?'
+        say: 'Everything she wants to know next, why this is happening and how Northstar compares to its peers, sits behind Premium.'
       }
     ]
   },
@@ -67,7 +67,7 @@ const SCENES = [
     beats: [
       {
         do: 'Click Agent → Upgrade your team → point at “Used … times” next to each name → click All managers (20) → Upgrade 20 people.',
-        say: 'Dana decides it is, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it.',
+        say: 'Dana decides it’s worth it, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it.',
         cap: ['D360 · portal use per person']
       },
       {
