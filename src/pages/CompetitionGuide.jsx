@@ -116,6 +116,7 @@ const TIPS = [
   ['Land the numbers', '141 people · 5 clients · 20 seats · $5/user · $1,200/yr · every 100 seats = $6,000/yr. Pause a beat after each.'],
   ['The closing line', 'Record the last two sentences until they’re perfect — it’s what judges remember.'],
   ['Data 360 screen timing', 'The portal starts the Data 360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
+  ['Dates stay current', 'The portal’s demo clock keeps the story fresh by itself: the campaign is always “sent last week” and in progress, and the seeded 30-day history always ends today. Nothing to update before a take.'],
   ['Live final backup', 'Keep a screen recording of Scenes 4–6 in case a live system is slow on the day.']
 ];
 

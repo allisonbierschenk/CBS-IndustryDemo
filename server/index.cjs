@@ -23,6 +23,12 @@ const { createData360 } = require('./lib/data360.cjs');
 const sfClient = createSalesforceClient();
 const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
 const d360 = createData360(sfClient); // Data 360 Query API — Apex's client growth view
+// Keeps the long-running demo current: campaign "last week" and in progress, seeded history ending today.
+const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
+  campaign: store.content.crm?.campaign || null,
+  baselineOpportunities: store.content.crm?.baseline?.opportunities || [],
+  onShift: () => d360.requestSync('demo clock', 1000)
+});
 activity.onRecord((e, user, tenant) => {
   crm.logActivity(e, user, tenant); // portal engagement → Salesforce → Data 360
   d360.markActivity();
