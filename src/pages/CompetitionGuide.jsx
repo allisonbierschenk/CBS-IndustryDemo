@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting stands in for any Salesforce customer, because every one of them has customers of its own: everyone is selling something to someone. When we bring Tableau into that account, the portal they use to serve those customers stops being a cost center and becomes a revenue-generating investment. Add D360, and they can see which customers are ready to buy, and act on it, without anyone pulling reports by hand. Salesforce turns each of those moments into booked revenue. That’s a conversation every Salesforce seller can start with Tableau.',
+        say: 'Apex Consulting stands in for any Salesforce customer, because every one of them has customers of its own: everyone is selling something to someone. Add Tableau, and the portal they use to serve those customers stops being a cost center and becomes a revenue-generating investment. Add D360, and they can see which customers are ready to buy, and act on it, without anyone pulling reports by hand. And Salesforce turns each of those moments into booked revenue.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
