@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting stands in for a customer almost every account team already has: a company that runs on Salesforce and Tableau and shares data with its clients through a portal. Today that portal costs them money. When it starts making them money, it grows with us: more seats, more D360, more Tableau+. In this demo, you’ll see Salesforce and Tableau, working together, turning Apex’s portal into a revenue-generating machine. Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s team stops pulling reports together and spends that time with the clients most ready to buy.',
+        say: 'Apex Consulting stands in for any of our customers, because every one of them has customers of its own: everyone is selling something to someone. With Tableau, the portal they use to serve those customers stops being a cost center and becomes a revenue-generating investment. With D360, they can see which of their customers are ready to buy, and act on it, without anyone pulling reports together by hand. And Salesforce turns each of those moments into booked revenue.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
