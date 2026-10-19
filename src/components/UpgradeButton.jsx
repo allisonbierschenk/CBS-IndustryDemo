@@ -65,8 +65,7 @@ function SeatsDialog({ onClose }) {
   useEffect(() => {
     api('/api/seats')
       .then((d) => {
-        setData(d);
-        setPicked(new Set(d.people.filter((p) => p.manager && !p.seat).map((p) => p.contactId))); // default: the managers
+        setData(d); // nobody pre-selected — the presenter clicks “All managers” on camera
       })
       .catch((e) => setState({ kind: 'error', message: e.message }));
     const onKey = (e) => e.key === 'Escape' && onClose();
