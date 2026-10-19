@@ -23,6 +23,11 @@ const { createData360 } = require('./lib/data360.cjs');
 const sfClient = createSalesforceClient();
 const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
 const d360 = createData360(sfClient); // Data 360 Query API — Apex's client growth view
+// The rep's upgrade notification carries Data 360's view of the client (engagement + campaign reach).
+crm.setEnricher(async (tenant) => {
+  const c = await d360.clientContext(tenant.id);
+  return c.events ? `Data 360: ${c.people} people active in the portal in the last 30 days (${c.events} visits)${c.recipients ? `; the launch campaign reached ${c.recipients}` : ''}.` : '';
+});
 // Keeps the long-running demo current: campaign "last week" and in progress, seeded history ending today.
 const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
   campaign: store.content.crm?.campaign || null,
@@ -415,7 +420,9 @@ app.get('/api/apex/freshness', requireUser, async (req, res) => {
 app.get('/api/seats', requireUser, async (req, res) => {
   if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
   try {
-    res.json({ price: store.content.crm?.seatPrice || '', people: await crm.rosterFor(req.tenant) });
+    // Each person's portal use in the last 30 days comes from Data 360, so the admin can see who actually uses it.
+    const [people, activity] = await Promise.all([crm.rosterFor(req.tenant), d360.peopleActivity(req.tenant.id).catch(() => null)]);
+    res.json({ price: store.content.crm?.seatPrice || '', activityFrom: activity ? 'Data 360' : null, people: people.map((p) => ({ ...p, visits: activity ? activity[p.userId] || 0 : null })) });
   } catch (e) {
     res.status(502).json({ error: e.message });
   }

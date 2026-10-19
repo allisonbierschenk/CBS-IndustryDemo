@@ -8,6 +8,8 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   const contacts = new Map(); // portal user id → Contact Id (Apex_Portal_User_Id__c)
   const seats = new Set(); // portal user ids with a Premium seat (Contact.Apex_Premium_Seat__c)
   let campaignId = null; // the launch campaign upgrades are attributed to (Opportunity.CampaignId)
+  let enrich = null; // async (tenant) => extra line for the rep's notification (Data 360 context)
+  const setEnricher = (fn) => (enrich = fn);
   let lastError = null;
 
   async function refresh() {
@@ -85,7 +87,8 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     await notifyOwner(a, {
       title: `💰 ${tenant.clientName} upgraded to Premium — +${usd(monthly * 12)}/yr`,
       body: `${user.name} upgraded in the Apex client portal (${price}). Closed Won.`,
-      targetId: opp.id
+      targetId: opp.id,
+      tenant
     });
     return { opportunityId: opp.id, url: sf.recordUrl(opp.id) };
   }
@@ -105,8 +108,11 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   const usd = (n) => `$${Number(n || 0).toLocaleString('en-US', { maximumFractionDigits: 0 })}`;
   let notifTypeId = null;
   /** Bell notification (Salesforce custom notification "Apex Portal Upgrade") to the Account owner — the rep. */
-  async function notifyOwner(a, { title, body, targetId }) {
+  async function notifyOwner(a, { title, body, targetId, tenant }) {
     try {
+      // Data 360 adds what's behind the sale: how engaged the client is and whether the campaign reached them.
+      const extra = enrich && tenant ? await enrich(tenant).catch(() => '') : '';
+      if (extra) body = `${body} ${extra}`;
       if (!notifTypeId) notifTypeId = (await sf.query("SELECT Id FROM CustomNotificationType WHERE DeveloperName = 'Apex_Portal_Upgrade'"))[0]?.Id;
       if (!notifTypeId) throw new Error('custom notification type Apex_Portal_Upgrade not found');
       // Running total, so the rep sees what the portal has brought in.
@@ -179,7 +185,8 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     await notifyOwner(a, {
       title: `💰 ${tenant.clientName} bought ${chosen.length} Premium seat${chosen.length === 1 ? '' : 's'} — +${usd(amount)}/yr`,
       body: `${user.name} upgraded ${chosen.length} ${chosen.every((p) => p.manager) ? 'managers' : 'people'} in the Apex client portal (${price} per user). Closed Won.`,
-      targetId: opp.id
+      targetId: opp.id,
+      tenant
     });
     return { opportunityId: opp.id, url: sf.recordUrl(opp.id), seats: chosen.length, amount };
   }
@@ -314,7 +321,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     };
   }
 
-  return { enabled: sf.enabled, resetDemo, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
+  return { enabled: sf.enabled, setEnricher, resetDemo, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
 }
 
 module.exports = { createCrm };

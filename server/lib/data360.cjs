@@ -125,6 +125,23 @@ function createData360(sf, { log = console } = {}) {
     return d?.lastRefreshDate || null;
   }
 
+  const safe = (id) => String(id).replace(/[^a-z0-9_-]/gi, '');
+  /** Portal events per person at one client, last 30 days (Data 360 · Apex Portal Activity). */
+  async function peopleActivity(clientId) {
+    const rows = await query(
+      `SELECT Portal_User_Id__c AS uid, COUNT(Event_Id__c) AS events FROM Apex_Portal_Activity__dlm WHERE Client_Id__c = '${safe(clientId)}' AND Event_Time__c >= current_date - INTERVAL '30' DAY GROUP BY Portal_User_Id__c`
+    );
+    return Object.fromEntries(rows.map((r) => [r.uid, Number(r.events || 0)]));
+  }
+  /** One client's engagement and campaign reach, from Data 360 — the context behind a purchase. */
+  async function clientContext(clientId) {
+    const [eng, reach] = await Promise.all([
+      query(`SELECT COUNT(Event_Id__c) AS events, APPROX_COUNT_DISTINCT(Portal_User_Id__c) AS people FROM Apex_Portal_Activity__dlm WHERE Client_Id__c = '${safe(clientId)}' AND Event_Time__c >= current_date - INTERVAL '30' DAY`),
+      query(`SELECT COUNT(Member_Id__c) AS recipients FROM Apex_Campaign_Response__dlm WHERE Client_Id__c = '${safe(clientId)}'`)
+    ]);
+    return { events: Number(eng[0]?.events || 0), people: Number(eng[0]?.people || 0), recipients: Number(reach[0]?.recipients || 0) };
+  }
+
   /** When each stream / insight last refreshed. */
   async function freshness() {
     const streams = await Promise.all(
@@ -146,7 +163,7 @@ function createData360(sf, { log = console } = {}) {
     return { streams, insights };
   }
 
-  return { enabled: sf.enabled, query, growth, sync, requestSync, markActivity, upgradesRefreshedAt, freshness };
+  return { enabled: sf.enabled, query, peopleActivity, clientContext, growth, sync, requestSync, markActivity, upgradesRefreshedAt, freshness };
 }
 
 module.exports = { createData360 };

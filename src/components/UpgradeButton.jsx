@@ -135,6 +135,11 @@ function SeatsDialog({ onClose }) {
                     <button className="chip-btn" onClick={() => setPicked(new Set(managers.map((p) => p.contactId)))}>
                       All managers ({managers.length})
                     </button>
+                    {data.activityFrom && (
+                      <button className="chip-btn" onClick={() => setPicked(new Set([...open].sort((a, b) => (b.visits || 0) - (a.visits || 0)).slice(0, 20).map((p) => p.contactId)))}>
+                        Most active (20)
+                      </button>
+                    )}
                     <button className="chip-btn" onClick={() => setPicked(new Set(open.map((p) => p.contactId)))}>
                       Everyone ({open.length})
                     </button>
@@ -143,6 +148,7 @@ function SeatsDialog({ onClose }) {
                     </button>
                     <input className="input seats-search" placeholder="Search people or titles" value={q} onChange={(e) => setQ(e.target.value)} aria-label="Search people" />
                   </div>
+                  {data.activityFrom && <p className="seats-note">Portal visits in the last 30 days, from {data.activityFrom}.</p>}
                   <ul className="seats-list">
                     {shown.map((p) => (
                       <li key={p.contactId}>
@@ -152,6 +158,11 @@ function SeatsDialog({ onClose }) {
                             <b>{p.name}</b>
                             <small>{p.title}</small>
                           </span>
+                          {p.visits != null && (
+                            <span className={`seats-visits${p.visits ? '' : ' is-zero'}`} title="Portal visits in the last 30 days, from Data 360">
+                              {p.visits} visit{p.visits === 1 ? '' : 's'}
+                            </span>
+                          )}
                           {p.manager && <span className="persona-chip">Manager</span>}
                           {p.seat && <span className="mini-tier premium">Premium</span>}
                         </label>
