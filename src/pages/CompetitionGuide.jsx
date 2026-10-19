@@ -82,7 +82,7 @@ const SCENES = [
     ]
   },
   {
-    time: '2:20–2:55',
+    time: '2:20–3:10',
     title: 'The client gets the value — at a predictable cost',
     as: 'Sam Patel · Northstar manager (now Premium)',
     beats: [
@@ -95,11 +95,16 @@ const SCENES = [
         do: 'Let the answer and its insight cards show.',
         say: 'Apex can offer this to every client because the AI, built on the Einstein Trust Layer, is included with Tableau+ and unmetered: a predictable cost for Apex, and a predictable price for its clients.',
         cap: ['Einstein Trust Layer', 'Included with Tableau+ · unmetered']
+      },
+      {
+        do: 'Click Industry Benchmarks (top nav): Northstar’s percentile gauge, the trend over time, and where each engagement stands against peers.',
+        say: 'And here are the benchmarks Dana couldn’t see before. This isn’t a Tableau dashboard: it’s Apex’s own design, with Tableau running headless underneath. The VizQL Data Service delivers the same governed numbers, with the same security, to any front end Apex wants to build.',
+        cap: ['Tableau headless · VizQL Data Service']
       }
     ]
   },
   {
-    time: '2:55–4:15',
+    time: '3:10–4:25',
     title: 'The decision that changes for Apex',
     as: 'Apex’s account team · Salesforce',
     beats: [
@@ -125,7 +130,7 @@ const SCENES = [
     ]
   },
   {
-    time: '4:15–5:00',
+    time: '4:25–5:00',
     title: 'The result — and why it scales',
     as: 'Closing frame',
     beats: [
