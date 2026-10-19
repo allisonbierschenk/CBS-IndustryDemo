@@ -7,6 +7,7 @@ Created through the Tableau Next / Semantic Layer REST APIs (API v64.0) as the o
 2. `POST /services/data/v64.0/tableau/workspaces` — `workspace.json`.
 3. `POST /services/data/v64.0/tableau/visualizations` — each `viz-*.json` (count function is `Countd`; weekly dates `DateTruncWeek`).
 4. `POST /services/data/v64.0/tableau/dashboards` — `dashboard.json` ("Apex Client Growth (D360)", 2×2 + title).
+   The layout needs `rowHeight` (10) and `style`; without them the widgets are placed but the page renders blank.
 
 Embed in Salesforce: Lightning App Builder → the page Apex staff use (e.g. Sales - Console Home) → add the Tableau Next
 dashboard component → pick "Apex Client Growth (D360)" → Save / Activate.
