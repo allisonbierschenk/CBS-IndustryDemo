@@ -49,7 +49,7 @@ async function autoUpsellTasks() {
     await crm.createTask(c.t, {
       subject: `${UPSELL_PREFIX} ${c.t.clientName} is engaged and on Standard`,
       description: `Flagged by D360: ${c.people} people at ${c.t.clientName} used the portal ${c.events} times in the last 30 days, and the launch campaign reached ${c.recipients} of them, but they don't pay for Premium yet. Suggest: Premium seats for their managers.`,
-      dueInDays: 2
+      dueInDays: 0 // due today, so it sits in the account manager's Today's Tasks on Home
     });
     console.log(`→ D360 flagged ${c.t.clientName}: follow-up task created for the account manager`);
   }

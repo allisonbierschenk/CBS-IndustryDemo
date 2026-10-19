@@ -118,7 +118,7 @@ const SCENES = [
         cap: ['D360 · three sources, one model, linked by client']
       },
       {
-        do: 'Back to Sales - Console → Meridian Solutions Account → Activity (or the To Do List at the bottom): the task “Upsell Premium — Meridian Solutions is engaged and on Standard”.',
+        do: 'Back to Sales - Console → Home: in Today’s Tasks (right side, next to the dashboard), the task “Upsell Premium — Meridian Solutions is engaged and on Standard”. Click it to show D360’s numbers in the task.',
         say: 'And D360 doesn’t just show it, it acts on it. Meridian’s account manager already has a follow-up task in Salesforce, with the numbers to start the conversation. That’s time the team used to spend pulling reports, now spent with the clients most ready to buy.',
         cap: ['D360 → Salesforce · follow-up task']
       }

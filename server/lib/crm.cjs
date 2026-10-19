@@ -140,7 +140,8 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
   /** A follow-up for the client's Apex account team, on the client's Account. */
   async function createTask(tenant, { user, subject, description, dueInDays = 2 }) {
     const a = requireAccount(tenant);
-    const due = new Date(Date.now() + dueInDays * 86400000).toISOString().slice(0, 10);
+    // Local calendar date (not UTC), so "due today" shows in Salesforce's Today's Tasks for the presenter.
+    const due = new Date(Date.now() + dueInDays * 86400000).toLocaleDateString('en-CA');
     const who = user && contacts.get(user.id);
     const t = await sf.create('Task', { WhatId: a.id, ...(who ? { WhoId: who } : {}), OwnerId: a.ownerId, Subject: subject.slice(0, 255), Description: description, ActivityDate: due, Priority: 'High', Status: 'Not Started' });
     return { taskId: t.id, url: sf.recordUrl(t.id) };
