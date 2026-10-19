@@ -32,12 +32,12 @@ const SCENES = [
     title: 'The client’s decision',
     as: 'Dana Whitfield · Northstar (Standard)',
     click: [
-      'Sign in as Dana → Home: point at Needs attention (Operational Transformation off track).',
+      'Sign in as Dana → Home: point at Needs attention → Take action: Consulting Investment, OFF TRACK (above the expected level, driven by the Operations service line).',
       'Open Value Intelligence — the embedded Tableau dashboard: Northstar’s numbers only. Scroll to the Industry Benchmarks tile, blurred and locked inside the dashboard.',
       'Hover the locked Agent icon (on Home or in the nav).'
     ],
     say: [
-      'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, the portal tells her that Operational Transformation is off track, and why.',
+      'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, the portal tells her that Consulting Investment is off track: Northstar is spending more than expected, and the Operations service line is driving it.',
       'This is her own Tableau dashboard inside Apex’s portal, showing Northstar’s numbers and nobody else’s. In the same dashboard are the benchmarks she can’t see yet.',
       'To ask questions about her data or compare Northstar to its peers, she needs Premium. So her decision is simple: is it worth paying for?'
     ],
@@ -117,6 +117,7 @@ const TIPS = [
   ['The closing line', 'Record the last two sentences until they’re perfect — it’s what judges remember.'],
   ['Data 360 screen timing', 'The portal starts the Data 360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
   ['Dates stay current', 'The portal’s demo clock keeps the story fresh by itself: the campaign is always “sent last week” and in progress, and the seeded 30-day history always ends today. Nothing to update before a take.'],
+  ['Check what’s off track', 'Needs attention is live Tableau Pulse output, so it can change as the data moves. Sign in as Dana before recording and match the line in Scene 3 to the metric shown under Take action (currently Consulting Investment).'],
   ['Live final backup', 'Keep a screen recording of Scenes 4–6 in case a live system is slow on the day.']
 ];
 
