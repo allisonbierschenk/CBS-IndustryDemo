@@ -113,9 +113,9 @@ const SCENES = [
         say: 'Look at these two charts side by side. Northstar is Apex’s most engaged client, and until a minute ago it didn’t pay for Premium. Meridian is next: it uses the portal heavily, the campaign reached it, and it’s still on Standard.'
       },
       {
-        do: 'Switch to the Data Cloud tab → Data Streams (searched for “Apex”): Apex_Portal_Activity, Apex_Opportunity, Apex_CampaignMember side by side.',
-        say: 'Without D360, nobody would see that, because usage, revenue and the campaign live in three different systems. Here they are in D360: three streams, combined into one model per client and kept up to date automatically.',
-        cap: ['D360 · three sources, one model']
+        do: 'Switch to the Tableau Next tab → the semantic model “Apex Client Growth”: its canvas shows Portal Activity, Premium Upgrade and Campaign Response, linked by Client Id.',
+        say: 'Without D360, nobody would see that, because usage, revenue and the campaign live in three different systems. Here they are in D360: three sources, connected by client in one model, and kept up to date automatically.',
+        cap: ['D360 · three sources, one model, linked by client']
       },
       {
         do: 'Back to Sales - Console → Meridian Solutions Account → Activity (or the To Do List at the bottom): the task “Upsell Premium — Meridian Solutions is engaged and on Standard”.',
@@ -152,7 +152,7 @@ const SCENES = [
 
 const PREP = [
   ['Reset', 'Presenter (⌥P) → Switch account → Reset demo. Every take starts from the same baseline.'],
-  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console: Home with the embedded Tableau Next dashboard “Apex Client Growth (D360)”, plus the Meridian Solutions Account · Salesforce Campaigns (the launch campaign) · Data Cloud → Data Streams, searched for “Apex”.'],
+  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console: Home with the embedded Tableau Next dashboard “Apex Client Growth (D360)”, plus the Meridian Solutions Account · Salesforce Campaigns (the launch campaign) · Tableau Next → Semantic Models → “Apex Client Growth” (the canvas with the three objects linked by Client Id).'],
   ['Warm up', 'Sign in as Dana and Sam once before recording so Needs attention and the Agent are cached and answer fast. After Reset demo, D360 recreates the follow-up tasks for its most engaged non-paying clients within minutes.'],
   ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.']
 ];

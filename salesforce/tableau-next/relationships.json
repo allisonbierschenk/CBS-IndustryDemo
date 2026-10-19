@@ -1,0 +1,38 @@
+[
+ {
+  "apiName": "Premium_Upgrade_Portal_Activity",
+  "label": "Premium Upgrade : Portal Activity (by client)",
+  "cardinality": "ManyToMany",
+  "joinType": "Auto",
+  "isEnabled": true,
+  "leftSemanticDefinitionApiName": "Premium_Upgrade",
+  "rightSemanticDefinitionApiName": "Portal_Activity",
+  "criteria": [
+   {
+    "joinOperator": "EqualsIgnoreCase",
+    "leftFieldType": "TableField",
+    "leftSemanticFieldApiName": "Client_Id",
+    "rightFieldType": "TableField",
+    "rightSemanticFieldApiName": "Client_Id"
+   }
+  ]
+ },
+ {
+  "apiName": "Portal_Activity_Campaign_Response",
+  "label": "Portal Activity : Campaign Response (by client)",
+  "cardinality": "ManyToMany",
+  "joinType": "Auto",
+  "isEnabled": true,
+  "leftSemanticDefinitionApiName": "Portal_Activity",
+  "rightSemanticDefinitionApiName": "Campaign_Response",
+  "criteria": [
+   {
+    "joinOperator": "EqualsIgnoreCase",
+    "leftFieldType": "TableField",
+    "leftSemanticFieldApiName": "Client_Id",
+    "rightFieldType": "TableField",
+    "rightSemanticFieldApiName": "Client_Id"
+   }
+  ]
+ }
+]
