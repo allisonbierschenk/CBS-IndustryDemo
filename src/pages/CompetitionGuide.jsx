@@ -14,11 +14,11 @@ const SCENES = [
     beats: [
       {
         do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
-        say: 'Most client portals show clients the most valuable thing a company has, its data, and give it away for free.'
+        say: 'Most client portals show clients the most valuable thing a company has, its data, and they are giving it away for free.'
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s teams stop pulling reports together and spend that time with the clients most ready to buy.',
+        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turning its portal into a revenue-generating machine. Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s team stops pulling reports together and spend that time with the clients most ready to buy.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
@@ -30,11 +30,11 @@ const SCENES = [
     beats: [
       {
         do: 'Switch to the Salesforce tab: Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.',
-        say: 'Apex recently added two things clients have been asking for to its portal: the ability to ask questions about their own data, which clients now expect, and anonymized benchmarks that show how they compare to their peers.'
+        say: 'Apex recently added two things clients have been asking for in the portal: the ability to ask questions about their own data, which users have now come to expect with AI, and anonymized benchmarks that show how they compare to their peers.'
       },
       {
         do: 'Scroll to Campaign Members (141) and the Sent / Opened / Clicked numbers.',
-        say: 'Then Apex announced it with a Salesforce marketing campaign: one email, sent to 141 people across Apex’s five clients.',
+        say: 'Then Apex announced it to all of their clients with a Salesforce email marketing campaign.',
         cap: ['Salesforce Marketing · Campaign']
       }
     ]
