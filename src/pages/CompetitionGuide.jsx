@@ -146,10 +146,16 @@ const SCENES = [
 ];
 
 const PREP = [
-  ['Reset', 'Presenter (⌥P) → Switch account → Reset demo. Every take starts from the same baseline.'],
-  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console: Home with the embedded Tableau Next dashboard “Apex Client Growth (D360)”, plus the Meridian Solutions Account · Salesforce Campaigns (the launch campaign) · Tableau Next → Semantic Models → “Apex Client Growth” (the canvas with the three objects linked by Client Id).'],
-  ['Warm up', 'Sign in as Dana and Sam once before recording so Needs attention and the Agent are cached and answer fast. After Reset demo, D360 recreates the follow-up tasks for its most engaged non-paying clients within minutes.'],
-  ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.']
+  ['45 min before · Reset', 'Portal → Presenter (⌥P) → Switch account → Reset demo. Note the time. D360 needs time to catch up, so never reset right before recording.'],
+  ['30 min before · Check Salesforce', 'Northstar Enterprises Account → Opportunities: no live “Premium seats” purchase (only Vantage and Crestline’s earlier ones, plus any “[Demo reset]” Closed Lost record). The launch Campaign → Campaign Results: Won Opportunities 0, Value Won $0.'],
+  ['15 min before · Check D360 has caught up', 'Data Cloud → Data Streams (search “Apex”): all four streams show Last Run Status Success, with Last Refreshed later than your reset time. If any still says Pending, wait and check again.'],
+  ['10 min before · Check the follow-up task', 'Meridian Solutions Account → Activity: “Upsell Premium — Meridian Solutions is engaged and on Standard”. D360 recreates it automatically after its refresh.'],
+  ['5 min before · Refresh the dashboard', 'Sales - Console → Home → the Tableau Next dashboard’s ▾ menu → Refresh (a page reload doesn’t refresh it). Check: Northstar has no Premium revenue bar; Vantage $1,500 and Crestline $1,080 do.'],
+  ['Warm up', 'Sign in as Dana, then Sam, so Needs attention and the Agent are cached and answer fast. Read Dana’s Needs attention summary and make sure the Scene 3 line still matches it.'],
+  ['Tabs', 'Portal (localhost:5173), signed in as Dana · Salesforce Sales - Console: Home with the dashboard, plus the Meridian Solutions Account · Salesforce Campaigns (the launch campaign) · Tableau Next → Semantic Models → “Apex Client Growth”.'],
+  ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.'],
+  ['During the take', 'Record the scenes in order. Nothing waits on D360: Scene 6 shows the picture before Dana’s purchase (Northstar flagged, Meridian next), and Salesforce shows the purchase instantly in Scene 4. Don’t refresh the dashboard mid-take.'],
+  ['After the take', 'Reset again at least 30 minutes before the next take, then repeat this checklist.']
 ];
 
 const TIPS = [
@@ -203,7 +209,7 @@ export default function CompetitionGuide() {
           </section>
 
           <section className="comp-block">
-            <h2>Before every take</h2>
+            <h2>Ready to record: checklist</h2>
             <ul className="comp-list">
               {PREP.map(([t, d]) => (
                 <li key={t}>
