@@ -14,7 +14,7 @@ const SCENES = [
     beats: [
       {
         do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
-        say: 'Almost every company that serves clients has a client portal, and for most it’s a cost center: a place to send reports nobody pays for.'
+        say: 'Every client portal shows clients the most valuable thing a company has, its data, and almost every company gives that away for free.'
       },
       {
         do: 'Stay on Home.',
