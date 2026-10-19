@@ -130,7 +130,7 @@ const SCENES = [
     as: 'Closing frame',
     beats: [
       {
-        do: 'Cut to the “everyone wins” graphic (The story, top of /guide).',
+        do: 'Cut to the closing slide: open localhost:5173/guide/close in its own tab, full screen (⌘⇧F).',
         say: 'So here’s what changed. Apex’s clients got proof of value, peer benchmarks and an AI analyst, at a price they can plan for.'
       },
       {

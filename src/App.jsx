@@ -5,6 +5,7 @@ import { RequireAuth, RequireView } from './components/RouteGuards.jsx';
 import Activity from './pages/Activity.jsx';
 import Agent from './pages/Agent.jsx';
 import CompetitionGuide from './pages/CompetitionGuide.jsx';
+import ClosingSlide from './pages/ClosingSlide.jsx';
 import ApexGrowth from './pages/ApexGrowth.jsx';
 import Benchmarks from './pages/Benchmarks.jsx';
 import DemoGuide from './pages/DemoGuide.jsx';
@@ -49,6 +50,7 @@ export default function App() {
       {/* Presenter guide — public so it can be opened before signing in */}
       <Route path="/guide" element={<DemoGuide />} />
       <Route path="/guide/competition" element={<CompetitionGuide />} />
+      <Route path="/guide/close" element={<ClosingSlide />} />
       <Route
         element={
           <RequireAuth>

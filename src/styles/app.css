@@ -1350,3 +1350,18 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .home-asks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
 .home-asks-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
 .home-asks-label svg { width: 15px; height: 15px; }
+
+/* Closing slide (video) */
+.close-slide { min-height: 100vh; box-sizing: border-box; padding: 6vh 7vw; display: flex; flex-direction: column; justify-content: center; gap: 4vh; background: radial-gradient(120% 140% at 0% 0%, #1f2a26 0%, #111614 55%, #0c100e 100%); color: #fff; position: relative; }
+.close-brand { position: absolute; top: 4vh; left: 7vw; }
+.close-brand a, .close-brand span, .close-brand b { color: #fff; }
+.close-kicker { color: var(--lime); font-weight: 800; letter-spacing: .12em; text-transform: uppercase; font-size: clamp(12px, 1.1vw, 16px); }
+.close-slide h1 { margin: 0; color: #fff; font-size: clamp(30px, 4.2vw, 64px); letter-spacing: -.025em; line-height: 1.08; }
+.close-slide h1 span { color: var(--lime); }
+.close-wins { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: 2vw; }
+.close-wins section { padding: 2.4vh 1.6vw; border-radius: 20px; background: rgba(255, 255, 255, .06); border: 1px solid rgba(255, 255, 255, .08); }
+.close-wins b { display: block; color: var(--lime); font-size: clamp(16px, 1.5vw, 24px); margin-bottom: 1.2vh; }
+.close-wins ul { margin: 0; padding-left: 1.1em; display: grid; gap: .9vh; font-size: clamp(14px, 1.15vw, 19px); color: rgba(255, 255, 255, .85); }
+.close-loop { list-style: none; display: flex; flex-wrap: wrap; gap: 10px; padding: 0; margin: 0; }
+.close-loop li { padding: 8px 16px; border-radius: 999px; border: 1px solid rgba(255, 255, 255, .22); font-size: clamp(13px, 1vw, 16px); }
+.close-loop li + li::before { content: '→'; margin-right: 10px; color: var(--lime); }
