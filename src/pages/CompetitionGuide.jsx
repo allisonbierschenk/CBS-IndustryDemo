@@ -105,16 +105,16 @@ const SCENES = [
     beats: [
       {
         do: 'Presenter → Switch user → Alex Morgan → Client growth (top nav).',
-        say: 'Now let’s look at Apex’s side. This is Alex, a portfolio partner, whose question every week is: which client should we call next?'
+        say: 'Now let’s look at Apex’s side. This is Alex, a portfolio partner who owns revenue growth across Apex’s clients. Every quarter, leadership asks Alex two questions: did our marketing pay off, and where will next quarter’s revenue come from?'
       },
       {
         do: 'Stay on Client growth (optionally cut to a simple three-boxes graphic: portal usage · Salesforce revenue · Marketing response).',
-        say: 'Without D360, the answer is spread across three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone has to combine all three in a spreadsheet each month, and by then the moment has passed.',
+        say: 'Without D360, answering them means pulling from three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone spends days combining them in a spreadsheet, and by the time it’s done, the numbers are already out of date.',
         cap: ['Without D360: 3 systems · 1 spreadsheet · monthly']
       },
       {
         do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if D360 is still processing).',
-        say: 'With D360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
+        say: 'With D360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and which clients are ready to buy next.',
         cap: ['D360 · one model per client · always current']
       },
       {
@@ -124,7 +124,7 @@ const SCENES = [
       },
       {
         do: 'Back to Client growth → Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → switch to Salesforce → Meridian’s Account → Activity: the new Task.',
-        say: 'And here’s the answer: Meridian and Helix are using the portal, the campaign reached them, and they’re still on Standard. One click gives each of their reps a task in Salesforce, with the numbers to make the call.',
+        say: 'And here’s where next quarter’s revenue comes from: Meridian and Helix are using the portal, the campaign reached them, and they’re still on Standard. One click gives each of their account managers a task in Salesforce, with the numbers to start that conversation.',
         cap: ['Activated to Salesforce · Tasks']
       },
       {
@@ -273,7 +273,7 @@ export default function CompetitionGuide() {
 
           <section className="comp-block comp-d360">
             <h2>Without vs. with D360 — the role in plain words</h2>
-            <p className="muted">Use this to explain D360 to anyone — including yourself before you record. The question is Alex’s: “Who do we call next, and why?”</p>
+            <p className="muted">Use this to explain D360 to anyone — including yourself before you record. The questions are Alex’s, asked by leadership every quarter: “Did our marketing pay off, and where will next quarter’s revenue come from?”</p>
             <div className="comp-vs">
               <div className="is-without">
                 <b>Without D360</b>
@@ -298,11 +298,11 @@ export default function CompetitionGuide() {
                   <li>Everyone uses the same numbers: the portal, Tableau, the Pulse Agent</li>
                   <li>And it acts: the next-best upsell becomes a Task for the rep in Salesforce</li>
                 </ul>
-                <p>The decision — who to call next — is made the day the signal appears, not at month-end.</p>
+                <p>Both questions are answered the day the signal appears, not after days of reporting.</p>
               </div>
             </div>
             <h3>One-line version</h3>
-            <p className="comp-oneliner">“Salesforce knows who bought. The portal knows who’s using it. Marketing knows who was reached. D360 is the only place that knows all three — so it’s the only place that can tell you who to call next.”</p>
+            <p className="comp-oneliner">“Salesforce knows who bought. The portal knows who’s using it. Marketing knows who was reached. D360 is the only place that knows all three, so it’s the only place that can tell Apex what its marketing earned and where its next revenue will come from.”</p>
           </section>
 
           <section className="comp-block">
