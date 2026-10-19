@@ -301,6 +301,14 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     return out;
   }
 
+  /** Is there already an open task on this client's Account whose subject starts with `prefix`? */
+  async function hasOpenTask(tenant, prefix) {
+    const a = accountFor(tenant.id);
+    if (!a) return true;
+    const rows = await sf.query(`SELECT Id FROM Task WHERE WhatId = '${a.id}' AND IsClosed = false AND Subject LIKE '${prefix.replace(/'/g, "\\'")}%' LIMIT 1`);
+    return rows.length > 0;
+  }
+
   /** Presenter view: the client's Account and the records the portal wrote to it, live from Salesforce. */
   async function recordsFor(tenant) {
     const a = requireAccount(tenant);
@@ -321,7 +329,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     };
   }
 
-  return { enabled: sf.enabled, setEnricher, resetDemo, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
+  return { enabled: sf.enabled, hasOpenTask, setEnricher, resetDemo, upgradesSince, logActivity, flushActivity, refresh, tierFor, hasSeat, accountFor, status, recordUpgrade, revertUpgrade, createTask, recordsFor, rosterFor, buySeats, resetSeats };
 }
 
 module.exports = { createCrm };

@@ -93,6 +93,8 @@ function createData360(sf, { log = console } = {}) {
   // Once the streams have landed, recompute the calculated insights now instead of waiting for their hourly schedule,
   // so D360's own screens (Data Explorer) match the portal within minutes.
   let watching = null;
+  let onLanded = null; // async () => … — runs each time fresh data has landed in D360
+  const setOnLanded = (fn) => (onLanded = fn);
   function watchThenRecompute(startedAt) {
     clearInterval(watching);
     const deadline = startedAt + 45 * 60 * 1000;
@@ -111,6 +113,7 @@ function createData360(sf, { log = console } = {}) {
         )
       );
       log.log(`↻ D360 streams landed — recomputing insights: ${r.join(' · ')}`);
+      if (onLanded) onLanded().catch((e) => log.warn(`⚠ after D360 refresh: ${e.message.slice(0, 160)}`));
     }, 60000);
     watching.unref?.();
   }
@@ -163,7 +166,7 @@ function createData360(sf, { log = console } = {}) {
     return { streams, insights };
   }
 
-  return { enabled: sf.enabled, query, peopleActivity, clientContext, growth, sync, requestSync, markActivity, upgradesRefreshedAt, freshness };
+  return { enabled: sf.enabled, setOnLanded, query, peopleActivity, clientContext, growth, sync, requestSync, markActivity, upgradesRefreshedAt, freshness };
 }
 
 module.exports = { createData360 };

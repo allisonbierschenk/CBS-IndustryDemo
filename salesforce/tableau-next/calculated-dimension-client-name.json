@@ -1,0 +1,3 @@
+{"apiName":"Campaign_Client_Name","label":"Client Name","dataType":"Text","description":"Client name for the campaign-reach chart (campaign members carry the client id).",
+ "expression":"CASE [Campaign_Response].[Client_Id] WHEN 'northstar' THEN 'Northstar Enterprises' WHEN 'vantage' THEN 'Vantage Group' WHEN 'crestline' THEN 'Crestline Partners' WHEN 'meridian' THEN 'Meridian Solutions' WHEN 'helix' THEN 'Helix Industries' ELSE [Campaign_Response].[Client_Id] END",
+ "displayCategory":"Discrete"}

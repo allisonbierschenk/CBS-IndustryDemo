@@ -99,43 +99,33 @@ const SCENES = [
     ]
   },
   {
-    time: '2:55–4:25',
+    time: '2:55–4:15',
     title: 'The decision that changes for Apex',
-    as: 'Alex Morgan · Apex portfolio partner',
+    as: 'Apex’s account team · Salesforce',
     beats: [
       {
-        do: 'Presenter → Switch user → Alex Morgan → Client growth (top nav).',
-        say: 'Now let’s look at Apex’s side. This is Alex, a portfolio partner who owns revenue growth across Apex’s clients. Every quarter, leadership asks Alex two questions: did our marketing pay off, and where will next quarter’s revenue come from?'
+        do: 'Switch to Salesforce (Sales - Console) → Home: the embedded Tableau Next dashboard “Apex Client Growth (D360)”.',
+        say: 'Now let’s look at Apex’s side, in Salesforce, where Apex’s account team works. This dashboard is Tableau Next, built on D360, which brings together who uses the portal, who pays for Premium, and who the campaign reached.',
+        cap: ['Tableau Next on D360 · embedded in Salesforce']
       },
       {
-        do: 'Stay on Client growth (optionally cut to a simple three-boxes graphic: portal usage · Salesforce revenue · Marketing response).',
-        say: 'Without D360, answering them means pulling from three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone spends days combining them in a spreadsheet, and by the time it’s done, the numbers are already out of date.',
-        cap: ['Without D360: 3 systems · 1 spreadsheet · monthly']
+        do: 'Point at the top two charts side by side: Premium Revenue by Client (left) and Portal Engagement by Client (right).',
+        say: 'Look at these two charts side by side. Northstar is Apex’s most engaged client, and until a minute ago it didn’t pay for Premium. Meridian is next: it uses the portal heavily, the campaign reached it, and it’s still on Standard.'
       },
       {
-        do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if D360 is still processing).',
-        say: 'With D360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and which clients are ready to buy next.',
-        cap: ['D360 · one model per client · always current']
+        do: 'Switch to the Data Cloud tab → Data Streams (searched for “Apex”): Apex_Portal_Activity, Apex_Opportunity, Apex_CampaignMember side by side.',
+        say: 'Without D360, nobody would see that, because usage, revenue and the campaign live in three different systems. Here they are in D360: three streams, combined into one model per client and kept up to date automatically.',
+        cap: ['D360 · three sources, one model']
       },
       {
-        do: 'Switch to the Data Cloud tab → Data Streams (search “Apex”): Apex_Portal_Activity, Apex_Opportunity, Apex_CampaignMember side by side → then the Data Explorer tab, already showing Data Model Object “Apex Premium Upgrade” (one row per Premium purchase: client, amount, seats, campaign).',
-        say: 'This is D360 itself. The portal, Salesforce and the campaign flow in here as three streams and land in one model: here’s every Premium purchase, by client, ready for the portal, Tableau and the AI to use.',
-        cap: ['D360 · Data Explorer · data model']
-      },
-      {
-        do: 'Back to Client growth → Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → switch to Salesforce → Meridian’s Account → Activity: the new Task.',
-        say: 'And here’s where next quarter’s revenue comes from: Meridian and Helix are using the portal, the campaign reached them, and they’re still on Standard. One click gives each of their account managers a task in Salesforce, with the numbers to start that conversation.',
-        cap: ['Activated to Salesforce · Tasks']
-      },
-      {
-        do: 'Portal → Agent → pick “D360 · Premium revenue” → ask “How much Premium revenue have we booked this year, and which clients drove it?”',
-        say: 'Apex’s leaders can ask the same Tableau AI how much Premium revenue the portal has brought in, and Tableau answers straight from the D360 data.',
-        cap: ['Tableau Pulse on D360']
+        do: 'Back to Sales - Console → Meridian Solutions Account → Activity (or the To Do List at the bottom): the task “Upsell Premium — Meridian Solutions is engaged and on Standard”.',
+        say: 'And D360 doesn’t just show it, it acts on it. Meridian’s account manager already has a follow-up task in Salesforce, with the numbers to start the conversation. That’s time the team used to spend pulling reports, now spent with the clients most ready to buy.',
+        cap: ['D360 → Salesforce · follow-up task']
       }
     ]
   },
   {
-    time: '4:25–5:00',
+    time: '4:15–5:00',
     title: 'The result — and why it scales',
     as: 'Closing frame',
     beats: [
@@ -162,8 +152,8 @@ const SCENES = [
 
 const PREP = [
   ['Reset', 'Presenter (⌥P) → Switch account → Reset demo. Every take starts from the same baseline.'],
-  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console on the Northstar Enterprises Account · Salesforce Campaigns (the launch campaign) · Data Cloud → Data Streams, searched for “Apex” · Data Cloud → Data Explorer: Data Space default → Object Type “Data Model Object” → type “Apex” → “Apex Premium Upgrade” (Edit Columns: Client Name, Amount, Seats, Close Date, Campaign Id).'],
-  ['Warm up', 'Sign in as Dana, Sam and Alex once before recording so Needs attention and the Agent are cached and answer fast.'],
+  ['Tabs', 'Portal (localhost:5173) · Salesforce Sales - Console: Home with the embedded Tableau Next dashboard “Apex Client Growth (D360)”, plus the Meridian Solutions Account · Salesforce Campaigns (the launch campaign) · Data Cloud → Data Streams, searched for “Apex”.'],
+  ['Warm up', 'Sign in as Dana and Sam once before recording so Needs attention and the Agent are cached and answer fast. After Reset demo, D360 recreates the follow-up tasks for its most engaged non-paying clients within minutes.'],
   ['Clean screen', 'Close the presenter dock, hide bookmarks, zoom the browser so text is readable at 1080p.']
 ];
 
@@ -273,7 +263,7 @@ export default function CompetitionGuide() {
 
           <section className="comp-block comp-d360">
             <h2>Without vs. with D360 — the role in plain words</h2>
-            <p className="muted">Use this to explain D360 to anyone — including yourself before you record. The questions are Alex’s, asked by leadership every quarter: “Did our marketing pay off, and where will next quarter’s revenue come from?”</p>
+            <p className="muted">Use this to explain D360 to anyone — including yourself before you record. The question is the account team’s: “Which clients are ready to buy, and how would we know?”</p>
             <div className="comp-vs">
               <div className="is-without">
                 <b>Without D360</b>

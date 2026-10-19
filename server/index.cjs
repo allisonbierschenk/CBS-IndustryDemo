@@ -28,6 +28,34 @@ crm.setEnricher(async (tenant) => {
   const c = await d360.clientContext(tenant.id);
   return c.events ? `D360: ${c.people} people used the portal ${c.events} times in the last 30 days${c.recipients ? `, and the launch campaign reached ${c.recipients} of them` : ''}.` : '';
 });
+// D360 → Salesforce, automatically: each time fresh data lands in D360, the most engaged clients that don't pay
+// for Premium yet (and that the launch campaign reached) get a follow-up task for their account manager.
+const UPSELL_PREFIX = 'Upsell Premium —';
+async function autoUpsellTasks() {
+  const g = await d360.growth();
+  const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
+  const arr = by(g.arr.rows);
+  const eng = by(g.engagement.rows);
+  const reach = by(g.reach.rows);
+  const num = (v) => Number(v || 0);
+  const targets = store.tenants
+    .filter((t) => crm.accountFor(t.id) && (crm.tierFor(t.id) || t.tier) !== 'premium' && !num(arr[t.id]?.premium_arr__c))
+    .map((t) => ({ t, events: num(eng[t.id]?.events__c), people: num(eng[t.id]?.active_people__c), recipients: num(reach[t.id]?.recipients__c) }))
+    .filter((c) => c.events > 0 && c.recipients > 0)
+    .sort((a, b) => b.events - a.events)
+    .slice(0, 2);
+  for (const c of targets) {
+    if (await crm.hasOpenTask(c.t, UPSELL_PREFIX)) continue;
+    await crm.createTask(c.t, {
+      subject: `${UPSELL_PREFIX} ${c.t.clientName} is engaged and on Standard`,
+      description: `Flagged by D360: ${c.people} people at ${c.t.clientName} used the portal ${c.events} times in the last 30 days, and the launch campaign reached ${c.recipients} of them, but they don't pay for Premium yet. Suggest: Premium seats for their managers.`,
+      dueInDays: 2
+    });
+    console.log(`→ D360 flagged ${c.t.clientName}: follow-up task created for the account manager`);
+  }
+}
+d360.setOnLanded(autoUpsellTasks);
+setTimeout(() => d360.enabled && autoUpsellTasks().catch((e) => console.warn(`⚠ upsell tasks: ${e.message.slice(0, 160)}`)), 30000).unref();
 // Keeps the long-running demo current: campaign "last week" and in progress, seeded history ending today.
 const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
   campaign: store.content.crm?.campaign || null,
