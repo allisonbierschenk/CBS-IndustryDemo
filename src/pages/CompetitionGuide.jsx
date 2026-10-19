@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In the next five minutes, you’ll see those products, working together, turn its portal into a revenue-generating machine.',
+        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine.',
         cap: ['Apex Consulting · Salesforce + Tableau customer']
       }
     ]
