@@ -4,100 +4,158 @@ import { Link } from 'react-router-dom';
 import { Brand } from '../components/TopBar.jsx';
 import Icon from '../components/Icon.jsx';
 
+// Each scene is a list of beats: what to click (left) next to the line you say while doing it (right),
+// plus any on-screen caption to add over that beat in editing.
 const SCENES = [
   {
     time: '0:00–0:25',
     title: 'The hook',
-    as: 'Any persona',
-    click: ['Apex portal Home (Northstar’s logo on screen).'],
-    say: [
-      'Almost every company that serves clients has a client portal, and for most of them it’s a cost center: a place to send reports that clients don’t pay for.',
-      'Apex Consulting runs on Salesforce and Tableau. In the next five minutes, you’ll see how those products, working together, turn Apex’s portal into a revenue-generating machine.'
-    ],
-    captions: ['Apex Consulting · Salesforce + Tableau customer']
+    as: 'Portal',
+    beats: [
+      {
+        do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
+        say: 'Almost every company that serves clients has a client portal, and for most of them it’s a cost center: a place to send reports that clients don’t pay for.'
+      },
+      {
+        do: 'Stay on Home.',
+        say: 'Apex Consulting runs on Salesforce and Tableau. In the next five minutes, you’ll see how those products, working together, turn Apex’s portal into a revenue-generating machine.',
+        cap: ['Apex Consulting · Salesforce + Tableau customer']
+      }
+    ]
   },
   {
     time: '0:25–0:45',
     title: 'The problem',
     as: 'Salesforce',
-    click: ['Salesforce → Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.', 'Show the 141 Campaign Members and the Sent / Opened / Clicked funnel.'],
-    say: [
-      'Apex added two things clients have been asking for: the ability to ask questions about their data in plain English, and anonymized benchmarks that show how they compare to their peers.',
-      'Then Apex announced it. This is the campaign in Salesforce: one email, sent to 141 people across Apex’s five clients.'
-    ],
-    captions: ['Salesforce Marketing · Campaign']
+    beats: [
+      {
+        do: 'Switch to the Salesforce tab: Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.',
+        say: 'Apex added two things clients have been asking for: the ability to ask questions about their data in plain English, and anonymized benchmarks that show how they compare to their peers.'
+      },
+      {
+        do: 'Scroll to Campaign Members (141) and the Sent / Opened / Clicked numbers.',
+        say: 'Then Apex announced it with a Salesforce marketing campaign: one email, sent to 141 people across Apex’s five clients.',
+        cap: ['Salesforce Marketing · Campaign']
+      }
+    ]
   },
   {
     time: '0:45–1:40',
     title: 'The client’s decision',
     as: 'Dana Whitfield · Northstar (Standard)',
-    click: [
-      'Sign in as Dana → Home: point at the Needs attention summary — On-Time Milestone Rate, Value Realization Rate and Engagement Health trending down, Consulting Investment trending up.',
-      'Open Value Intelligence — the embedded Tableau dashboard: Northstar’s numbers only. Scroll to the Industry Benchmarks tile, blurred and locked inside the dashboard.',
-      'Hover the locked Agent icon (on Home or in the nav).'
-    ],
-    say: [
-      'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, the portal tells her what needs attention: on-time milestones, value realization and engagement health have been trending down for months, while Northstar’s consulting spend keeps rising.',
-      'This is her own Tableau dashboard inside Apex’s portal, showing Northstar’s numbers and nobody else’s. In the same dashboard are the benchmarks she can’t see yet.',
-      'To ask questions about her data or compare Northstar to its peers, she needs Premium. So her decision is simple: is it worth paying for?'
-    ],
-    captions: ['Tableau Pulse · Needs attention', 'Tableau Embedded · row-level security']
+    beats: [
+      {
+        do: 'Back to the portal (Dana) → Home: point at the Needs attention summary.',
+        say: 'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, Tableau Pulse tells her what needs attention: on-time milestones, value realization and engagement health have been trending down for months, while Northstar’s consulting spend keeps rising.',
+        cap: ['Tableau Pulse · Needs attention']
+      },
+      {
+        do: 'Click Value Intelligence (top nav) → scroll to the blurred, locked Industry Benchmarks tile.',
+        say: 'This is her own Tableau dashboard, embedded in Apex’s portal, showing Northstar’s numbers and nobody else’s. In the same dashboard are the benchmarks she can’t see yet.',
+        cap: ['Tableau Embedded · row-level security']
+      },
+      {
+        do: 'Hover the Agent icon with the lock badge (nav or a Take action row on Home).',
+        say: 'To ask questions about her data or compare Northstar to its peers, she needs Premium. So her decision is simple: is it worth paying for?'
+      }
+    ]
   },
   {
     time: '1:40–2:20',
     title: 'One click, booked revenue',
     as: 'Dana → Salesforce',
-    click: ['Agent (locked) → Upgrade your team → All managers (20) → $1,200/yr → Upgrade 20 people.', 'Switch to Salesforce → the bell 🔔 “Northstar Enterprises bought 20 Premium seats — +$1,200/yr” → click it → the Closed Won Opportunity (20 seats, Dana as decision maker, campaign).'],
-    say: [
-      'Dana decides it is, but only for her 20 managers. At five dollars per user per month, that’s $1,200 a year, confirmed in one click.',
-      'Now look at Salesforce. Apex’s account rep has already been notified, and the opportunity is closed-won and credited to the campaign, before Dana has even closed the window.',
-      'Apex’s portal just made a sale on its own.'
-    ],
-    captions: ['Salesforce Sales Cloud · Opportunity', 'Campaign attribution', 'Salesforce notification']
+    beats: [
+      {
+        do: 'Click Agent → Upgrade your team → All managers (20) → Upgrade 20 people.',
+        say: 'Dana decides it is, but only for her 20 managers. At five dollars per user per month, that’s $1,200 a year, confirmed in one click.'
+      },
+      {
+        do: 'Switch to Salesforce → click the bell 🔔 (“Northstar Enterprises bought 20 Premium seats — +$1,200/yr”) → it opens the Opportunity.',
+        say: 'Now look at Salesforce. Apex’s account rep has already been notified, and in Sales Cloud the opportunity is closed-won and credited to the marketing campaign, before Dana has even closed the window.',
+        cap: ['Salesforce notification', 'Salesforce Sales Cloud · Opportunity · campaign attribution']
+      },
+      {
+        do: 'Stay on the Opportunity (20 seats, Dana as decision maker, the campaign).',
+        say: 'Apex’s portal just made a sale on its own.'
+      }
+    ]
   },
   {
     time: '2:20–2:55',
     title: 'The client gets the value — at a predictable cost',
     as: 'Sam Patel · Northstar manager (now Premium)',
-    click: ['Switch user → Sam Patel → Agent → “Which engagement is furthest behind plan, and why?” → the answer.'],
-    say: [
-      'Sam is one of those 20 managers, so he has Premium now. He asks which engagement is furthest behind plan and why, and he gets a plain-English answer built from Northstar’s own numbers.',
-      'Apex can offer this to every client because the AI is included with Tableau+ and unmetered. That means a predictable cost for Apex, and a predictable price for its clients.'
-    ],
-    captions: ['Tableau Pulse Agent', 'Einstein Trust Layer', 'Included with Tableau+ · unmetered']
+    beats: [
+      {
+        do: 'Portal → Presenter (⌥P) → Switch user → Sam Patel → Agent → ask “Which engagement is furthest behind plan, and why?”',
+        say: 'Sam is one of those 20 managers, so he has Premium now. He asks the Tableau Pulse agent which engagement is furthest behind plan and why, and he gets a plain-English answer built from Northstar’s own numbers.',
+        cap: ['Tableau Pulse Agent']
+      },
+      {
+        do: 'Let the answer and its insight cards show.',
+        say: 'Apex can offer this to every client because the AI, built on the Einstein Trust Layer, is included with Tableau+ and unmetered. That means a predictable cost for Apex, and a predictable price for its clients.',
+        cap: ['Einstein Trust Layer', 'Included with Tableau+ · unmetered']
+      }
+    ]
   },
   {
     time: '2:55–4:25',
     title: 'The decision that changes for Apex',
     as: 'Alex Morgan · Apex portfolio partner',
-    click: [
-      'Switch user → Alex Morgan → Client growth: point at “From the launch campaign” (Northstar’s $1,200, marked syncing if Data 360 is still processing).',
-      'Switch to the Data Cloud app → Data Explorer → Calculated Insight “Apex Client Premium ARR”: one row per client — the same numbers, in Data 360 itself. (Optional, 3 seconds: Data Streams list — Apex Portal Activity, Apex Opportunity, Apex Campaign Member.)',
-      'Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → show a Task on the Account.',
-      'Agent → “Data 360 · Premium revenue” → “How much Premium revenue have we booked this year, and which clients drove it?”'
-    ],
-    say: [
-      'Now let’s look at Apex’s side. This is Alex, a portfolio partner, whose question every week is: which client should we call next?',
-      'Without Data 360, the answer is spread across three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone has to combine all three in a spreadsheet each month, and by then the moment has passed.',
-      'With Data 360, all three come together for every client, all the time. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
-      'This is Data 360 itself. It calculates each client’s Premium revenue once, so the portal, Tableau and the AI all work from the same numbers.',
-      'And here’s the answer: Meridian and Helix are using the portal, the campaign reached them, and they’re still on Standard. One click gives each of their reps a task in Salesforce, with the numbers to make the call.',
-      'Apex’s leaders can also ask the AI how much Premium revenue the portal has brought in, and the answer comes straight from Data 360.'
-    ],
-    captions: ['Without Data 360: 3 systems · 1 spreadsheet · monthly', 'Data 360 · one model per client · always current', 'Data 360 · Data Explorer', 'Activated to Salesforce · Tasks', 'Tableau Pulse on Data 360']
+    beats: [
+      {
+        do: 'Presenter → Switch user → Alex Morgan → Client growth (top nav).',
+        say: 'Now let’s look at Apex’s side. This is Alex, a portfolio partner, whose question every week is: which client should we call next?'
+      },
+      {
+        do: 'Stay on Client growth (optionally cut to a simple three-boxes graphic: portal usage · Salesforce revenue · Marketing response).',
+        say: 'Without Data 360, the answer is spread across three systems: who uses the portal is in its logs, who bought is in Salesforce, and who opened the campaign is in Marketing. Someone has to combine all three in a spreadsheet each month, and by then the moment has passed.',
+        cap: ['Without Data 360: 3 systems · 1 spreadsheet · monthly']
+      },
+      {
+        do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if Data 360 is still processing).',
+        say: 'With Data 360, all three come together for every client, all the time. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
+        cap: ['Data 360 · one model per client · always current']
+      },
+      {
+        do: 'Switch to the Data Cloud tab → Data Explorer → Calculated Insight “Apex Client Premium ARR”.',
+        say: 'This is Data 360 itself. It calculates each client’s Premium revenue once, so the portal, Tableau and the AI all work from the same numbers.',
+        cap: ['Data 360 · Data Explorer · calculated insight']
+      },
+      {
+        do: 'Back to Client growth → Next best upsell: tick Meridian and Helix → Create follow-ups in Salesforce → switch to Salesforce → Meridian’s Account → Activity: the new Task.',
+        say: 'And here’s the answer: Meridian and Helix are using the portal, the campaign reached them, and they’re still on Standard. One click gives each of their reps a task in Salesforce, with the numbers to make the call.',
+        cap: ['Activated to Salesforce · Tasks']
+      },
+      {
+        do: 'Portal → Agent → pick “Data 360 · Premium revenue” → ask “How much Premium revenue have we booked this year, and which clients drove it?”',
+        say: 'Apex’s leaders can ask the same Tableau AI how much Premium revenue the portal has brought in, and Tableau answers straight from the Data 360 data.',
+        cap: ['Tableau Pulse on Data 360']
+      }
+    ]
   },
   {
     time: '4:25–5:00',
     title: 'The result — and why it scales',
     as: 'Closing frame',
-    click: ['The “everyone wins” graphic (The story, top of /guide) — or back to Client growth.'],
-    say: [
-      'So here’s what changed. Apex’s clients got proof of value, peer benchmarks and an AI analyst, at a price they can plan for.',
-      'Apex got booked revenue, a measurable return on its campaign, and its next deals already on reps’ lists, without adding headcount. Every 100 seats adds $6,000 a year in recurring revenue.',
-      'And any Tableau customer with a client portal can do the same, with Salesforce, Data 360 and Tableau working as one platform.',
-      'Apex’s portal isn’t a cost center anymore. It’s a revenue-generating machine.'
-    ],
-    captions: ['Salesforce · Data 360 · Tableau — one platform']
+    beats: [
+      {
+        do: 'Cut to the “everyone wins” graphic (The story, top of /guide).',
+        say: 'So here’s what changed. Apex’s clients got proof of value, peer benchmarks and an AI analyst, at a price they can plan for.'
+      },
+      {
+        do: 'Hold on the graphic.',
+        say: 'Apex got booked revenue, a measurable return on its campaign, and its next deals already on reps’ lists, without adding headcount. Every 100 seats adds $6,000 a year in recurring revenue.'
+      },
+      {
+        do: 'Hold on the graphic.',
+        say: 'And any Tableau customer with a client portal can do the same, with Salesforce, Data 360 and Tableau working as one platform.',
+        cap: ['Salesforce · Data 360 · Tableau — one platform']
+      },
+      {
+        do: 'Hold — end on the line.',
+        say: 'Apex’s portal isn’t a cost center anymore. It’s a revenue-generating machine.'
+      }
+    ]
   }
 ];
 
@@ -112,7 +170,7 @@ const TIPS = [
   ['Record scene by scene', 'One clip per scene, in order, then stitch. Retakes become cheap and the pacing stays tight.'],
   ['Load before you record', 'Open each page first, then start recording. Cut any Agent “thinking” time in the edit — it’s fine to say “answers in seconds”.'],
   ['Voiceover separately', 'Record the voiceover from this script on its own track; match the clicks to it. At a natural ~140 words a minute it runs about 3:45 — the rest of the 5:00 is clicks and pauses, so don’t rush.'],
-  ['Say value, show technology', 'Don’t name the products out loud — add them as on-screen captions (below). Judges credit every name they see without costing you seconds.'],
+  ['Name the product as it works', 'Each line names its product at the moment it does something — “Tableau Pulse tells her…”, “Data 360 brings all three together…”. Say the name clearly; don’t stop to explain it. The dark chips under each click are the product for that step, and double as optional on-screen captions.'],
   ['Land the numbers', '141 people · 5 clients · 20 seats · $5/user · $1,200/yr · every 100 seats = $6,000/yr. Pause a beat after each.'],
   ['The closing line', 'Record the last two sentences until they’re perfect — it’s what judges remember.'],
   ['Data 360 screen timing', 'The portal starts the Data 360 refresh and recomputes the insights by itself — Data Explorer shows a new purchase a few minutes after it’s made (Client growth shows it instantly, marked syncing). Record the Data Explorer clip once it has landed, or show the baseline clients.'],
@@ -129,7 +187,7 @@ const CAPTION_STYLE = [
 ];
 
 export default function CompetitionGuide() {
-  const words = SCENES.reduce((n, s) => n + s.say.join(' ').split(/\s+/).length, 0);
+  const words = SCENES.reduce((n, s) => n + s.beats.map((b) => b.say).join(' ').split(/\s+/).length, 0);
   return (
     <div className="frame">
       <div className="page">
@@ -181,26 +239,30 @@ export default function CompetitionGuide() {
                       {s.time} · {s.as}
                     </span>
                   </div>
-                  <div className="comp-click">
-                    <b>Click</b>
-                    <ol>
-                      {s.click.map((c) => (
-                        <li key={c}>{c}</li>
-                      ))}
-                    </ol>
-                  </div>
-                  <div className="comp-say">
-                    <b>Say</b>
-                    {s.say.map((l) => (
-                      <p key={l}>“{l}”</p>
-                    ))}
-                  </div>
-                  <div className="comp-captions">
-                    <b>On-screen text</b>
-                    {s.captions.map((c) => (
-                      <span key={c} className="comp-cap">
-                        {c}
-                      </span>
+                  <div className="comp-beats">
+                    <div className="comp-beats-head">
+                      <span>Click</span>
+                      <span>Say</span>
+                    </div>
+                    {s.beats.map((b, k) => (
+                      <div key={k} className="comp-beat">
+                        <div className="comp-do">
+                          <span className="comp-step">{k + 1}</span>
+                          <span>
+                            {b.do}
+                            {b.cap?.length > 0 && (
+                              <span className="comp-beat-caps">
+                                {b.cap.map((c) => (
+                                  <span key={c} className="comp-cap">
+                                    {c}
+                                  </span>
+                                ))}
+                              </span>
+                            )}
+                          </span>
+                        </div>
+                        <p className="comp-line">“{b.say}”</p>
+                      </div>
                     ))}
                   </div>
                 </div>
@@ -243,27 +305,31 @@ export default function CompetitionGuide() {
           </section>
 
           <section className="comp-block">
-            <h2>Caption sheet (for editing)</h2>
-            <p className="muted">Add these as on-screen text over the recording. Name the technology in captions; spend your voice on value.</p>
+            <h2>Product by step (optional captions)</h2>
+            <p className="muted">Where each product is named in the voiceover. If you add on-screen text later, use these.</p>
             <table className="comp-table">
               <thead>
                 <tr>
                   <th>When</th>
                   <th>Scene</th>
+                  <th>At</th>
                   <th>On-screen text</th>
                 </tr>
               </thead>
               <tbody>
                 {SCENES.flatMap((s) =>
-                  s.captions.map((c, j) => (
-                    <tr key={`${s.title}-${c}`}>
-                      <td>{j === 0 ? s.time : ''}</td>
-                      <td>{j === 0 ? s.title : ''}</td>
-                      <td>
-                        <span className="comp-cap">{c}</span>
-                      </td>
-                    </tr>
-                  ))
+                  s.beats
+                    .flatMap((b, k) => (b.cap || []).map((c) => ({ c, k })))
+                    .map(({ c, k }, j) => (
+                      <tr key={`${s.title}-${c}`}>
+                        <td>{j === 0 ? s.time : ''}</td>
+                        <td>{j === 0 ? s.title : ''}</td>
+                        <td>Step {k + 1}</td>
+                        <td>
+                          <span className="comp-cap">{c}</span>
+                        </td>
+                      </tr>
+                    ))
                 )}
               </tbody>
             </table>
