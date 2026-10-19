@@ -14,11 +14,11 @@ const SCENES = [
     beats: [
       {
         do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
-        say: 'Almost every company that serves clients has a client portal, and for most of them it’s a cost center: a place to send reports that clients don’t pay for.'
+        say: 'Almost every company that serves clients has a client portal, and for most it’s a cost center: a place to send reports nobody pays for.'
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In the next five minutes, you’ll see how those products, working together, turn Apex’s portal into a revenue-generating machine.',
+        say: 'Apex Consulting runs on Salesforce and Tableau. In the next five minutes, you’ll see those products, working together, turn its portal into a revenue-generating machine.',
         cap: ['Apex Consulting · Salesforce + Tableau customer']
       }
     ]
@@ -30,7 +30,7 @@ const SCENES = [
     beats: [
       {
         do: 'Switch to the Salesforce tab: Campaigns → “Partner portal update: conversational analytics + anonymized benchmarks”.',
-        say: 'Apex added two things clients have been asking for: the ability to ask questions about their data in plain English, and anonymized benchmarks that show how they compare to their peers.'
+        say: 'Apex added two things clients wanted: asking questions about their data in plain English, and anonymized benchmarks against their peers.'
       },
       {
         do: 'Scroll to Campaign Members (141) and the Sent / Opened / Clicked numbers.',
@@ -66,12 +66,13 @@ const SCENES = [
     as: 'Dana → Salesforce',
     beats: [
       {
-        do: 'Click Agent → Upgrade your team → All managers (20) → Upgrade 20 people.',
-        say: 'Dana decides it is, but only for her 20 managers. At five dollars per user per month, that’s $1,200 a year, confirmed in one click.'
+        do: 'Click Agent → Upgrade your team → point at the purple “visits” next to each name → click All managers (20) → Upgrade 20 people.',
+        say: 'Dana decides it is, but only for her 20 managers. Data 360 shows her how much each person uses the portal, so she knows who’ll get value. At five dollars per user per month, that’s $1,200 a year, in one click.',
+        cap: ['Data 360 · portal visits per person']
       },
       {
-        do: 'Switch to Salesforce → click the bell 🔔 (“Northstar Enterprises bought 20 Premium seats — +$1,200/yr”) → it opens the Opportunity.',
-        say: 'Now look at Salesforce. Apex’s account rep has already been notified, and in Sales Cloud the opportunity is closed-won and credited to the marketing campaign, before Dana has even closed the window.',
+        do: 'Switch to Salesforce → click the bell 🔔 (“Northstar Enterprises bought 20 Premium seats — +$1,200/yr”, with the Data 360 line underneath) → it opens the Opportunity.',
+        say: 'Now look at Salesforce. Apex’s account rep has already been notified, and Data 360 adds what’s behind the sale: forty Northstar people have been active in the portal this month, and the campaign reached all of them. In Sales Cloud the opportunity is closed-won and credited to the campaign, before Dana has even closed the window.',
         cap: ['Salesforce notification', 'Salesforce Sales Cloud · Opportunity · campaign attribution']
       },
       {
@@ -92,7 +93,7 @@ const SCENES = [
       },
       {
         do: 'Let the answer and its insight cards show.',
-        say: 'Apex can offer this to every client because the AI, built on the Einstein Trust Layer, is included with Tableau+ and unmetered. That means a predictable cost for Apex, and a predictable price for its clients.',
+        say: 'Apex can offer this to every client because the AI, built on the Einstein Trust Layer, is included with Tableau+ and unmetered: a predictable cost for Apex, and a predictable price for its clients.',
         cap: ['Einstein Trust Layer', 'Included with Tableau+ · unmetered']
       }
     ]
@@ -144,7 +145,7 @@ const SCENES = [
       },
       {
         do: 'Hold on the graphic.',
-        say: 'Apex got booked revenue, a measurable return on its campaign, and its next deals already on reps’ lists, without adding headcount. Every 100 seats adds $6,000 a year in recurring revenue.'
+        say: 'Apex got booked revenue, a measurable return on its campaign, and its next deals already on reps’ lists, without adding headcount.'
       },
       {
         do: 'Hold on the graphic.',
