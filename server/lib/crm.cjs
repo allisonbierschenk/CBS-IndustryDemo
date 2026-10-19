@@ -184,7 +184,7 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     await markResponded(user);
     await notifyOwner(a, {
       title: `💰 ${tenant.clientName} bought ${chosen.length} Premium seat${chosen.length === 1 ? '' : 's'} — +${usd(amount)}/yr`,
-      body: `${user.name} upgraded ${chosen.length} ${chosen.every((p) => p.manager) ? 'managers' : 'people'} in the Apex client portal (${price} per user). Closed Won.`,
+      body: `${user.name} upgraded ${chosen.length} ${chosen.every((p) => p.manager) ? 'managers' : 'people'} in the Apex client portal (at ${price}). Closed Won.`,
       targetId: opp.id,
       tenant
     });
