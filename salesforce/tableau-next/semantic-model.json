@@ -1,0 +1,6 @@
+{"apiName":"Apex_Client_Growth","label":"Apex Client Growth","dataspace":"default","description":"Apex's client growth: Premium upgrades (Salesforce Opportunities), portal engagement and launch-campaign reach — harmonized in D360.",
+ "semanticDataObjects":[
+  {"apiName":"Premium_Upgrade","label":"Premium Upgrade","dataObjectName":"Apex_Premium_Upgrade__dlm","dataObjectType":"Dmo","shouldIncludeAllFields":true},
+  {"apiName":"Portal_Activity","label":"Portal Activity","dataObjectName":"Apex_Portal_Activity__dlm","dataObjectType":"Dmo","shouldIncludeAllFields":true},
+  {"apiName":"Campaign_Response","label":"Campaign Response","dataObjectName":"Apex_Campaign_Response__dlm","dataObjectType":"Dmo","shouldIncludeAllFields":true}
+ ]}

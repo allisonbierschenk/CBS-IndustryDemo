@@ -15,6 +15,57 @@ const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const activity = require('./lib/activity.cjs');
 const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
+const { createSalesforceClient } = require('./lib/salesforce.cjs');
+const { createCrm } = require('./lib/crm.cjs');
+const { createData360 } = require('./lib/data360.cjs');
+
+// Apex's Salesforce org is the system of record for each client's subscription tier (see lib/crm.cjs).
+const sfClient = createSalesforceClient();
+const crm = createCrm(sfClient, { campaign: store.content.crm?.campaign || null });
+const d360 = createData360(sfClient); // D360 Query API — Apex's client growth view
+// The rep's upgrade notification carries D360's view of the client (engagement + campaign reach).
+crm.setEnricher(async (tenant) => {
+  const c = await d360.clientContext(tenant.id);
+  return c.events ? `D360: ${c.people} people used the portal ${c.events} times in the last 30 days${c.recipients ? `, and the launch campaign reached ${c.recipients} of them` : ''}.` : '';
+});
+// D360 → Salesforce, automatically: each time fresh data lands in D360, the most engaged clients that don't pay
+// for Premium yet (and that the launch campaign reached) get a follow-up task for their account manager.
+const UPSELL_PREFIX = 'Upsell Premium —';
+async function autoUpsellTasks() {
+  const g = await d360.growth();
+  const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
+  const arr = by(g.arr.rows);
+  const eng = by(g.engagement.rows);
+  const reach = by(g.reach.rows);
+  const num = (v) => Number(v || 0);
+  const targets = store.tenants
+    .filter((t) => crm.accountFor(t.id) && (crm.tierFor(t.id) || t.tier) !== 'premium' && !num(arr[t.id]?.premium_arr__c))
+    .map((t) => ({ t, events: num(eng[t.id]?.events__c), people: num(eng[t.id]?.active_people__c), recipients: num(reach[t.id]?.recipients__c) }))
+    .filter((c) => c.events > 0 && c.recipients > 0)
+    .sort((a, b) => b.events - a.events)
+    .slice(0, 2);
+  for (const c of targets) {
+    if (await crm.hasOpenTask(c.t, UPSELL_PREFIX)) continue;
+    await crm.createTask(c.t, {
+      subject: `${UPSELL_PREFIX} ${c.t.clientName} is engaged and on Standard`,
+      description: `Flagged by D360: ${c.people} people at ${c.t.clientName} used the portal ${c.events} times in the last 30 days, and the launch campaign reached ${c.recipients} of them, but they don't pay for Premium yet. Suggest: Premium seats for their managers.`,
+      dueInDays: 2
+    });
+    console.log(`→ D360 flagged ${c.t.clientName}: follow-up task created for the account manager`);
+  }
+}
+d360.setOnLanded(autoUpsellTasks);
+setTimeout(() => d360.enabled && autoUpsellTasks().catch((e) => console.warn(`⚠ upsell tasks: ${e.message.slice(0, 160)}`)), 30000).unref();
+// Keeps the long-running demo current: campaign "last week" and in progress, seeded history ending today.
+const demoClock = require('./lib/demo-clock.cjs').createDemoClock(sfClient, {
+  campaign: store.content.crm?.campaign || null,
+  baselineOpportunities: store.content.crm?.baseline?.opportunities || [],
+  onShift: () => d360.requestSync('demo clock', 1000)
+});
+activity.onRecord((e, user, tenant) => {
+  crm.logActivity(e, user, tenant); // portal engagement → Salesforce → D360
+  d360.markActivity();
+});
 
 const env = {
   server: (process.env.TABLEAU_SERVER || '').replace(/\/+$/, ''),
@@ -74,16 +125,41 @@ app.use((req, res, next) => {
 });
 
 // ── Session helpers ─────────────────────────────────────────────────────────
-// Demo upgrade: a Standard client can "buy" Premium during the demo. It lives only in this portal session
-// (signed cookie), so signing out or switching users resets it. While upgraded, the tenant is treated as
-// Premium and the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+// A client's tier comes from their Salesforce Account (Apex_Subscription_Tier__c) when Salesforce is configured,
+// else from tenants.json. Demo upgrade: a Standard client "buys" Premium during the demo — recorded in Salesforce
+// as a Closed Won Opportunity + tier change, and flagged in this portal session (signed cookie); signing out or
+// switching users puts the Account back on Standard (the Opportunity stays as the record of the upgrade). While Premium, the JWT's 'subscription tier' attribute says Premium, so Tableau sees it too.
+// A person is Premium if their company is, or if their company bought them a Premium seat (Contact.Apex_Premium_Seat__c).
+function crmTier(user) {
+  if (!user) return null;
+  const company = crm.tierFor(user.tenantId);
+  return company !== 'premium' && crm.hasSeat(user.id) ? 'premium' : company;
+}
+const isApexGrowth = (user) => (user?.roles || []).includes('apex-growth') && d360.enabled;
+const isSeatAdmin = (user) => (user?.roles || []).includes('seat-admin') && crm.enabled;
 function withUpgrade(user, s) {
-  if (!user || !s?.upgraded) return user;
-  return { ...user, attributes: { ...user.attributes, 'subscription tier': ['Premium'] }, upgradedInSession: true };
+  if (!user) return user;
+  const tier = s?.upgraded ? 'premium' : crmTier(user);
+  if (!tier) return user;
+  return { ...user, attributes: { ...user.attributes, 'subscription tier': [tier === 'premium' ? 'Premium' : 'Standard'] }, upgradedInSession: Boolean(s?.upgraded), crmTier: tier };
 }
 function tenantForSession(user) {
   const t = store.tenantFor(user);
-  return t && user?.upgradedInSession ? { ...t, tier: 'premium', upgradedInSession: true } : t;
+  if (!t) return t;
+  if (user?.upgradedInSession) return { ...t, tier: 'premium', upgradedInSession: true };
+  return user?.crmTier ? { ...t, tier: user.crmTier } : t;
+}
+// Sign-out / user switch: undo this session's demo upgrade in Salesforce too.
+async function revertSessionUpgrade(s) {
+  if (!s?.upgraded) return;
+  const tenant = store.tenantFor(store.findUserById(s.uid));
+  if (!tenant || !crm.enabled) return;
+  try {
+    await crm.revertUpgrade(tenant);
+    console.log(`→ demo reset: ${tenant.clientName} back on Standard in Salesforce (upgrade Opportunity kept)`);
+  } catch (e) {
+    console.warn(`⚠ could not revert ${tenant.clientName}'s upgrade in Salesforce: ${e.message}`);
+  }
 }
 
 function currentUser(req) {
@@ -186,6 +262,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
   const user = store.findUserById(req.body?.userId);
   if (!user) return res.status(404).json({ error: 'Unknown user' });
 
+  revertSessionUpgrade(jar.read(req, SESSION_COOKIE)); // switching users resets the previous demo upgrade
   startSession(res, user);
   pulse.forgetSession(user); // a fresh sign-in never inherits an earlier session's (e.g. upgraded) attributes
   console.log(`→ signed in ${user.id} (${user.email})`);
@@ -202,22 +279,218 @@ app.post('/api/auth/login', throttle, (req, res) => {
   }
 });
 
-app.post('/api/auth/logout', (req, res) => {
+app.post('/api/auth/logout', async (req, res) => {
   const user = currentUser(req);
   if (user) pulse.forgetSession(user); // next Tableau session uses the stored (non-upgraded) attributes
+  await revertSessionUpgrade(jar.read(req, SESSION_COOKIE));
   jar.clear(res, SESSION_COOKIE);
   res.json({ ok: true });
 });
 
 // Demo checkout: upgrade this session to Premium (reset by signing out / switching users).
-app.post('/api/upgrade', requireUser, (req, res) => {
+app.post('/api/upgrade', requireUser, async (req, res) => {
   if (req.tenant.tier === 'premium') return res.json({ ok: true, already: true });
+  const price = store.content.benchmarks?.price || '';
+  // Record it in Apex's CRM: Closed Won Opportunity + Account tier → Premium. If Salesforce is unreachable the
+  // demo still upgrades this session, and says so.
+  let salesforce = null;
+  if (crm.enabled) {
+    try {
+      salesforce = await crm.recordUpgrade(req.user, req.tenant, { price });
+    } catch (e) {
+      console.warn(`⚠ Salesforce upgrade not recorded: ${e.message}`);
+      salesforce = { error: 'The upgrade worked, but it could not be recorded in Salesforce.' };
+    }
+  }
   const s = jar.read(req, SESSION_COOKIE);
-  jar.write(res, SESSION_COOKIE, { ...s, upgraded: true }, SESSION_TTL_MS);
+  jar.write(res, SESSION_COOKIE, { ...s, upgraded: true, upgradeOpp: salesforce?.opportunityId || null }, SESSION_TTL_MS);
   pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
-  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price: store.content.benchmarks?.price || '' });
-  console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium for this session`);
-  res.json({ ok: true });
+  activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price, amount: (Number(String(price).replace(/[^0-9.]/g, '')) || 0) * 12, opportunity: salesforce?.opportunityId || null });
+  console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium${salesforce?.opportunityId ? ` · Salesforce Opportunity ${salesforce.opportunityId}` : ''}`);
+  if (salesforce?.opportunityId) d360.requestSync('upgrade');
+  res.json({ ok: true, salesforce });
+});
+
+app.get('/api/crm/status', requireUser, (req, res) => res.json(crm.status()));
+
+// Presenter: put the whole demo back to its starting point (Salesforce, D360 on its next refresh, Pulse goals).
+app.post('/api/demo/reset', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    const b = store.content.crm?.baseline || {};
+    const tiers = Object.fromEntries(store.tenants.map((t) => [t.id, t.tier === 'premium' ? 'Premium' : 'Standard']));
+    const sfOut = await crm.resetDemo({ baselineOpportunities: b.opportunities || [], respondedUsers: b.respondedUsers || [], tiers });
+    const goals = await features.resetAllGoals();
+    for (const u of store.users) pulse.forgetSession(u); // next Tableau session carries the reset tier
+    d360.requestSync('demo reset', 1000);
+    console.log('→ demo reset', { ...sfOut, goals });
+    res.json({ ok: true, ...sfOut, goals });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// ── Apex client growth (Apex staff, e.g. Alex Morgan) — D360 ────────────
+// Harmonized in D360: Premium upgrades (CRM Opportunities), portal engagement (Apex Portal Activity) and launch
+// campaign reach (Campaign Members), one row per client; "next best upsell" = engaged Standard clients the campaign reached.
+app.get('/api/apex/growth', requireUser, async (req, res) => {
+  if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
+  try {
+    const [g, refreshedAt] = await Promise.all([d360.growth(), d360.upgradesRefreshedAt()]);
+    // Upgrades already in Salesforce but not yet processed by D360 — shown at once, labeled "syncing".
+    const fresh = await crm.upgradesSince(refreshedAt).catch(() => []);
+    const by = (rows) => Object.fromEntries(rows.map((r) => [r.client_id__c, r]));
+    const arr = by(g.arr.rows);
+    for (const u of fresh) {
+      const a = (arr[u.clientId] = arr[u.clientId] || { client_id__c: u.clientId, premium_arr__c: 0, premium_seats__c: 0, upgrades__c: 0 });
+      a.premium_arr__c = Number(a.premium_arr__c || 0) + u.amount;
+      a.premium_seats__c = Number(a.premium_seats__c || 0) + u.seats;
+      a.upgrades__c = Number(a.upgrades__c || 0) + 1;
+      a.syncing = true;
+    }
+    const eng = by(g.engagement.rows);
+    const reach = by(g.reach.rows);
+    const num = (v) => Number(v || 0);
+    const clients = store.tenants
+      .filter((t) => crm.accountFor(t.id))
+      .map((t) => {
+        const tier = crm.tierFor(t.id) || t.tier;
+        const e = eng[t.id] || {};
+        const a = arr[t.id] || {};
+        const events = num(e.events__c);
+        const people = num(e.active_people__c);
+        const recipients = num(reach[t.id]?.recipients__c);
+        return {
+          id: t.id,
+          name: t.clientName,
+          industry: t.industry,
+          tier,
+          arr: num(a.premium_arr__c),
+          seats: num(a.premium_seats__c),
+          upgrades: num(a.upgrades__c),
+          syncing: Boolean(a.syncing),
+          events,
+          people,
+          recipients,
+          weekly: g.weekly.filter((w) => w.Client_Id__c === t.id).map((w) => ({ week: String(w.week).slice(0, 10), events: num(w.events) })),
+          // Upsell signal: Standard, reached by the launch campaign, and actively using the portal.
+          upsell: tier !== 'premium' && recipients > 0 && events > 0 ? Math.round(events * 0.6 + people * 4 + recipients) : 0
+        };
+      })
+      .sort((x, y) => y.arr - x.arr || y.events - x.events);
+    const campaignId = g.upgrades.find((u) => u.Campaign_Id__c)?.Campaign_Id__c || null;
+    const upgrades = [
+      ...fresh.map((u) => ({ name: u.name, client: u.client, amount: u.amount, seats: u.seats, closed: String(u.closed || '').slice(0, 10), campaign: u.campaign, syncing: true })),
+      ...g.upgrades.map((u) => ({ name: u.Name__c, client: u.Client_Name__c, amount: num(u.Amount__c), seats: num(u.Seats__c), closed: String(u.Close_Date__c || '').slice(0, 10), campaign: Boolean(u.Campaign_Id__c) }))
+    ];
+    res.json({
+      sources: { arr: g.arr.from, engagement: g.engagement.from, reach: g.reach.from },
+      totals: {
+        arr: clients.reduce((s, c) => s + c.arr, 0),
+        campaignArr: upgrades.filter((u) => u.campaign).reduce((s, u) => s + u.amount, 0),
+        seats: clients.reduce((s, c) => s + c.seats, 0),
+        events: clients.reduce((s, c) => s + c.events, 0)
+      },
+      clients,
+      upsell: clients.filter((c) => c.upsell > 0).sort((a, b) => b.upsell - a.upsell),
+      upgrades,
+      campaign: store.content.crm?.campaign || null,
+      campaignId,
+      syncing: fresh.length,
+      dataRefreshedAt: refreshedAt
+    });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+// Activation: the D360 upsell list → follow-up Tasks for each client's Apex rep in Salesforce.
+app.post('/api/apex/followups', requireUser, async (req, res) => {
+  if (!isApexGrowth(req.user)) return res.status(403).json({ error: 'Apex staff only.' });
+  const picks = Array.isArray(req.body?.clients) ? req.body.clients.slice(0, 20) : [];
+  try {
+    const out = [];
+    for (const p of picks) {
+      const tenant = store.tenants.find((t) => t.id === p.id);
+      if (!tenant) continue;
+      const t = await crm.createTask(tenant, {
+        subject: `Upsell Premium — ${tenant.clientName} is engaged and on Standard`,
+        description: `From D360 (Apex client growth): ${p.events} portal events by ${p.people} people in the last 30 days; the launch campaign reached ${p.recipients} of their people; still on Standard. Suggest: Premium seats for their managers.\nRequested by ${req.user.name}.`,
+        dueInDays: 2
+      });
+      out.push({ client: tenant.clientName, taskId: t.taskId });
+    }
+    activity.record(req.user, store.tenantFor(req.user), 'message', { topic: 'Upsell follow-ups', count: out.length });
+    d360.requestSync('follow-ups');
+    res.json({ ok: true, created: out });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.post('/api/apex/sync', requireUser, async (req, res) => {
+  if (!d360.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    await crm.flushActivity();
+    res.json({ ok: true, streams: await d360.sync() });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.get('/api/apex/freshness', requireUser, async (req, res) => {
+  if (!d360.enabled) return res.json({ enabled: false });
+  try {
+    res.json({ enabled: true, ...(await d360.freshness()) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// ── Premium seats (portal admin, e.g. Dana at Northstar) ────────────────────
+app.get('/api/seats', requireUser, async (req, res) => {
+  if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
+  try {
+    // Each person's portal use in the last 30 days comes from D360, so the admin can see who actually uses it.
+    const [people, activity] = await Promise.all([crm.rosterFor(req.tenant), d360.peopleActivity(req.tenant.id).catch(() => null)]);
+    res.json({ price: store.content.crm?.seatPrice || '', activityFrom: activity ? 'D360' : null, people: people.map((p) => ({ ...p, visits: activity ? activity[p.userId] || 0 : null })) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+app.post('/api/seats', requireUser, async (req, res) => {
+  if (!isSeatAdmin(req.user)) return res.status(403).json({ error: 'Only your company’s portal admin can manage seats.' });
+  const ids = Array.isArray(req.body?.contactIds) ? req.body.contactIds.map(String).slice(0, 500) : [];
+  if (!ids.length) return res.status(400).json({ error: 'Pick at least one person.' });
+  try {
+    const price = store.content.crm?.seatPrice || '';
+    const r = await crm.buySeats(req.user, req.tenant, ids, { price });
+    for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u); // next Tableau session carries their new tier
+    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium seats', seats: r.seats, amount: r.amount, price, opportunity: r.opportunityId });
+    console.log(`→ ${req.user.email} bought ${r.seats} Premium seats for ${req.tenant.clientName} · Salesforce Opportunity ${r.opportunityId}`);
+    d360.requestSync('seat purchase');
+    res.json({ ok: true, ...r });
+  } catch (e) {
+    res.status(e.status || 502).json({ error: e.message });
+  }
+});
+// Presenter clean-up: take Northstar's seats back so the seat purchase can be demoed again.
+app.post('/api/seats/reset', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.status(400).json({ error: 'Salesforce isn’t connected.' });
+  try {
+    const n = await crm.resetSeats(req.tenant);
+    for (const u of store.users.filter((x) => x.tenantId === req.tenant.id)) pulse.forgetSession(u);
+    activity.record(req.user, req.tenant, 'upgrade', { plan: 'Seats reset', seats: n });
+    res.json({ ok: true, removed: n });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
+});
+// Presenter dock: this client's Salesforce Account and the records the portal wrote to it.
+app.get('/api/crm/records', requireUser, async (req, res) => {
+  if (!crm.enabled) return res.json({ enabled: false });
+  try {
+    res.json({ enabled: true, ...(await crm.recordsFor(req.tenant)) });
+  } catch (e) {
+    res.status(502).json({ error: e.message });
+  }
 });
 
 // ── Customer context ────────────────────────────────────────────────────────
@@ -257,6 +530,12 @@ app.get('/api/me', (req, res) => {
       activityLog: (user.roles || []).includes('activity'),
       slackChannels: store.slackChannelsFor(tenant),
       pulseGoals: ent.has('goals'),
+      agent: ent.has('agent'),
+      agentQuestions: ent.has('agent') ? store.content.agent?.homeQuestions || [] : [],
+      // Dana-style portal admin: buys Premium seats for named people instead of upgrading the whole company.
+      seats: isSeatAdmin(user) ? { price: store.content.crm?.seatPrice || store.content.benchmarks?.price || '' } : null,
+      seatRoster: crm.enabled && tenant.id === 'northstar' ? true : false,
+      apexGrowth: isApexGrowth(user),
       benchmarks: { price: store.content.benchmarks?.price || null, cover: store.content.benchmarks?.cover || null }
     }
   });
@@ -304,7 +583,10 @@ function orderMetrics(ctx) {
   return [...ctx].sort((a, b) => rank(a.item.metadata.name) - rank(b.item.metadata.name) || a.item.metadata.name.localeCompare(b.item.metadata.name));
 }
 
+// The Pulse Agent chat is Premium. "Explain this" (explain: true) uses the same Pulse brief and stays open to everyone.
+const agentAllowed = (req) => store.entitlementsFor(req.tenant).has('agent') || req.body?.explain === true;
 app.get('/api/agent/context', requireUser, async (req, res) => {
+  if (!agentAllowed(req)) return res.status(403).json({ error: 'The Agent is part of Premium.', premium: true });
   try {
     const ctx = orderMetrics(await pulse.metricContext(req.user, agentScope(req.tenant)));
     const metrics = ctx.map(({ source, item }) => ({ name: item.metadata.name, metricId: item.metadata.metric_id, source }));
@@ -329,6 +611,7 @@ setInterval(() => {
 }, 5 * 60 * 1000).unref();
 
 app.post('/api/agent/chat', requireUser, async (req, res) => {
+  if (!agentAllowed(req)) return res.status(403).json({ error: 'The Agent is part of Premium.', premium: true });
   const question = String(req.body?.question || '').trim().slice(0, 1000);
   if (!question) return res.status(400).json({ error: 'Please enter a question.' });
   // source: a data source label (e.g. "Transportation") to ask only that source's metrics; default all.
@@ -378,22 +661,36 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
 // Demo: messages are kept in memory and written to the server log for the Apex team.
 const messages = [];
 const TOPICS = ['General question', 'Engagement update', 'Data or dashboard question', 'Schedule a review', 'Premium subscription', 'Billing'];
-app.post('/api/messages', requireUser, (req, res) => {
+// A client's message becomes a follow-up Task on their Salesforce Account for the Apex account team.
+app.post('/api/messages', requireUser, async (req, res) => {
   const topic = TOPICS.includes(req.body?.topic) ? req.body.topic : 'General question';
   const body = String(req.body?.message || '').trim().slice(0, 2000);
   if (!body) return res.status(400).json({ error: 'Please enter a message.' });
   const ref = `APX-${Date.now().toString(36).toUpperCase().slice(-6)}`;
   const to = req.tenant.accountManager || null;
-  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, to: to?.email || null, topic, body };
+  let salesforce = null;
+  if (crm.enabled) {
+    try {
+      salesforce = await crm.createTask(req.tenant, {
+        user: req.user,
+        subject: `${topic} — ${req.user.name} (${ref})`,
+        description: `From ${req.user.name} <${req.user.email}> via the Apex client portal.${to ? ` Account manager: ${to.name}.` : ''}\n\n${body}`,
+        dueInDays: topic === 'Schedule a review' ? 1 : 2
+      });
+    } catch (e) {
+      console.warn(`⚠ Salesforce task not created: ${e.message}`);
+    }
+  }
+  const entry = { ref, at: new Date().toISOString(), client: req.tenant.clientName, from: req.user.email, to: to?.email || null, topic, body, task: salesforce?.taskId || null };
   messages.push(entry);
   console.log('✉ message for Apex team', entry);
-  activity.record(req.user, req.tenant, 'message', { topic, to: to?.email || '', ref });
-  res.json({ ok: true, ref, topic, to });
+  activity.record(req.user, req.tenant, 'message', { topic, to: to?.email || '', ref, task: salesforce?.taskId || null });
+  res.json({ ok: true, ref, topic, to, salesforce: salesforce ? { taskId: salesforce.taskId } : null });
 });
 app.get('/api/messages/topics', requireUser, (req, res) => res.json({ topics: TOPICS }));
 
 // ── Portal capabilities (library, subscriptions, attention, links, authoring, feeds, activity) ──
-const features = registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret });
+const features = registerFeatures(app, { store, pulse, activity, requireUser, env, mintEmbedToken, mintFor, sessionSecret: env.sessionSecret, crm });
 
 // ── React build (production) — BrowserRouter fallback to index.html ─────────
 const DIST = path.join(__dirname, '..', 'dist');

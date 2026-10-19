@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Apex_Premium_Seat__c</fullName>
+    <label>Apex Premium Seat</label>
+    <description>This person has a Premium seat in the Apex client portal (benchmarks, the Agent, goals) — bought by their company's portal admin.</description>
+    <type>Checkbox</type>
+    <defaultValue>false</defaultValue>
+</CustomField>

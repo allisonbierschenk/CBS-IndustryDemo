@@ -1,0 +1,46 @@
+{
+ "sourceEntityDeveloperName": "Apex_Portal_Activity__dll",
+ "targetEntityDeveloperName": "Apex_Portal_Activity__dlm",
+ "fieldMapping": [
+  {
+   "sourceFieldDeveloperName": "Id__c",
+   "targetFieldDeveloperName": "Event_Id__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Event_Time_c__c",
+   "targetFieldDeveloperName": "Event_Time__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Event_Type_c__c",
+   "targetFieldDeveloperName": "Event_Type__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Client_Id_c__c",
+   "targetFieldDeveloperName": "Client_Id__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Client_Name_c__c",
+   "targetFieldDeveloperName": "Client_Name__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Portal_User_Id_c__c",
+   "targetFieldDeveloperName": "Portal_User_Id__c"
+  },
+  {
+   "sourceFieldDeveloperName": "User_Name_c__c",
+   "targetFieldDeveloperName": "User_Name__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Tier_c__c",
+   "targetFieldDeveloperName": "Tier__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Subject_c__c",
+   "targetFieldDeveloperName": "Subject__c"
+  },
+  {
+   "sourceFieldDeveloperName": "Seats_c__c",
+   "targetFieldDeveloperName": "Seats__c"
+  }
+ ]
+}

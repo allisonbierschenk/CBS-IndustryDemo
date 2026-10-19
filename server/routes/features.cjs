@@ -861,5 +861,22 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       res.status(502).type('text').send(e.message);
     }
   });
-  return { warmAttention };
+  /** Demo reset: delete every goal metric the portal created, for every user. */
+  async function resetAllGoals() {
+    let n = 0;
+    for (const [userId, list] of Object.entries(loadOwn())) {
+      const user = store.findUserById(userId);
+      if (!user) continue;
+      for (const x of list || []) {
+        const id = typeof x === 'string' ? x : x.metricId;
+        await deleteOwnMetric(user, id).then(() => n++, () => forgetOwn(user, id));
+      }
+      pulse.resetContext(user);
+      attentionCache.delete(attentionKey(user));
+    }
+    saveAttention();
+    return n;
+  }
+
+  return { warmAttention, resetAllGoals };
 };

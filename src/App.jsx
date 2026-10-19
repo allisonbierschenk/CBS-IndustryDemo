@@ -4,6 +4,9 @@ import Layout from './components/Layout.jsx';
 import { RequireAuth, RequireView } from './components/RouteGuards.jsx';
 import Activity from './pages/Activity.jsx';
 import Agent from './pages/Agent.jsx';
+import CompetitionGuide from './pages/CompetitionGuide.jsx';
+import ClosingSlide from './pages/ClosingSlide.jsx';
+import ApexGrowth from './pages/ApexGrowth.jsx';
 import Benchmarks from './pages/Benchmarks.jsx';
 import DemoGuide from './pages/DemoGuide.jsx';
 import Alerts from './pages/Alerts.jsx';
@@ -46,6 +49,8 @@ export default function App() {
       <Route path="/login" element={<Login />} />
       {/* Presenter guide — public so it can be opened before signing in */}
       <Route path="/guide" element={<DemoGuide />} />
+      <Route path="/guide/competition" element={<CompetitionGuide />} />
+      <Route path="/guide/close" element={<ClosingSlide />} />
       <Route
         element={
           <RequireAuth>
@@ -82,6 +87,7 @@ export default function App() {
         <Route path="alerts" element={<Alerts />} />
         <Route path="feeds" element={<Feeds />} />
         <Route path="activity" element={me?.features?.activityLog ? <Activity /> : <Navigate to="/" replace />} />
+        <Route path="growth" element={me?.features?.apexGrowth ? <ApexGrowth /> : <Navigate to="/" replace />} />
         <Route path="help" element={<Help />} />
         <Route path="privacy" element={<Privacy />} />
         <Route path="*" element={<NotFound />} />

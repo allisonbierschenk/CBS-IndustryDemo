@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomNotificationType xmlns="http://soap.sforce.com/2006/04/metadata">
+    <customNotifTypeName>Apex Portal Upgrade</customNotifTypeName>
+    <description>A client upgraded themselves in the Apex client portal — alerts the account owner with the new revenue.</description>
+    <desktop>true</desktop>
+    <masterLabel>Apex Portal Upgrade</masterLabel>
+    <mobile>true</mobile>
+</CustomNotificationType>

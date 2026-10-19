@@ -95,10 +95,18 @@ export function provenance(key, me, extra = {}) {
     case 'premium':
       return {
         tag: 'Data monetization',
-        freshness: 'Checked on every request, so what a client can open always matches their current plan in Apex’s system.',
+        freshness: 'Your plan comes from Apex’s CRM (Salesforce, refreshed every minute) and is checked on every request, so what you can open always matches your current subscription.',
         source: 'Premium content — Industry Benchmarks, your own Pulse metrics with goals, and build-your-own reports — uses the same published data source as everything else; clients’ own goal metrics are created on it through the Pulse REST API. Nothing extra to build or copy.',
         security: `Entitlements are enforced on the server: content outside a client’s subscription never gets a token or data. Your subscription tier (${[].concat(me.user.attributes?.['subscription tier'] || []).join(', ') || 'none'}) also travels in your sign-in token, so Tableau can act on it too.`,
-        why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project.'
+        why: 'Tableau turns Apex’s data and expertise into a product it can sell. Premium tiers are just more views and insights on the same governed source of truth — no second analytics stack — and Tableau keeps every client’s data separate, so one portal serves free and paid clients alike. Adding a new paid insight is publishing a view, not a software project. And it’s connected to how Apex runs its business: the plan lives on the client’s Salesforce Account, and a self-service upgrade lands in Salesforce as a Closed Won Opportunity — revenue the account team sees immediately, attributed to the campaign that announced it. Larger clients buy Premium per seat: their portal admin picks the people, each seat is flagged on that person’s Salesforce Contact, and Tableau sees Premium in that person’s sign-in token only.'
+      };
+    case 'data360':
+      return {
+        tag: 'D360',
+        freshness: 'Automatic: every upgrade, seat purchase or follow-up starts a D360 refresh. New upgrades show here at once, marked “syncing”, until D360 has processed them; numbers come from calculated insights once they’ve recomputed, else straight from the data model.',
+        source: 'D360 harmonizes three sources into one model per client: Premium upgrades (Salesforce Opportunities), portal engagement (every sign-in, Agent question, goal and request the portal records in Salesforce) and the launch campaign (Campaign Members). Calculated insights compute Premium ARR, seats, engagement and campaign reach; this page reads them with the D360 Query API.',
+        security: 'Apex staff only — enforced on the server. Clients never see this page or each other’s data.',
+        why: 'D360 is what makes CRM, the portal and Tableau one system: the portal’s usage, the CRM’s revenue and the campaign’s reach land in one harmonized model, so Apex can see which campaign drove which upgrade and who to call next — and Create follow-ups sends that back to Salesforce as Tasks for the reps. Without it, each system only knows its own piece.'
       };
     case 'goals':
       return {

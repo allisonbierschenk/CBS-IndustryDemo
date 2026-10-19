@@ -109,6 +109,26 @@
           "transportation"
         ],
         "view": "transportation"
+      },
+      {
+        "name": "Apex Client Growth – Portal Activity (Data 360)",
+        "label": "D360 · Portal engagement",
+        "requires": [
+          "apex-growth"
+        ]
+      },
+      {
+        "name": "Apex Client Growth – Premium Upgrades (Data 360)",
+        "label": "D360 · Premium revenue",
+        "requires": [
+          "apex-growth"
+        ]
+      }
+    ],
+    "homeQuestions": [
+      {
+        "q": "Which engagement is furthest behind plan, and why?",
+        "source": "Value Intelligence"
       }
     ]
   },
@@ -297,5 +317,18 @@
         "downIsGood": true
       }
     ]
+  },
+  "crm": {
+    "_comment": "Apex's Salesforce org. Upgrades are attributed to this Campaign (Opportunity.CampaignId) — the announcement that the partner portal now has conversational analytics and anonymized benchmarks.",
+    "campaign": "Partner portal update: conversational analytics + anonymized benchmarks",
+    "seatPrice": "$5/user/month",
+    "baseline": {
+      "_comment": "Demo reset (Presenter → Reset demo) restores this: only these portal-upgrade Opportunities exist (Vantage 25 seats, Crestline 18 seats — bought before the launch campaign), client tiers as in tenants.json, no Premium seats, nobody has responded to the campaign yet (anyone who did → Clicked). Every upgrade made during a demo, including old Meridian tests, is deleted.",
+      "opportunities": [
+        "006Hu000021ScpSIAS",
+        "006Hu000021ScpXIAS"
+      ],
+      "respondedUsers": []
+    }
   }
 }
