@@ -14,7 +14,7 @@ const SCENES = [
     beats: [
       {
         do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
-        say: 'Every client portal shows clients the most valuable thing a company has, its data, and almost every company gives that away for free.'
+        say: 'Most client portals show clients the most valuable thing a company has, its data, and give it away for free.'
       },
       {
         do: 'Stay on Home.',
@@ -114,7 +114,7 @@ const SCENES = [
       },
       {
         do: 'Point at “From the launch campaign” and Northstar’s $1,200 in the table (marked “syncing” if Data 360 is still processing).',
-        say: 'With Data 360, all three come together for every client, all the time. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
+        say: 'With Data 360, all three come together for every client and stay up to date. That’s what this page shows: what the campaign earned, including Northstar’s $1,200, and who to call next.',
         cap: ['Data 360 · one model per client · always current']
       },
       {
@@ -145,11 +145,11 @@ const SCENES = [
       },
       {
         do: 'Hold on the graphic.',
-        say: 'Apex got booked revenue and a measurable return on its campaign. And its people got time back: clients answer their own questions instead of waiting on an analyst, nobody stitches spreadsheets together at month-end, and reps get their next call handed to them.'
+        say: 'Apex got booked revenue and a measurable return on its campaign. And its people got time back: clients answer their own questions instead of waiting on an analyst, no one has to stitch spreadsheets together at month-end, and reps get their next call handed to them.'
       },
       {
         do: 'Hold on the graphic.',
-        say: 'And any Tableau customer with a client portal can do the same, with Salesforce, Data 360 and Tableau working as one platform.',
+        say: 'And most Tableau customers with a client portal could do the same, with Salesforce, Data 360 and Tableau working as one platform.',
         cap: ['Salesforce · Data 360 · Tableau — one platform']
       },
       {
