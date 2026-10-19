@@ -323,17 +323,12 @@
     "campaign": "Partner portal update: conversational analytics + anonymized benchmarks",
     "seatPrice": "$5/user/month",
     "baseline": {
-      "_comment": "Demo reset (Presenter → Reset demo) restores this: only these portal-upgrade Opportunities exist, client tiers as in tenants.json, no Premium seats, campaign responders = respondedUsers (everyone else who responded during a demo → Clicked).",
+      "_comment": "Demo reset (Presenter → Reset demo) restores this: only these portal-upgrade Opportunities exist (Vantage 25 seats, Crestline 18 seats — bought before the launch campaign), client tiers as in tenants.json, no Premium seats, nobody has responded to the campaign yet (anyone who did → Clicked). Every upgrade made during a demo, including old Meridian tests, is deleted.",
       "opportunities": [
-        "006Hu000021Scp0IAC",
-        "006Hu000021ScovIAC",
         "006Hu000021ScpSIAS",
-        "006Hu000021ScpXIAS",
-        "006Hu000021ScogIAC"
+        "006Hu000021ScpXIAS"
       ],
-      "respondedUsers": [
-        "u-meridian"
-      ]
+      "respondedUsers": []
     }
   }
 }
