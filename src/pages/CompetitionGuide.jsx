@@ -158,6 +158,17 @@ const PREP = [
   ['After the take', 'Reset again at least 30 minutes before the next take, then repeat this checklist.']
 ];
 
+const LIVE = [
+  ['Use your laptop', 'Present from localhost:5173 on your laptop, where the portal has its Salesforce connection. The Railway site doesn’t have it yet, so the seat picker, the bell and the follow-up tasks won’t work there.'],
+  ['45 minutes before you go on', 'Run the ready-to-record checklist above: Reset demo, check Salesforce, wait until D360’s Data Streams show Success after your reset, check Meridian’s task, refresh the dashboard, sign in as Dana and Sam.'],
+  ['Have a backup open', 'Keep a screen recording of Scenes 4–6 in another tab. If Wi-Fi, Tableau or Salesforce is slow, cut to it and keep talking; the story doesn’t change.'],
+  ['Scenes 1–3', 'Exactly as scripted. Everything is already on screen; no waiting.'],
+  ['Scene 4 · the purchase', 'Live and instant: the seat picker, the bell 🔔 and the closed-won Opportunity all appear within seconds. Pause on the bell for the audience.'],
+  ['Scene 5 · the Agent', 'The only live wait: a few seconds while the Agent answers. Start the second line (“Apex can offer this to every client…”) as soon as you click the question, so the answer arrives as you finish.'],
+  ['Scene 6 · D360', 'Nothing needs to update. The dashboard shows the picture before Dana’s purchase (Northstar flagged, Meridian next), and Meridian’s task is already there. Don’t refresh the dashboard on stage.'],
+  ['If something breaks', 'Say what it does, show the backup clip, and move on. Judges score the story and the build, not a perfect click.']
+];
+
 const TIPS = [
   ['Record scene by scene', 'One clip per scene, in order, then stitch. Retakes become cheap and the pacing stays tight.'],
   ['Load before you record', 'Open each page first, then start recording. Cut any Agent “thinking” time in the edit — it’s fine to say “answers in seconds”.'],
@@ -212,6 +223,18 @@ export default function CompetitionGuide() {
             <h2>Ready to record: checklist</h2>
             <ul className="comp-list">
               {PREP.map(([t, d]) => (
+                <li key={t}>
+                  <b>{t}</b>
+                  {d}
+                </li>
+              ))}
+            </ul>
+          </section>
+
+          <section className="comp-block">
+            <h2>Presenting live (the finals)</h2>
+            <ul className="comp-list">
+              {LIVE.map(([t, d]) => (
                 <li key={t}>
                   <b>{t}</b>
                   {d}
