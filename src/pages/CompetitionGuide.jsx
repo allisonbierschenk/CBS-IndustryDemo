@@ -46,7 +46,7 @@ const SCENES = [
     beats: [
       {
         do: 'Back to the portal (Dana) → Home: point at the Needs attention summary.',
-        say: 'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, Tableau Pulse tells her what needs attention: on-time milestones, value realization and engagement health have been trending down for months, while Northstar’s consulting spend keeps rising.',
+        say: 'This is Dana, VP of Operations at Northstar, one of the people who got that email. When she signs in, Tableau Pulse tells her what needs attention: on-time milestones and engagement health have been trending down for months, while Northstar’s consulting spend keeps rising.',
         cap: ['Tableau Pulse · Needs attention']
       },
       {
@@ -67,7 +67,7 @@ const SCENES = [
     beats: [
       {
         do: 'Click Agent → Upgrade your team → point at “Used … times” next to each name → click All managers (20) → Upgrade 20 people.',
-        say: 'Dana decides it’s worth it, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it.',
+        say: 'Dana decides the upgrade is worth it, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it.',
         cap: ['D360 · portal use per person']
       },
       {
@@ -109,8 +109,8 @@ const SCENES = [
         cap: ['Tableau Next on D360 · embedded in Salesforce']
       },
       {
-        do: 'Point at the top chart, Engagement vs. Premium Revenue by Client: each client’s portal use next to what it pays for Premium.',
-        say: 'This chart puts each client’s portal use right next to what it pays for Premium. Northstar is Apex’s most engaged client, and until a minute ago it didn’t pay for Premium. Meridian is the next opportunity: of the clients still on Standard, it uses the portal the most, and the campaign reached it.'
+        do: 'Point at the top chart, Engagement vs. Premium Revenue by Client: each client’s portal use next to what they pay for Premium.',
+        say: 'This chart puts each client’s portal use right next to what they pay for Premium. Northstar was Apex’s most engaged client and wasn’t paying for Premium, which is why D360 had already flagged it to its account manager. Dana just converted it. Meridian is the next opportunity: of the clients still on Standard, they use the portal the most, and the campaign has reached them. Because of this insight, Apex knows to focus on Meridian next.',
       },
       {
         do: 'Switch to the Tableau Next tab → the semantic model “Apex Client Growth”: its canvas shows Portal Activity, Premium Upgrade and Campaign Response, linked by Client Id.',

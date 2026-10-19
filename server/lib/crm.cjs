@@ -281,9 +281,17 @@ function createCrm(sf, { log = console, campaign = null } = {}) {
     const seated = await sf.query('SELECT Id FROM Contact WHERE Apex_Premium_Seat__c = true');
     out.seats = await patchAll('Contact', seated.map((c) => ({ id: c.Id, Apex_Premium_Seat__c: false })));
     seats.clear();
+    // Demo purchases are neutralized, not deleted: D360's incremental refresh can miss a deletion that happens while a
+    // refresh is running, but it always picks up an update. Zeroed, un-attributed, Closed Lost — so they drop out of
+    // D360, Tableau Next and the campaign. Ones neutralized on an earlier reset (D360 already has them zeroed) are deleted.
     const keep = new Set(baselineOpportunities);
-    const opps = (await sf.query('SELECT Id FROM Opportunity WHERE Apex_Portal_Upgrade__c = true')).filter((o) => !keep.has(o.Id));
-    out.opportunities = await removeAll(opps.map((o) => o.Id));
+    const opps = (await sf.query('SELECT Id, Name FROM Opportunity WHERE Apex_Portal_Upgrade__c = true')).filter((o) => !keep.has(o.Id));
+    out.opportunities = await patchAll(
+      'Opportunity',
+      opps.map((o) => ({ id: o.Id, Name: `[Demo reset] ${o.Name}`.slice(0, 120), Amount: 0, Apex_Premium_Seats__c: 0, Apex_Portal_Upgrade__c: false, CampaignId: null, StageName: 'Closed Lost' }))
+    );
+    const stale = await sf.query("SELECT Id FROM Opportunity WHERE Name LIKE '[Demo reset]%' AND LastModifiedDate < LAST_N_DAYS:1");
+    await removeAll(stale.map((o) => o.Id));
     const accts = await sf.query('SELECT Id, Apex_Client_Id__c, Apex_Subscription_Tier__c FROM Account WHERE Apex_Client_Id__c != null');
     const tierFix = accts.filter((a) => tiers[a.Apex_Client_Id__c] && a.Apex_Subscription_Tier__c !== tiers[a.Apex_Client_Id__c]);
     out.tiers = await patchAll('Account', tierFix.map((a) => ({ id: a.Id, Apex_Subscription_Tier__c: tiers[a.Apex_Client_Id__c] })));
