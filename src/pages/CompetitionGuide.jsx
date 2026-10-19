@@ -18,8 +18,8 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine.',
-        cap: ['Apex Consulting · Salesforce + Tableau customer']
+        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turn its portal into a revenue-generating machine: Tableau gives clients the experience, Salesforce runs the campaign and the sale, and Data 360 connects them so Apex knows who to call next.',
+        cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · Data 360']
       }
     ]
   },
