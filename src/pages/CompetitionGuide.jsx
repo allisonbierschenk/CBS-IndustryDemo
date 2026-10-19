@@ -14,11 +14,11 @@ const SCENES = [
     beats: [
       {
         do: 'Portal Home, signed in as Dana (Northstar’s logo on screen). Don’t click yet.',
-        say: 'Most client portals are a store with no checkout: clients come in, look at everything, and leave without buying a thing.'
+        say: 'Most client portals show clients the most valuable thing a company has, its data, and they are giving it away for free.'
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce, like so many of our customers, and its portal was exactly that. In this demo, Tableau adds the checkout, D360 tells Apex who’s ready to buy, and Salesforce rings it up. Same portal, same data. Now it pays for itself.',
+        say: 'Apex Consulting stands in for almost any Salesforce customer, because nearly all of them have customers of their own. Add Tableau, and the portal they use to serve those customers stops being a cost center and becomes a revenue-generating investment. Add D360, and they can see which customers are ready to buy, and act on it, without anyone pulling reports by hand. And Salesforce turns each of those moments into booked revenue.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
