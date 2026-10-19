@@ -391,7 +391,7 @@ const FEATURES = [
       ['How fresh is it?', 'Automatic: every upgrade starts a D360 refresh. A new purchase shows on Client growth at once, marked “syncing”, and the label clears by itself when D360 has processed it (usually minutes). Calculated insights recompute hourly; until then the page reads the data model, so numbers never go backwards.'],
       ['Where does Tableau come in?', 'Tableau Cloud connects to the same D360 model, and Pulse metrics on it (Premium ARR, portal engagement) alert Apex leaders — the same governed numbers.']
     ]
-  }), (p) => (p.id === 'alex' ? null : 'Alex Morgan (Apex)')),
+  }), () => 'Moving to Salesforce (Tableau Next dashboard)'),
   F('build', 'money', 'Build your own report', () => ({
     title: 'Build your own report',
     where: 'Reports → Build your own report',
