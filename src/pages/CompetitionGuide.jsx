@@ -82,7 +82,7 @@ const SCENES = [
     ]
   },
   {
-    time: '2:20–3:10',
+    time: '2:20–3:25',
     title: 'The client gets the value — at a predictable cost',
     as: 'Sam Patel · Northstar manager (now Premium)',
     beats: [
@@ -100,11 +100,16 @@ const SCENES = [
         do: 'Click Industry Benchmarks (top nav): Northstar’s percentile gauge, the trend over time, and where each engagement stands against peers.',
         say: 'And here are the benchmarks Dana couldn’t see before. This isn’t a Tableau dashboard: it’s Apex’s own design, with Tableau running headless underneath. The VizQL Data Service delivers the same governed numbers, with the same security, to any front end Apex wants to build.',
         cap: ['Tableau headless · VizQL Data Service']
+      },
+      {
+        do: 'On Where you stand, click an engagement that’s below the pack → Set a goal (action bar) → drag to the 75th percentile → Set goal & follow. The goal card appears under Your goals.',
+        say: 'Sam wants that engagement in the top quartile, so he sets a goal. That one click creates his own Tableau Pulse metric through the Pulse API, sets the goal and subscribes him, so Pulse tracks his progress and flags it in Needs attention.',
+        cap: ['Tableau Pulse API · his own metric + goal']
       }
     ]
   },
   {
-    time: '3:10–4:25',
+    time: '3:25–4:35',
     title: 'The decision that changes for Apex',
     as: 'Apex’s account team · Salesforce',
     beats: [
@@ -130,7 +135,7 @@ const SCENES = [
     ]
   },
   {
-    time: '4:25–5:00',
+    time: '4:35–5:10',
     title: 'The result — and why it scales',
     as: 'Closing frame',
     beats: [
@@ -151,7 +156,7 @@ const SCENES = [
 ];
 
 const PREP = [
-  ['45 min before · Reset', 'Portal → Presenter (⌥P) → Switch account → Reset demo. Note the time. D360 needs time to catch up, so never reset right before recording.'],
+  ['45 min before · Reset', 'Portal → Presenter (⌥P) → Switch account → Reset demo. Note the time. Reset also deletes the goal metrics created in the portal, so Sam’s Your goals starts empty for Scene 5. D360 needs time to catch up, so never reset right before recording.'],
   ['30 min before · Check Salesforce', 'Northstar Enterprises Account → Opportunities: no live “Premium seats” purchase (only Vantage and Crestline’s earlier ones, plus any “[Demo reset]” Closed Lost record). The launch Campaign → Campaign Results: Won Opportunities 0, Value Won $0.'],
   ['15 min before · Check D360 has caught up', 'Data Cloud → Data Streams (search “Apex”): all four streams show Last Run Status Success, with Last Refreshed later than your reset time. If any still says Pending, wait and check again.'],
   ['10 min before · Check the follow-up task', 'Meridian Solutions Account → Activity: “Upsell Premium — Meridian Solutions is engaged and on Standard”. D360 recreates it automatically after its refresh.'],
