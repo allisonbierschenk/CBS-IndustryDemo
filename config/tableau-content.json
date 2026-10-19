@@ -124,6 +124,12 @@
           "apex-growth"
         ]
       }
+    ],
+    "homeQuestions": [
+      {
+        "q": "Which engagement is furthest behind plan, and why?",
+        "source": "Value Intelligence"
+      }
     ]
   },
   "library": {

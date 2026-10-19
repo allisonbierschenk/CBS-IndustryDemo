@@ -1345,3 +1345,8 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .seats-visits { font-size: 12px; font-weight: 600; color: #5a2fd6; background: rgba(90, 47, 214, .08); padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
 .seats-visits.is-zero { color: var(--faint, #8a938f); background: rgba(0, 0, 0, .04); }
 .seats-note { margin: 0 0 6px; font-size: 12px; color: var(--muted, #66706b); }
+
+/* Home · one-click Agent questions (Premium) */
+.home-asks { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; margin-top: 14px; }
+.home-asks-label { display: inline-flex; align-items: center; gap: 6px; font-size: 12px; font-weight: 700; letter-spacing: .06em; text-transform: uppercase; color: var(--faint); }
+.home-asks-label svg { width: 15px; height: 15px; }

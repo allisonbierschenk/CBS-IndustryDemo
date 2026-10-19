@@ -503,6 +503,7 @@ app.get('/api/me', (req, res) => {
       slackChannels: store.slackChannelsFor(tenant),
       pulseGoals: ent.has('goals'),
       agent: ent.has('agent'),
+      agentQuestions: ent.has('agent') ? store.content.agent?.homeQuestions || [] : [],
       // Dana-style portal admin: buys Premium seats for named people instead of upgrading the whole company.
       seats: isSeatAdmin(user) ? { price: store.content.crm?.seatPrice || store.content.benchmarks?.price || '' } : null,
       seatRoster: crm.enabled && tenant.id === 'northstar' ? true : false,

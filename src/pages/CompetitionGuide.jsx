@@ -87,7 +87,7 @@ const SCENES = [
     as: 'Sam Patel · Northstar manager (now Premium)',
     beats: [
       {
-        do: 'Portal → Presenter (⌥P) → Switch user → Sam Patel → Agent → ask “Which engagement is furthest behind plan, and why?”',
+        do: 'Portal → Presenter (⌥P) → Switch user → Sam Patel → on Home, click “Which engagement is furthest behind plan, and why?” under Try asking.',
         say: 'Sam is one of those 20 managers, so he has Premium now. He asks the Tableau Pulse agent which engagement is furthest behind plan and why, and he gets a plain-English answer built from Northstar’s own numbers.',
         cap: ['Tableau Pulse Agent']
       },

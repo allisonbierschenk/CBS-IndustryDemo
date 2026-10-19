@@ -53,6 +53,20 @@ export default function Home() {
             </span>
           </Link>
         </div>
+        {me.features?.agentQuestions?.length > 0 && (
+          <div className="home-asks">
+            <span className="home-asks-label">
+              <Icon name="agent" />
+              Try asking
+            </span>
+            {me.features.agentQuestions.map(({ q, source }) => (
+              <Link key={q} className="chip-q" to={`/agent?q=${encodeURIComponent(q)}${source ? `&source=${encodeURIComponent(source)}` : ''}`}>
+                {q}
+                <Icon name="arrowRight" />
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
       <AttentionPanel />
     </div>
