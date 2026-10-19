@@ -18,7 +18,7 @@ const SCENES = [
       },
       {
         do: 'Stay on Home.',
-        say: 'Apex Consulting runs on Salesforce and Tableau. In this demo, you’ll see those products, working together, turning its portal into a revenue-generating machine. Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s team stops pulling reports together and spend that time with the clients most ready to buy.',
+        say: 'Apex Consulting stands in for our customers: any company that runs on Salesforce and Tableau and serves its clients through a portal, which is why every account team should be having this conversation. In this demo, you’ll see those products, working together, turning its portal into a revenue-generating machine. Tableau gives clients the experience, Salesforce runs the campaign and the sale, and D360 connects them, so Apex’s team stops pulling reports together and spend that time with the clients most ready to buy.',
         cap: ['Apex Consulting · Salesforce + Tableau customer', 'Tableau · Salesforce · D360']
       }
     ]
@@ -67,7 +67,7 @@ const SCENES = [
     beats: [
       {
         do: 'Click Agent → Upgrade your team → point at “Used … times” next to each name → click All managers (20) → Upgrade 20 people.',
-        say: 'Dana decides it is, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it. At five dollars per user per month, that’s $1,200 a year, in one click.',
+        say: 'Dana decides it is, but only for her 20 managers. D360 shows her how often each of her managers uses the portal, so she knows who will get value from it.',
         cap: ['D360 · portal use per person']
       },
       {
@@ -136,11 +136,6 @@ const SCENES = [
       {
         do: 'Hold on the graphic.',
         say: 'Apex got booked revenue and a measurable return on its campaign. And its people got time back: clients answer their own questions instead of waiting on an analyst, no one has to stitch spreadsheets together at month-end, and reps get their next call handed to them.'
-      },
-      {
-        do: 'Hold on the graphic.',
-        say: 'And most Tableau customers with a client portal could do the same, with Salesforce, D360 and Tableau working as one platform.',
-        cap: ['Salesforce · D360 · Tableau — one platform']
       },
       {
         do: 'Hold — end on the line.',
