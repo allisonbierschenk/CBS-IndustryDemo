@@ -98,12 +98,12 @@ const SCENES = [
       },
       {
         do: 'Click Industry Benchmarks (top nav): Northstar’s percentile gauge, the trend over time, and where each engagement stands against peers.',
-        say: 'And here are the benchmarks Dana couldn’t see before. This isn’t a Tableau dashboard: it’s Apex’s own design, with Tableau running headless underneath. The VizQL Data Service delivers the same governed numbers, with the same security, to any front end Apex wants to build.',
+        say: 'And here are the benchmarks Dana couldn’t see before. This isn’t a Tableau dashboard: it’s Apex’s own design, with Tableau running headless underneath. The VizQL Data Service delivers the same governed numbers, with the same security, to any user interface Apex wants to build.',
         cap: ['Tableau headless · VizQL Data Service']
       },
       {
         do: 'On Where you stand, click an engagement that’s below the pack → Set a goal (action bar) → drag to the 75th percentile → Set goal & follow. The goal card appears under Your goals.',
-        say: 'Sam wants that engagement in the top quartile, so he sets a goal. That one click creates his own Tableau Pulse metric through the Pulse API, sets the goal and subscribes him, so Pulse tracks his progress and flags it in Needs attention.',
+        say: 'Sam wants that engagement in the top quartile, so he sets a goal. That one click creates his own Tableau Pulse metric through the Pulse API, sets the goal and subscribes him, so Pulse tracks his progress and flags it on the homepage.',
         cap: ['Tableau Pulse API · his own metric + goal']
       }
     ]
