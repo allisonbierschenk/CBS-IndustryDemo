@@ -1,0 +1,34 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<PermissionSet xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Apex Client Portal</label>
+    <description>Fields the Apex client portal reads and writes (subscription tier, upgrades).</description>
+    <hasActivationRequired>false</hasActivationRequired>
+    <fieldPermissions><field>Account.Apex_Client_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Account.Apex_Subscription_Tier__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_Portal_User_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_Premium_Seat__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Contact.Apex_People_Manager__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Opportunity.Apex_Premium_Seats__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Event_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Event_Type__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Event_Time__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Account__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Contact__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Client_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Client_Name__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Portal_User_Id__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.User_Name__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Persona__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Tier__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Subject__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Amount__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Seats__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Has_Premium_Seat__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Apex_Portal_Activity__c.Detail__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <fieldPermissions><field>Opportunity.Apex_Client_Name__c</field><readable>true</readable><editable>false</editable></fieldPermissions>
+    <fieldPermissions><field>Opportunity.Apex_Client_Id_F__c</field><readable>true</readable><editable>false</editable></fieldPermissions>
+    <fieldPermissions><field>CampaignMember.Apex_Client_Id_F__c</field><readable>true</readable><editable>false</editable></fieldPermissions>
+    <fieldPermissions><field>CampaignMember.Apex_Portal_User_Id_F__c</field><readable>true</readable><editable>false</editable></fieldPermissions>
+    <fieldPermissions><field>Opportunity.Apex_Portal_Upgrade__c</field><readable>true</readable><editable>true</editable></fieldPermissions>
+    <objectPermissions><allowCreate>true</allowCreate><allowDelete>true</allowDelete><allowEdit>true</allowEdit><allowRead>true</allowRead><modifyAllRecords>false</modifyAllRecords><object>Apex_Portal_Activity__c</object><viewAllRecords>true</viewAllRecords></objectPermissions>
+</PermissionSet>

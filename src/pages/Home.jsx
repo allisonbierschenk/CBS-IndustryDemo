@@ -21,12 +21,15 @@ export default function Home() {
         <h1>How would you like to explore {me.tenant.shortName}&apos;s results?</h1>
 
         <div className="choose-grid">
-          <Link to="/agent" className="choice choice-agent">
+          <Link to="/agent" className={`choice choice-agent${me.features?.agent ? '' : ' is-locked'}`}>
             <span className="choice-ic">
               <Icon name="agent" />
+              {!me.features?.agent && <span className="lock-badge" aria-hidden="true"><Icon name="lock" /></span>}
             </span>
             <span className="choice-copy">
-              <b>Ask the agent</b>
+              <b>
+                Ask the agent{!me.features?.agent && <span className="mini-tier premium choice-badge">Premium</span>}
+              </b>
               <span>Ask questions about your engagements in plain language.</span>
             </span>
             <span className="arrow-chip">
@@ -50,6 +53,20 @@ export default function Home() {
             </span>
           </Link>
         </div>
+        {me.features?.agentQuestions?.length > 0 && (
+          <div className="home-asks">
+            <span className="home-asks-label">
+              <Icon name="agent" />
+              Try asking
+            </span>
+            {me.features.agentQuestions.map(({ q, source }) => (
+              <Link key={q} className="chip-q" to={`/agent?q=${encodeURIComponent(q)}${source ? `&source=${encodeURIComponent(source)}` : ''}`}>
+                {q}
+                <Icon name="arrowRight" />
+              </Link>
+            ))}
+          </div>
+        )}
       </section>
       <AttentionPanel />
     </div>

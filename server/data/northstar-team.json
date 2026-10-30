@@ -1,0 +1,313 @@
+{
+ "_comment": "Northstar Enterprises' wider team in the Apex client portal — roster people (no sign-in) who can be given Premium seats. With Dana Whitfield and Sam Patel (users.json) Northstar has 40 users; 20 are people managers (Sam + the 19 below). Seeded into Salesforce as Contacts on the Northstar Account.",
+ "tenantId": "northstar",
+ "signInManagers": [
+  "u-northstar-ops"
+ ],
+ "members": [
+  {
+   "id": "ns-001",
+   "firstName": "Marisol",
+   "lastName": "Vega",
+   "email": "marisol.vega@northstar.com",
+   "title": "Warehouse Manager – Dallas",
+   "manager": true
+  },
+  {
+   "id": "ns-002",
+   "firstName": "Trevor",
+   "lastName": "Okafor",
+   "email": "trevor.okafor@northstar.com",
+   "title": "Fleet Operations Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-003",
+   "firstName": "Hannah",
+   "lastName": "Lindqvist",
+   "email": "hannah.lindqvist@northstar.com",
+   "title": "Transportation Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-004",
+   "firstName": "Darius",
+   "lastName": "Coleman",
+   "email": "darius.coleman@northstar.com",
+   "title": "Distribution Center Manager – Memphis",
+   "manager": true
+  },
+  {
+   "id": "ns-005",
+   "firstName": "Priyanka",
+   "lastName": "Shah",
+   "email": "priyanka.shah@northstar.com",
+   "title": "Inventory Control Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-006",
+   "firstName": "Owen",
+   "lastName": "Gallagher",
+   "email": "owen.gallagher@northstar.com",
+   "title": "Procurement Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-007",
+   "firstName": "Lucia",
+   "lastName": "Moreno",
+   "email": "lucia.moreno@northstar.com",
+   "title": "Logistics Manager – West",
+   "manager": true
+  },
+  {
+   "id": "ns-008",
+   "firstName": "Ben",
+   "lastName": "Nakamura",
+   "email": "ben.nakamura@northstar.com",
+   "title": "Supply Chain Planning Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-009",
+   "firstName": "Aisha",
+   "lastName": "Bello",
+   "email": "aisha.bello@northstar.com",
+   "title": "Customer Operations Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-010",
+   "firstName": "Connor",
+   "lastName": "Walsh",
+   "email": "connor.walsh@northstar.com",
+   "title": "Last-Mile Delivery Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-011",
+   "firstName": "Grace",
+   "lastName": "Kim",
+   "email": "grace.kim@northstar.com",
+   "title": "Safety & Compliance Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-012",
+   "firstName": "Mateo",
+   "lastName": "Rossi",
+   "email": "mateo.rossi@northstar.com",
+   "title": "Carrier Relations Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-013",
+   "firstName": "Nadia",
+   "lastName": "Petrova",
+   "email": "nadia.petrova@northstar.com",
+   "title": "Yard Operations Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-014",
+   "firstName": "Kwame",
+   "lastName": "Asante",
+   "email": "kwame.asante@northstar.com",
+   "title": "Demand Planning Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-015",
+   "firstName": "Emily",
+   "lastName": "Carter",
+   "email": "emily.carter@northstar.com",
+   "title": "Network Optimization Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-016",
+   "firstName": "Rafael",
+   "lastName": "Duarte",
+   "email": "rafael.duarte@northstar.com",
+   "title": "Cross-Dock Manager – Atlanta",
+   "manager": true
+  },
+  {
+   "id": "ns-017",
+   "firstName": "Sofia",
+   "lastName": "Haddad",
+   "email": "sofia.haddad@northstar.com",
+   "title": "Returns Operations Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-018",
+   "firstName": "Jake",
+   "lastName": "Morrison",
+   "email": "jake.morrison@northstar.com",
+   "title": "Fulfillment Manager – Columbus",
+   "manager": true
+  },
+  {
+   "id": "ns-019",
+   "firstName": "Leah",
+   "lastName": "Goldberg",
+   "email": "leah.goldberg@northstar.com",
+   "title": "Operational Excellence Manager",
+   "manager": true
+  },
+  {
+   "id": "ns-020",
+   "firstName": "Ethan",
+   "lastName": "Brooks",
+   "email": "ethan.brooks@northstar.com",
+   "title": "Logistics Analyst",
+   "manager": false
+  },
+  {
+   "id": "ns-021",
+   "firstName": "Mia",
+   "lastName": "Fernandez",
+   "email": "mia.fernandez@northstar.com",
+   "title": "Transportation Coordinator",
+   "manager": false
+  },
+  {
+   "id": "ns-022",
+   "firstName": "Noah",
+   "lastName": "Sullivan",
+   "email": "noah.sullivan@northstar.com",
+   "title": "Inventory Analyst",
+   "manager": false
+  },
+  {
+   "id": "ns-023",
+   "firstName": "Chloe",
+   "lastName": "Nguyen",
+   "email": "chloe.nguyen@northstar.com",
+   "title": "Dispatch Supervisor",
+   "manager": false
+  },
+  {
+   "id": "ns-024",
+   "firstName": "Liam",
+   "lastName": "O'Connor",
+   "email": "liam.oconnor@northstar.com",
+   "title": "Freight Audit Specialist",
+   "manager": false
+  },
+  {
+   "id": "ns-025",
+   "firstName": "Zara",
+   "lastName": "Ahmed",
+   "email": "zara.ahmed@northstar.com",
+   "title": "Supply Chain Analyst",
+   "manager": false
+  },
+  {
+   "id": "ns-026",
+   "firstName": "Lucas",
+   "lastName": "Meyer",
+   "email": "lucas.meyer@northstar.com",
+   "title": "Warehouse Associate Lead",
+   "manager": false
+  },
+  {
+   "id": "ns-027",
+   "firstName": "Ava",
+   "lastName": "Thompson",
+   "email": "ava.thompson@northstar.com",
+   "title": "Procurement Specialist",
+   "manager": false
+  },
+  {
+   "id": "ns-028",
+   "firstName": "Isaac",
+   "lastName": "Rivera",
+   "email": "isaac.rivera@northstar.com",
+   "title": "Fleet Maintenance Coordinator",
+   "manager": false
+  },
+  {
+   "id": "ns-029",
+   "firstName": "Maya",
+   "lastName": "Patel",
+   "email": "maya.patel@northstar.com",
+   "title": "Demand Planner",
+   "manager": false
+  },
+  {
+   "id": "ns-030",
+   "firstName": "Elijah",
+   "lastName": "Grant",
+   "email": "elijah.grant@northstar.com",
+   "title": "Routing Analyst",
+   "manager": false
+  },
+  {
+   "id": "ns-031",
+   "firstName": "Nora",
+   "lastName": "Jensen",
+   "email": "nora.jensen@northstar.com",
+   "title": "Customer Service Specialist",
+   "manager": false
+  },
+  {
+   "id": "ns-032",
+   "firstName": "Samuel",
+   "lastName": "Ortiz",
+   "email": "samuel.ortiz@northstar.com",
+   "title": "Safety Coordinator",
+   "manager": false
+  },
+  {
+   "id": "ns-033",
+   "firstName": "Layla",
+   "lastName": "Hussein",
+   "email": "layla.hussein@northstar.com",
+   "title": "Data Analyst, Operations",
+   "manager": false
+  },
+  {
+   "id": "ns-034",
+   "firstName": "Caleb",
+   "lastName": "Wright",
+   "email": "caleb.wright@northstar.com",
+   "title": "Carrier Onboarding Specialist",
+   "manager": false
+  },
+  {
+   "id": "ns-035",
+   "firstName": "Ruby",
+   "lastName": "Chen",
+   "email": "ruby.chen@northstar.com",
+   "title": "Operations Coordinator",
+   "manager": false
+  },
+  {
+   "id": "ns-036",
+   "firstName": "Gabriel",
+   "lastName": "Silva",
+   "email": "gabriel.silva@northstar.com",
+   "title": "Process Improvement Analyst",
+   "manager": false
+  },
+  {
+   "id": "ns-037",
+   "firstName": "Ivy",
+   "lastName": "Robinson",
+   "email": "ivy.robinson@northstar.com",
+   "title": "Returns Specialist",
+   "manager": false
+  },
+  {
+   "id": "ns-038",
+   "firstName": "Henry",
+   "lastName": "Park",
+   "email": "henry.park@northstar.com",
+   "title": "Cost Analyst",
+   "manager": false
+  }
+ ]
+}

@@ -1,0 +1,17 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomObject xmlns="http://soap.sforce.com/2006/04/metadata">
+    <label>Apex Portal Activity</label>
+    <pluralLabel>Apex Portal Activities</pluralLabel>
+    <description>What a client did in the Apex client portal (sign-ins, Agent questions, goals, upgrades, requests) — engagement data for Data 360 and the account team.</description>
+    <nameField><label>Activity</label><type>AutoNumber</type><displayFormat>PA-{000000}</displayFormat></nameField>
+    <deploymentStatus>Deployed</deploymentStatus>
+    <sharingModel>ReadWrite</sharingModel>
+    <enableReports>true</enableReports>
+    <enableSearch>true</enableSearch>
+    <enableHistory>false</enableHistory>
+    <enableActivities>false</enableActivities>
+    <enableFeeds>false</enableFeeds>
+    <enableBulkApi>true</enableBulkApi>
+    <enableSharing>true</enableSharing>
+    <enableStreamingApi>true</enableStreamingApi>
+</CustomObject>

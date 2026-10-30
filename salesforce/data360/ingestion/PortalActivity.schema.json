@@ -1,0 +1,16 @@
+{"schemas":[{"name":"PortalActivity","label":"PortalActivity","schemaType":"IngestApi","fields":[
+ {"name":"EventId","label":"Event Id","dataType":"Text"},
+ {"name":"EventTime","label":"Event Time","dataType":"DateTime"},
+ {"name":"EventType","label":"Event Type","dataType":"Text"},
+ {"name":"PortalUserId","label":"Portal User Id","dataType":"Text"},
+ {"name":"UserEmail","label":"User Email","dataType":"Text"},
+ {"name":"UserName","label":"User Name","dataType":"Text"},
+ {"name":"Persona","label":"Persona","dataType":"Text"},
+ {"name":"ClientId","label":"Client Id","dataType":"Text"},
+ {"name":"ClientName","label":"Client Name","dataType":"Text"},
+ {"name":"Tier","label":"Tier","dataType":"Text"},
+ {"name":"Subject","label":"Subject","dataType":"Text"},
+ {"name":"Amount","label":"Amount","dataType":"Number"},
+ {"name":"Seats","label":"Seats","dataType":"Number"},
+ {"name":"Detail","label":"Detail","dataType":"Text"}
+]}]}

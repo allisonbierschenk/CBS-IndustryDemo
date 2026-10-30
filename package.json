@@ -5,7 +5,7 @@
   "description": "Apex Consulting Client Value Intelligence Portal — Tableau Embedded CBS / Professional Services demo (React + Connected Apps Direct Trust + user attribute RLS)",
   "type": "module",
   "scripts": {
-    "dev": "concurrently -k -n api,web -c gray,green \"node --watch server/index.cjs\" \"vite\"",
+    "dev": "concurrently -k -n api,web -c gray,green \"node --watch-path=server --watch-path=config server/index.cjs\" \"vite\"",
     "build": "NODE_ENV=production vite build",
     "start": "node server/index.cjs",
     "heroku-postbuild": "npm run build",

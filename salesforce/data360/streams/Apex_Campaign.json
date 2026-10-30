@@ -1,0 +1,63 @@
+{
+ "name": "Apex_Campaign",
+ "label": "Apex Campaign",
+ "datasource": "SalesforceDotCom_Home",
+ "connectorInfo": {
+  "connectorType": "SalesforceDotCom",
+  "connectorDetails": {
+   "name": "SalesforceDotCom_Home",
+   "sourceObject": "Campaign"
+  }
+ },
+ "dataLakeObjectInfo": {
+  "name": "Apex_Campaign",
+  "label": "Apex Campaign",
+  "category": "Other",
+  "dataspaceInfo": [
+   {
+    "name": "default"
+   }
+  ],
+  "dataLakeFieldInputRepresentations": [
+   {
+    "name": "Id",
+    "label": "Campaign ID",
+    "dataType": "Text",
+    "isPrimaryKey": true
+   },
+   {
+    "name": "Name",
+    "label": "Name",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Type",
+    "label": "Type",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "Status",
+    "label": "Status",
+    "dataType": "Text",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "StartDate",
+    "label": "Start Date",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   },
+   {
+    "name": "CreatedDate",
+    "label": "Created Date",
+    "dataType": "DateTime",
+    "isPrimaryKey": false
+   }
+  ]
+ },
+ "refreshConfig": {
+  "refreshMode": "UPSERT"
+ }
+}

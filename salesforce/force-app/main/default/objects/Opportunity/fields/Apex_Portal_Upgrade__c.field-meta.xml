@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<CustomField xmlns="http://soap.sforce.com/2006/04/metadata">
+    <fullName>Apex_Portal_Upgrade__c</fullName>
+    <label>Apex Portal Upgrade</label>
+    <description>Created by a client's self-service upgrade in the Apex client portal.</description>
+    <type>Checkbox</type>
+    <defaultValue>false</defaultValue>
+</CustomField>

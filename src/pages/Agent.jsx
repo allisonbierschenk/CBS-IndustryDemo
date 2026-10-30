@@ -11,6 +11,7 @@ import InfoTip from '../components/InfoTip.jsx';
 import PulseAiNote from '../components/PulseAiNote.jsx';
 import PulseMarkup, { direction } from '../components/PulseMarkup.jsx';
 import TrendChart from '../components/TrendChart.jsx';
+import UpgradeButton, { useUpgrade } from '../components/UpgradeButton.jsx';
 
 const plain = (s) => String(s || '').replace(/<[^>]+>/g, '');
 
@@ -65,6 +66,81 @@ function Answer({ msg }) {
 }
 
 export default function Agent() {
+  const { me } = useSession();
+  return me.features?.agent ? <AgentChat /> : <AgentLocked me={me} />;
+}
+
+/** Standard clients: the Agent is part of Premium — a preview of what it answers, and the upgrade. */
+function AgentLocked({ me }) {
+  const upgrade = useUpgrade();
+  const price = me.features?.seats?.price || me.features?.benchmarks?.price;
+  const examples = ['What are our Value Realization Rate trends?', 'Which engagement is furthest behind plan, and why?', 'Are we on track to hit our goal?'];
+  return (
+    <div className="container">
+      <section className="bm-panel agent-lock">
+        <div className="agent-lock-copy">
+          <div className="agent-lock-kicker">
+            <Icon name="lock" />
+            Premium
+          </div>
+          <h1>Ask your data anything</h1>
+          <p>
+            Ask about {me.tenant.shortName}’s engagements in plain English — what changed, why, and what to look at next. Every answer comes from your governed
+            metrics, with the numbers to back it up.
+          </p>
+          <div className="agent-lock-qs">
+            {examples.map((q) => (
+              <button key={q} type="button" onClick={() => upgrade('upgrade')}>
+                <Icon name="agent" />
+                {q}
+              </button>
+            ))}
+          </div>
+          {price && (
+            <div className="agent-lock-price">
+              <b>{price}</b> with Premium · includes Industry Benchmarks and your own goals
+            </div>
+          )}
+          <div className="bench-lock-actions">
+            <UpgradeButton className="btn btn-lime" label={me.features?.seats ? 'Upgrade your team' : 'Upgrade to Premium'} />
+            <UpgradeButton className="btn btn-ghost-light" label="What’s included" intent="learn" />
+          </div>
+        </div>
+        <div className="agent-lock-preview" aria-hidden="true">
+          <div className="alp-q">Which engagement is furthest behind plan, and why?</div>
+          <div className="alp-a">
+            <div className="alp-line w90" />
+            <div className="alp-line w75" />
+            <div className="alp-cards">
+              <div className="alp-card">
+                <small>Value Realization Rate</small>
+                <b>71.4%</b>
+                <span className="alp-down">▼ 6.2 pts</span>
+              </div>
+              <div className="alp-card">
+                <small>Engagement Health</small>
+                <b>64</b>
+                <span className="alp-down">▼ 9</span>
+              </div>
+            </div>
+            <svg viewBox="0 0 300 80" className="alp-chart">
+              <path d="M0 22 C40 18 70 30 100 34 S170 52 200 58 S260 66 300 70" fill="none" stroke="var(--lime)" strokeWidth="3" />
+              <path d="M0 40 L300 40" stroke="rgba(255,255,255,.18)" strokeDasharray="4 6" />
+            </svg>
+            <div className="alp-line w60" />
+          </div>
+          <div className="alp-veil">
+            <span className="bench-lock-ic">
+              <Icon name="lock" />
+            </span>
+          </div>
+        </div>
+      </section>
+    </div>
+  );
+}
+
+function AgentChat() {
   const { me } = useSession();
   const [prep, setPrep] = useState({ loading: true });
   const [messages, setMessages] = useState([]);

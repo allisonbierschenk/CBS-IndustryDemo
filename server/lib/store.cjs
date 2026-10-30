@@ -26,6 +26,7 @@ function entitlementsFor(tenant) {
     set.add('benchmarks');
     set.add('authoring'); // build-your-own reports
     set.add('goals'); // create their own Pulse metrics with goals
+    set.add('agent'); // the Pulse Agent chat (Explain this stays available to everyone)
   }
   return set;
 }
