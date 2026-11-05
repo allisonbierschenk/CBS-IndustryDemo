@@ -123,7 +123,7 @@ export default function Alerts() {
           Your metrics
         </h2>
         <p className="muted" style={{ margin: '6px 0 16px' }}>
-          Metrics you follow power the Agent and the “Needs attention” summary on your home page.
+          Metrics you follow power the Pulse Agent and the “Needs attention” summary on your home page.
         </p>
         <CreateMetric onCreated={loadMetrics} />
         {metrics.loading && <p className="muted">Loading…</p>}
@@ -264,7 +264,7 @@ function CreateMetricForm({ onCreated }) {
       {state.kind === 'error' && <div className="error-msg">{state.message}</div>}
       {state.kind === 'done' && (
         <p className="cm-done">
-          <Icon name="check" size={14} /> {state.created ? 'Created' : 'Updated'} your {state.name} metric with a goal of {state.goal}. It now appears in the Agent and Needs attention.
+          <Icon name="check" size={14} /> {state.created ? 'Created' : 'Updated'} your {state.name} metric with a goal of {state.goal}. It now appears in the Pulse Agent and Needs attention.
         </p>
       )}
     </form>

@@ -14,6 +14,7 @@ const TECH = {
   pulse: { label: 'Tableau Pulse', color: '#e0702f', note: 'Governed metrics + insights platform; built-in AI on the Einstein Trust Layer explains them.' },
   pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
+  mcp: { label: 'Tableau MCP', color: '#3d6b4f', note: 'Tableau’s Model Context Protocol server: lets any AI agent query governed Tableau data with tools, as the signed-in user (passthrough auth).' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
   author: { label: 'Web authoring', color: '#c0398a', note: 'Tableau’s editor embedded on the governed data source.' },
   portal: { label: 'Portal entitlements', color: '#2a312e', note: 'Apex’s app decides what a client’s subscription includes — enforced on the server, not hidden in the UI.' }
@@ -28,7 +29,7 @@ const ROLE = {
 const PLAN = { premium: { icon: 'star', label: 'Premium' }, standard: { icon: 'shield', label: 'Standard' } };
 
 const GROUPS = [
-  { key: 'ai', label: 'AI', icon: 'agent', note: 'Pulse insights and the Agent' },
+  { key: 'ai', label: 'AI', icon: 'agent', note: 'Pulse Agent, Data Agent (MCP) and Pulse insights' },
   { key: 'bi', label: 'Traditional BI', icon: 'dashboard', note: 'Dashboards, drill-down, delivery' },
   { key: 'money', label: 'Data monetization', icon: 'star', note: 'Premium tier and upsell' }
 ];
@@ -94,7 +95,7 @@ const FEATURES = [
   F('attentionAct', 'ai', 'Act on an off-track metric', () => ({
     title: 'Act on an off-track metric',
     where: 'Home → Needs attention',
-    do: 'On an off-track row, use the icons: Ask the Agent, Open dashboard, or Contact Apex (prefilled with what Pulse found).',
+    do: 'On an off-track row, use the icons: Ask the Pulse Agent, Open dashboard, or Contact Apex (prefilled with what Pulse found).',
     say: 'From “something’s wrong” to the next step in one click.',
     money: 'Every off-track metric becomes a conversation with Apex — already filled in with the facts.',
     tech: ['pulse'],
@@ -120,30 +121,46 @@ const FEATURES = [
       ['What does Pulse do with the goal?', 'It tracks progress to the goal; Pulse also offers Goal and Threshold Breakdown and Pace to Goal insights (Pace to Goal needs Tableau+ with Forecast on).']
     ]
   })),
-  F('agent', 'ai', 'Ask the Agent', (p) => ({
-    title: 'Ask the Agent',
-    where: 'Agent',
+  F('agent', 'ai', 'Ask the Pulse Agent', (p) => ({
+    title: 'Ask the Pulse Agent',
+    where: 'Top bar → Pulse Agent',
     do: 'Ask “What are the Value Realization Rate trends?”, then click a follow-up chip; point at the insight cards and trend chart.',
     say: 'Answers in plain language — from the same governed metrics as the dashboard.',
     money: 'Pulse AI is included with Tableau+ and unmetered — no tokens, no usage bill, however many questions clients ask.',
     tech: ['pulse', 'rls'],
     ask: [
       ['Is there an LLM?', 'Yes — built-in AI on the Einstein Trust Layer. It describes insights Tableau already computed; it never analyzes raw data, so insights are deterministic.'],
-      ['What can it see?', `Only the Pulse metrics ${p.first} follows, under the same data security as the dashboards.`]
+      ['What can it see?', `Only the Pulse metrics ${p.first} follows, under the same data security as the dashboards.`],
+      ['How is it different from the Data Agent?', 'The Pulse Agent answers from the governed Pulse metrics the user follows: unmetered with Tableau+. The Data Agent (chat bubble) uses Tableau MCP and your own LLM to ask anything of the data source.']
     ]
   })),
-  F('agentSource', 'ai', 'Agent data-source picker', () => ({
+  F('mcpAgent', 'ai', 'Data Agent (Tableau MCP)', (p) => ({
+    title: 'Ask anything with the Data Agent',
+    where: 'Chat bubble, bottom-right of every page',
+    do: `Open the chat bubble and ask “Which service line delivered the most business value?”, then expand “Tableau MCP tool calls” to show the query the AI wrote. Switch to another client and ask the same question: different numbers.`,
+    say: 'Any AI agent, on governed Tableau data — with each client’s security intact.',
+    money: 'Ask-anything AI as a premium portal feature, without copying client data into an AI platform.',
+    tech: ['mcp', 'vds', 'rls'],
+    ask: [
+      ['What is MCP?', 'Model Context Protocol: the open standard for giving AI agents tools. Tableau’s MCP server exposes tools like get-datasource-metadata and query-datasource (VizQL Data Service).'],
+      ['Whose data can it see?', `Only ${p.first}’s. The portal passes ${p.first}’s own Tableau session to the MCP server (passthrough auth), so every query runs as ${p.first} with the same row-level security as the dashboards. No service account.`],
+      ['Which LLM?', 'Any — this demo uses OpenAI. The LLM only sees query results Tableau already secured. Unlike Pulse AI, it’s metered by the model provider.'],
+      ['Why do the numbers match the dashboard?', 'It queries the same published data source and defaults to year to date on the date field the dashboard’s Pulse metrics use.'],
+      ['Can it change anything?', 'No — read-only tools only, limited to this client’s data sources, and 3 questions per chat before a new chat.']
+    ]
+  })),
+  F('agentSource', 'ai', 'Pulse Agent data-source picker', () => ({
     title: 'Switch data sources',
-    where: 'Agent',
+    where: 'Pulse Agent',
     do: 'Pick Transportation and ask “What is driving Freight Cost?” — only the Transportation metrics are in play.',
     say: 'One agent, scoped to the data you choose.',
     tech: ['pulse'],
     ask: [['Why separate sources?', 'Each source is its own conversation, so answers never mix metrics from different data.']]
   }), onlyElena),
-  F('selectionAgent', 'ai', 'Ask the Agent about a selection', () => ({
+  F('selectionAgent', 'ai', 'Ask the Pulse Agent about a selection', () => ({
     title: 'Ask about what you selected',
     where: 'Any dashboard',
-    do: 'Select marks on a chart, then Ask the Agent — the question is written from your selection.',
+    do: 'Select marks on a chart, then Ask the Pulse Agent — the question is written from your selection.',
     say: 'Point at the data, ask why.',
     tech: ['embed', 'pulse'],
     ask: [['How is the question built?', 'From the selected marks’ fields and values, read through the Embedding API.']]
@@ -155,7 +172,7 @@ const FEATURES = [
       ? 'Select a few lanes or carriers → Explain this → click a follow-up to act.'
       : 'Select a few engagements on a chart → Explain this → click a follow-up to act.',
     say: 'See something on a dashboard? Get the why — and act on it — without leaving the page.',
-    money: 'Every explanation ends in a next step — Continue in the Agent, or a conversation with Apex.',
+    money: 'Every explanation ends in a next step — Continue in the Pulse Agent, or a conversation with Apex.',
     tech: ['pulse', 'embed'],
     ask: [['What did it just do?', 'Asked Pulse about the selected marks using only the Pulse metrics the user follows on that dashboard’s data source, and showed the answer beside the dashboard.']]
   })),
@@ -175,7 +192,7 @@ const FEATURES = [
     say: 'Show your clients the measurable value of your services every time they log in.',
     money: 'Proof of value at every login is what wins renewals and expansions.',
     tech: ['embed', 'pulse', 'rls'],
-    ask: [['Where do the KPI tiles come from?', 'Tableau Pulse metrics on the published data source — one governed definition each, so tiles, charts, the Agent and feeds agree.']]
+    ask: [['Where do the KPI tiles come from?', 'Tableau Pulse metrics on the published data source — one governed definition each, so tiles, charts, the Pulse Agent and feeds agree.']]
   })),
   F('early', 'bi', 'Early-stage notice', () => ({
     title: 'Honest about early data',
@@ -300,7 +317,7 @@ const FEATURES = [
     do: 'Show email subscriptions and followed Pulse metrics; follow a new one.',
     say: 'Clients choose what they’re told about.',
     tech: ['rest', 'pulse'],
-    ask: [['Where are follows stored?', 'In Tableau Pulse — following a metric also drives the Agent and Needs attention.']]
+    ask: [['Where are follows stored?', 'In Tableau Pulse — following a metric also drives the Pulse Agent and Needs attention.']]
   })),
   F('help', 'bi', 'Help & KPI definitions', () => ({
     title: 'KPI definitions',
@@ -360,7 +377,7 @@ const FEATURES = [
   F('activity', 'money', 'Activity log', () => ({
     title: 'See how clients use the portal',
     where: 'Account menu → Activity log',
-    do: 'Open the Activity log: sign-ins, exports, shares, upgrades and Agent questions.',
+    do: 'Open the Activity log: sign-ins, exports, shares, upgrades and Pulse Agent / Data Agent questions.',
     say: 'Apex sees which clients engage — and which need a call.',
     money: 'Usage signals show who to upsell and who is at risk of churning.',
     tech: ['portal'],
@@ -377,7 +394,7 @@ const FEATURES = [
   })),
   F('security', 'core', null, (p) => ({
     title: 'Secure personalization at scale',
-    where: 'Presenter dock (Switch user)',
+    where: 'Sign-in page (or ⌥1–⌥9)',
     do:
       p.role === 'exec'
         ? 'Switch to Sam Patel (Northstar, Operations only) or Alex Morgan (two clients): same dashboards, different data.'
@@ -414,9 +431,10 @@ const ABOUT = {
   "attention": "Pulse flags the metrics going the wrong way.",
   "attentionAct": "One click to ask why, open the dashboard or email Apex.",
   "goals": "Premium: the client sets a goal on any KPI — the portal creates a real Pulse metric for them through the Pulse REST API, sets the goal and follows it.",
-  "agent": "Ask a question in plain English, get an answer from the client’s metrics.",
-  "agentSource": "Choose which metrics the chat uses (Elena has two sets).",
-  "selectionAgent": "Select data on a chart, ask the chat about it.",
+  "agent": "Pulse Agent: ask in plain English, answered from the client’s Pulse metrics.",
+  "mcpAgent": "Data Agent (chat bubble): ask anything — AI queries Tableau through MCP, as the user.",
+  "agentSource": "Choose which metrics the Pulse Agent uses (Elena has two sets).",
+  "selectionAgent": "Select data on a chart, ask the Pulse Agent about it.",
   "explain": "Select a data point in a dashboard → Pulse explains it.",
   "tableauAgent": "Tableau’s AI inside the dashboard (needs a license).",
   "vi": "The value Apex has delivered to this client.",
@@ -447,7 +465,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'mcpAgent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

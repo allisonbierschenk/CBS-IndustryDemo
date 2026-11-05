@@ -115,7 +115,7 @@ export default function SelectionActions({ viz, title, ignoreWorksheets = [], ex
               )}
               <button className={`btn ${pulseSource ? 'btn-sel' : 'btn-lime'} btn-sm`} onClick={askAgent}>
                 <Icon name="agent" />
-                Ask the Agent
+                Ask the Pulse Agent
               </button>
               <button className="btn btn-sel btn-sm" onClick={() => setSlack(true)}>
                 <Icon name="send" />

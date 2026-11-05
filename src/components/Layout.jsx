@@ -7,6 +7,7 @@ import {
   usePreloadViews,
 } from "../context/EmbedContext.jsx";
 import { useSession } from "../context/SessionContext.jsx";
+import DataAgentChat from "./DataAgentChat.jsx";
 import PresenterDock from "./PresenterDock.jsx";
 import TopBar from "./TopBar.jsx";
 import { UpgradeProvider } from "./UpgradeButton.jsx";
@@ -43,6 +44,7 @@ export default function Layout() {
               <Footer clientName={me.tenant.clientName} />
               <PersistentEmbeds containerRef={pageRef} />
             </div>
+            <DataAgentChat />
             <PresenterDock />
           </div>
         </EmbedProvider>

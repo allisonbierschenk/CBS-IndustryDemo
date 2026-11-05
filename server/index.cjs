@@ -12,6 +12,7 @@ const express = require('express');
 const { createCookieJar } = require('./lib/session.cjs');
 const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
+const { createMcpAgent } = require('./lib/mcpAgent.cjs');
 const activity = require('./lib/activity.cjs');
 const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
@@ -187,7 +188,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
   if (!user) return res.status(404).json({ error: 'Unknown user' });
 
   startSession(res, user);
-  pulse.forgetSession(user); // a fresh sign-in never inherits an earlier session's (e.g. upgraded) attributes
+  pulse.forgetSession(user); forgetMcpSession(user); // a fresh sign-in never inherits an earlier session's (e.g. upgraded) attributes
   console.log(`→ signed in ${user.id} (${user.email})`);
   activity.record(user, store.tenantFor(user), 'sign-in', {});
   features.warmAttention(user); // start the (slow) Pulse brief now so Home doesn't wait for it
@@ -204,7 +205,7 @@ app.post('/api/auth/login', throttle, (req, res) => {
 
 app.post('/api/auth/logout', (req, res) => {
   const user = currentUser(req);
-  if (user) pulse.forgetSession(user); // next Tableau session uses the stored (non-upgraded) attributes
+  if (user) { pulse.forgetSession(user); forgetMcpSession(user); } // next Tableau session uses the stored (non-upgraded) attributes
   jar.clear(res, SESSION_COOKIE);
   res.json({ ok: true });
 });
@@ -214,7 +215,7 @@ app.post('/api/upgrade', requireUser, (req, res) => {
   if (req.tenant.tier === 'premium') return res.json({ ok: true, already: true });
   const s = jar.read(req, SESSION_COOKIE);
   jar.write(res, SESSION_COOKIE, { ...s, upgraded: true }, SESSION_TTL_MS);
-  pulse.forgetSession(req.user); // re-sign in to Tableau with subscription tier = Premium
+  pulse.forgetSession(req.user); forgetMcpSession(req.user); // re-sign in to Tableau with subscription tier = Premium
   activity.record(req.user, req.tenant, 'upgrade', { plan: 'Premium', price: store.content.benchmarks?.price || '' });
   console.log(`→ demo upgrade: ${req.user.email} (${req.tenant.clientName}) → Premium for this session`);
   res.json({ ok: true });
@@ -371,6 +372,108 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
   } catch (e) {
     console.error('agent chat error:', e.message);
     res.status(502).json({ error: e.message });
+  }
+});
+
+// ── Data Agent: OpenAI + Tableau MCP server (passthrough auth, per-user Tableau session) ──
+// The user's own REST session token is forwarded to the MCP server as X-Tableau-Auth, so every
+// MCP tool call runs as that user: Tableau permissions + row-level security apply. See docs/MCP_AGENT.md.
+// Separate Tableau session from the Pulse one: these scopes cover the REST/VDS/Pulse calls the MCP tools make.
+const MCP_SCOPES = [
+  'tableau:content:read',
+  'tableau:mcp_site_settings:read',
+  'tableau:viz_data_service:read',
+  'tableau:insight_definitions_metrics:read',
+  'tableau:insight_metrics:read',
+  'tableau:metric_subscriptions:read',
+  'tableau:insights:read',
+  'tableau:insight_brief:create',
+  'tableau:entitlements:read',
+  // Tableau Cloud releases older than 2026.2 also require the wildcard on passthrough JWT sessions.
+  ...(process.env.TABLEAU_MCP_WILDCARD_SCOPE === 'false' ? [] : ['tableau:*:*'])
+];
+const mcpTableau = createPulseClient({
+  server: env.server,
+  site: env.site,
+  clientId: env.clientId,
+  secretId: env.secretId,
+  secretValue: env.secretValue,
+  attributeFor: userAttributes,
+  scopes: MCP_SCOPES,
+  label: 'MCP'
+});
+const mcpAgent = createMcpAgent({
+  mcpUrl: process.env.TABLEAU_MCP_URL,
+  openaiKey: process.env.OPENAI_API_KEY,
+  model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+  restSession: mcpTableau.restSession,
+  forgetSession: mcpTableau.forgetSession
+});
+
+// Hoisted so sign-in / sign-out / upgrade (defined above) can drop the MCP session too.
+function forgetMcpSession(user) {
+  mcpTableau.forgetSession(user);
+}
+
+/** The customer's entitled agent data sources with their LUIDs (resolved as the user). */
+async function mcpDatasources(user, tenant) {
+  const list = agentScope(tenant).datasources;
+  return Promise.all(list.map(async (d) => ({ name: d.name, label: d.label, dateField: d.dateField, luid: await mcpTableau.resolveDatasource(user, d.name) })));
+}
+
+const MCP_MAX_QUESTIONS = 3;
+const mcpConversations = new Map(); // id -> { userId, messages: [{role, content}], at }
+setInterval(() => {
+  for (const [id, c] of mcpConversations) if (Date.now() - c.at > CONVERSATION_TTL_MS) mcpConversations.delete(id);
+}, 5 * 60 * 1000).unref();
+
+app.get('/api/mcp/context', requireUser, async (req, res) => {
+  if (!mcpAgent.configured()) return res.json({ configured: false });
+  try {
+    const datasources = await mcpDatasources(req.user, req.tenant);
+    res.json({
+      configured: true,
+      mcpHost: new URL(process.env.TABLEAU_MCP_URL).host,
+      model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
+      maxQuestions: MCP_MAX_QUESTIONS,
+      datasources: datasources.map(({ name, label }) => ({ name, label })),
+      suggested: [
+        'Which service line delivered the most business value?',
+        'How has our value realization rate trended by quarter?',
+        'Which engagements are behind on milestones?',
+        ...(datasources.some((d) => d.label === 'Transportation') ? ['What does our transportation savings data show by month?'] : [])
+      ]
+    });
+  } catch (e) {
+    console.error('mcp context error:', e.message);
+    res.status(502).json({ error: e.message });
+  }
+});
+
+app.post('/api/mcp/chat', requireUser, async (req, res) => {
+  const question = String(req.body?.question || '').trim().slice(0, 1000);
+  if (!question) return res.status(400).json({ error: 'Please enter a question.' });
+  const found = mcpConversations.get(String(req.body?.conversationId || ''));
+  const prior = found && found.userId === req.user.id ? found : null;
+  // Each Data Agent conversation is capped at MCP_MAX_QUESTIONS; after that the user must start a new chat.
+  const asked = prior ? prior.messages.filter((m) => m.role === 'user').length : 0;
+  if (asked >= MCP_MAX_QUESTIONS) {
+    return res.status(429).json({ error: `This chat has reached its ${MCP_MAX_QUESTIONS}-question limit. Start a new chat to keep asking.`, code: 'limit', limit: MCP_MAX_QUESTIONS });
+  }
+  const conversationId = prior ? req.body.conversationId : crypto.randomUUID();
+  const started = Date.now();
+  try {
+    const datasources = await mcpDatasources(req.user, req.tenant);
+    const r = await mcpAgent.ask(req.user, { question, history: prior ? prior.messages.slice(-12) : [], tenantName: req.tenant.clientName, datasources });
+    const turns = [...(prior?.messages || []), { role: 'user', content: question }, { role: 'assistant', content: r.content }];
+    mcpConversations.set(conversationId, { userId: req.user.id, messages: turns, at: Date.now() });
+    const ms = Date.now() - started;
+    console.log(`⚡ MCP agent for ${req.user.email} in ${ms} ms (${r.steps.length} tool calls: ${r.steps.map((s) => `${s.tool}${s.ok ? '' : '✖'}`).join(', ')})`);
+    activity.record(req.user, req.tenant, 'mcp-question', { question, ms, tools: r.steps.length });
+    res.json({ content: r.content, steps: r.steps, conversationId, ms, asked: asked + 1, limit: MCP_MAX_QUESTIONS });
+  } catch (e) {
+    console.error('mcp chat error:', e.message);
+    res.status(e.status || 502).json({ error: e.message });
   }
 });
 

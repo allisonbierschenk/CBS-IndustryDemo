@@ -155,7 +155,7 @@ function ActionRow({ title, status, issue, expectation, drivers = [], ask, sourc
         </dl>
       </div>
       <div className="att-btns">
-        <Link className="att-icon" to={`/agent?q=${encodeURIComponent(ask)}${source ? `&source=${encodeURIComponent(source)}` : ''}`} title="Ask the Agent" aria-label={`Ask the Agent about ${title}`}>
+        <Link className="att-icon" to={`/agent?q=${encodeURIComponent(ask)}${source ? `&source=${encodeURIComponent(source)}` : ''}`} title="Ask the Pulse Agent" aria-label={`Ask the Pulse Agent about ${title}`}>
           <Icon name="agent" />
         </Link>
         {dashboard && (

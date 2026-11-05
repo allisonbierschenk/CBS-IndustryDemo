@@ -30,7 +30,7 @@ export default function TopBar() {
       <nav className="nav" aria-label="Main">
         <NavLink to="/agent">
           <Icon name="agent" className="nav-ic" />
-          Agent
+          Pulse Agent
         </NavLink>
         <Link to="/dashboards" aria-current={onDashboards ? 'page' : undefined}>
           Value Intelligence

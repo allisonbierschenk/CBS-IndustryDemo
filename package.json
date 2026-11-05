@@ -2,7 +2,7 @@
   "name": "apex-client-value-intelligence",
   "version": "1.0.0",
   "private": true,
-  "description": "Apex Consulting Client Value Intelligence Portal — Tableau Embedded CBS / Professional Services demo (React + Connected Apps Direct Trust + user attribute RLS)",
+  "description": "Apex Consulting Client Value Intelligence Portal \u2014 Tableau Embedded CBS / Professional Services demo (React + Connected Apps Direct Trust + user attribute RLS)",
   "type": "module",
   "scripts": {
     "dev": "concurrently -k -n api,web -c gray,green \"node --watch server/index.cjs\" \"vite\"",
@@ -11,12 +11,15 @@
     "heroku-postbuild": "npm run build",
     "generate-data": "node scripts/generate-data.cjs",
     "check": "node scripts/check-config.cjs",
-    "test": "node --test test/*.test.cjs"
+    "test": "node --test test/*.test.cjs",
+    "mcp": "node scripts/mcp-server.cjs",
+    "dev:mcp": "concurrently -k -n mcp,api,web -c magenta,gray,green \"node scripts/mcp-server.cjs\" \"node --watch server/index.cjs\" \"vite\""
   },
   "engines": {
     "node": ">=20.0.0"
   },
   "dependencies": {
+    "@modelcontextprotocol/sdk": "^1.32.2",
     "d3": "^7.9.0",
     "dotenv": "^16.6.1",
     "express": "^4.22.3",

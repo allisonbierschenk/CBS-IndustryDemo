@@ -9,7 +9,9 @@ export default defineConfig({
     port: 5173,
     open: true, // `npm run dev` opens the portal in your browser; React/CSS edits hot-reload
 
-    proxy: { '/api': 'http://localhost:3000' }
+    // 127.0.0.1, not localhost: localhost resolves to IPv6 ::1 first, so any other dev server on [::1]:3000
+    // (e.g. another project's Vite) would silently receive the portal's /api calls.
+    proxy: { '/api': 'http://127.0.0.1:3000' }
   },
   build: { outDir: 'dist', sourcemap: false }
 });
