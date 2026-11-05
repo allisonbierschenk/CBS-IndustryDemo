@@ -8,6 +8,7 @@ import Icon from '../components/Icon.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import DashboardFilters from '../components/DashboardFilters.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import DataDetailsButton from '../components/DataDetails.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
@@ -72,6 +73,7 @@ export default function Transportation() {
             <ViewsMenu viz={viz} />
             <SubscribeButton viewKey="transportation" title={view.title} />
             <ExportMenu viz={viz} title={view.title} />
+            <DataDetailsButton viz={viz} />
             <InfoTip kind="transportation" label="About this dashboard" />
           </div>
         </div>

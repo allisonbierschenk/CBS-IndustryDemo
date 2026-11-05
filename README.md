@@ -73,6 +73,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 
 ### On the dashboard pages
 
+- **Data Details** — data catalog panel for the view (ported from Tab-SE/embedding_playbook): workbook, owner, view count, data sources, certification, data quality warnings, lineage, and every field with its description, type and formula. Embedding API in the browser + Metadata API and REST on the server (`/api/data-details`), as the signed-in user.
 - **Views** — save the current filters as a Tableau custom view and make it your default (opens automatically next time).
 - **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.
 - **Export → Share** — signed link + QR code that reopens the page with its filters (`?service-line=…&engagement-type=…`).

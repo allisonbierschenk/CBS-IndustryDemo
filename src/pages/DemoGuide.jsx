@@ -15,6 +15,7 @@ const TECH = {
   pulseApi: { label: 'Pulse REST API', color: '#b8541f', note: 'Creates Pulse metric definitions, metrics, goals and follows programmatically — as the signed-in user, straight from the data source.' },
   rest: { label: 'REST API', color: '#5c6670', note: 'Library, favorites, subscriptions and Pulse follows — run as the signed-in user.' },
   mcp: { label: 'Tableau MCP', color: '#3d6b4f', note: 'Tableau’s Model Context Protocol server: lets any AI agent query governed Tableau data with tools, as the signed-in user (passthrough auth).' },
+  meta: { label: 'Metadata API', color: '#6b5b2e', note: 'Tableau Catalog over GraphQL: lineage, field descriptions and formulas, certification and data quality warnings — read as the signed-in user.' },
   vds: { label: 'VizQL Data Service', color: '#0f8a8a', note: 'Governed data as JSON/CSV, queried as the user — same security as the dashboards.' },
   author: { label: 'Web authoring', color: '#c0398a', note: 'Tableau’s editor embedded on the governed data source.' },
   portal: { label: 'Portal entitlements', color: '#2a312e', note: 'Apex’s app decides what a client’s subscription includes — enforced on the server, not hidden in the UI.' }
@@ -185,6 +186,19 @@ const FEATURES = [
     ask: [['Does it always work?', 'It needs Tableau Agent enabled and licensed for the site — check before demoing; this site reported it as not licensed earlier.']]
   })),
   // ── Traditional BI ──────────────────────────────────────────────────────
+  F('dataDetails', 'bi', 'Data Details (data catalog)', (p) => ({
+    title: 'Data Details: the catalog behind the dashboard',
+    where: 'Dashboard header → Data Details',
+    do: 'Open Data Details: workbook, owner and view count, data source (Live/Extract, certified), lineage, then the fields used in this view. Expand a calculated field to show its formula; search the fields.',
+    say: 'Every number is traceable: which data, which fields, how it’s calculated, who owns it.',
+    money: 'A self-service catalog clients can browse without asking Apex what a field means.',
+    tech: ['embed', 'meta', 'rest'],
+    ask: [
+      ['Where does this come from?', 'Two halves, merged: the Embedding API (the view’s data sources and fields, in the browser) and the Metadata API + REST API (lineage, descriptions, formulas, certification, warnings), queried on the server as the signed-in user.'],
+      ['Can clients see other clients’ content?', `No — every call runs with ${p.first}’s own Tableau session, so it only returns content ${p.first} has permission to see.`],
+      ['Where do the plain-language definitions come from?', 'Field descriptions set on the published data source in Tableau. They appear here, in Tableau and in Pulse automatically.']
+    ]
+  })),
   F('vi', 'bi', 'Value Intelligence dashboard', (p) => ({
     title: 'Share live proof of value',
     where: 'Value Intelligence',
@@ -438,6 +452,7 @@ const ABOUT = {
   "explain": "Select a data point in a dashboard → Pulse explains it.",
   "tableauAgent": "Tableau’s AI inside the dashboard (needs a license).",
   "vi": "The value Apex has delivered to this client.",
+  "dataDetails": "A catalog of the data behind the dashboard: sources, lineage, field definitions.",
   "early": "Banner for a brand-new client with little history.",
   "filters": "Dropdowns that filter every chart at once.",
   "scorecard": "Engagement summary table; click a row to filter.",
@@ -465,7 +480,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'mcpAgent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'mcpAgent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'dataDetails', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

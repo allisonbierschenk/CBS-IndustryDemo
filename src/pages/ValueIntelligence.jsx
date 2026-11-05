@@ -10,6 +10,7 @@ import DashboardFilters from '../components/DashboardFilters.jsx';
 import EngagementCards from '../components/EngagementCards.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import DataDetailsButton from '../components/DataDetails.jsx';
 import EngagementScorecard from '../components/EngagementScorecard.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
@@ -151,6 +152,7 @@ export default function ValueIntelligence() {
               <ViewsMenu viz={viz} />
               <SubscribeButton viewKey="valueIntelligence" title={vi.title} />
               <ExportMenu viz={viz} title={vi.title} />
+              <DataDetailsButton viz={viz} />
               <InfoTip kind="valueIntelligence" label="About this dashboard" />
             </div>
           </div>

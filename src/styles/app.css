@@ -1216,3 +1216,46 @@ button.pcard.is-picked { border: 2px solid var(--ink); box-shadow: 0 0 0 4px var
 .mcp-step-list li { margin: 6px 0; }
 .mcp-step-list li.is-error code { color: var(--bad); }
 .mcp-step-list pre { margin: 4px 0 0; padding: 8px; background: rgba(0,0,0,.04); border-radius: 6px; overflow-x: auto; font-size: 11px; max-height: 160px; }
+
+/* Data Details (data catalog panel, from the embedding playbook) */
+.dd .kicker { display: inline-flex; align-items: center; gap: 6px; }
+.dd .insight-body { font-size: 13px; line-height: 1.5; }
+.dd-grid { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 10px 0 0; font-size: 12px; }
+.dd-grid dt { color: var(--muted); }
+.dd-grid dd { margin: 0; overflow-wrap: anywhere; color: var(--ink); }
+.dd-warnings { display: grid; gap: 8px; margin-top: 14px; }
+.dd-warning { display: flex; gap: 8px; padding: 9px 11px; border-radius: 12px; font-size: 12px; background: #fdf6e7; border: 1px solid #ebcf8f; color: #6b4a08; }
+.dd-warning.is-elevated { background: #fdf3f1; border-color: #e7b3ab; color: var(--bad); }
+.dd-search { display: flex; gap: 8px; align-items: center; margin-top: 16px; }
+.dd-search .input { height: 38px; font-size: 13px; }
+.dd-search .icon-btn { flex: none; width: 38px; height: 38px; font-size: 17px; }
+.dd-spin { display: inline-block; animation: ddspin 1s linear infinite; }
+@keyframes ddspin { to { transform: rotate(360deg); } }
+.dd-err { margin: 10px 0 0; font-size: 12px; color: var(--bad); }
+.dd-warn-text { margin: 10px 0 0; font-size: 12px; color: var(--warn); }
+.dd-sources { display: grid; gap: 14px; margin-top: 16px; }
+.dd-source { padding: 14px; border-radius: 16px; border: 1px solid var(--line); background: var(--page); }
+.dd-source-name { display: flex; align-items: center; gap: 6px; margin: 0; font-size: 14px; }
+.dd-cert { display: inline-grid; place-items: center; width: 18px; height: 18px; border-radius: 999px; background: var(--good); color: #fff; }
+.dd-badges { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+.dd-block { margin-top: 12px; }
+.dd-h { margin: 0 0 4px; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.dd-lineage { list-style: none; margin: 0; padding: 0; display: grid; gap: 4px; font-size: 12px; }
+.dd-lineage li { display: flex; align-items: center; gap: 6px; }
+.dd-lineage svg { opacity: .6; }
+.dd-indent { padding-left: 16px; }
+.dd-warn-icon { color: var(--warn); }
+.dd-group-btn { display: flex; align-items: center; gap: 4px; padding: 0; border: 0; background: none; cursor: pointer; font: inherit; font-size: 11px; font-weight: 800; letter-spacing: .08em; text-transform: uppercase; color: var(--muted); }
+.dd-fields { list-style: none; margin: 6px 0 0; padding: 0; }
+.dd-fields li { border-top: 1px solid var(--line); padding: 6px 0; }
+.dd-fields li:first-child { border-top: 0; }
+.dd-field { display: flex; align-items: center; gap: 8px; width: 100%; padding: 0; border: 0; background: none; text-align: left; cursor: pointer; font: inherit; font-size: 13px; }
+.dd-caret { width: 12px; flex: none; opacity: .5; }
+.dd-measure { color: var(--good); font-weight: 600; }
+.dd-dimension { color: #2f5fb3; font-weight: 600; }
+.dd-tag { padding: 0 5px; border-radius: 6px; border: 1px solid var(--line); font-size: 10px; color: var(--muted); }
+.dd-agg { margin-left: auto; font-size: 10px; text-transform: uppercase; color: var(--muted); }
+.dd-field-more { margin: 4px 0 2px 20px; font-size: 12px; color: var(--ink-2); }
+.dd-field-more p { margin: 0 0 4px; }
+.dd-field-more pre { margin: 0; padding: 6px 8px; border-radius: 8px; background: var(--sage-2); font-size: 11px; white-space: pre-wrap; }
+.dd-small { font-size: 12px; margin-top: 10px; }

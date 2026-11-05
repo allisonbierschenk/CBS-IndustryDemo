@@ -13,6 +13,7 @@ const { createCookieJar } = require('./lib/session.cjs');
 const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const { createMcpAgent } = require('./lib/mcpAgent.cjs');
+const { createDataDetails, parseViewUrl } = require('./lib/dataDetails.cjs');
 const activity = require('./lib/activity.cjs');
 const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
@@ -372,6 +373,29 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
   } catch (e) {
     console.error('agent chat error:', e.message);
     res.status(502).json({ error: e.message });
+  }
+});
+
+// ── Data Details: data catalog panel for an embedded view (Metadata API + REST, as the user) ──
+// Ported from Tab-SE/embedding_playbook (api/data-details). The Embedding API half runs in the browser.
+const dataDetails = createDataDetails({ server: env.server, restSession: pulse.restSession });
+app.get('/api/data-details', requireUser, async (req, res) => {
+  const src = String(req.query.src || '');
+  const parsed = (() => {
+    try {
+      return parseViewUrl(src);
+    } catch {
+      return null;
+    }
+  })();
+  if (!parsed) return res.status(400).json({ error: `Unrecognized view URL: ${src}` });
+  if (parsed.origin !== env.server || parsed.site !== env.site) return res.status(400).json({ error: 'That view is not on this Tableau site.' });
+  try {
+    res.json(await dataDetails.forView(req.user, src));
+    activity.record(req.user, req.tenant, 'data-details', { view: parsed.view });
+  } catch (e) {
+    console.error('data details error:', e.message);
+    res.status(e.status || 502).json({ error: e.message });
   }
 });
 

@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import Crumbs from '../components/Crumbs.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
+import DataDetailsButton from '../components/DataDetails.jsx';
 import InfoTip from '../components/InfoTip.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import TableauViz from '../components/TableauViz.jsx';
@@ -36,6 +37,7 @@ export default function ReportView() {
             <AnalyticsAssistantButton viz={viz} />
             <ViewsMenu viz={viz} />
             <ExportMenu viz={viz} title={title} />
+            <DataDetailsButton viz={viz} />
             <InfoTip kind="report" extra={{ workbook: info?.workbook }} label="About this report" />
           </div>
         </div>
