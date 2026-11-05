@@ -100,7 +100,8 @@
         "name": "Apex Consulting - Client Value Intelligence",
         "label": "Value Intelligence",
         "requires": [],
-        "view": "valueIntelligence"
+        "view": "valueIntelligence",
+        "dateField": "Adjusted Date"
       },
       {
         "name": "Apex Consulting - Operational Value & Savings",
@@ -108,9 +109,11 @@
         "requires": [
           "transportation"
         ],
-        "view": "transportation"
+        "view": "transportation",
+        "dateField": "Date"
       }
-    ]
+    ],
+    "_dateField": "dateField = the date field the dashboard's Pulse KPIs use (their time_dimension). The Data Agent filters to year to date on it by default so its numbers match the dashboard."
   },
   "library": {
     "_comment": "Report library: every view the user can open in this project, limited to these workbooks and their portal entitlements.",

@@ -23,7 +23,7 @@ const POINTS = [
 
 export default function PulseAiNote() {
   return (
-    <ul className="ai-note" aria-label="How the Agent's AI works">
+    <ul className="ai-note" aria-label="How the Pulse Agent's AI works">
       {POINTS.map((p) => (
         <li key={p.title} title={p.text}>
           <Icon name={p.icon} />

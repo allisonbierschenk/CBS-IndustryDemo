@@ -1,15 +1,14 @@
-// Presenter controls: secure persona switching, talk track, and "under the hood" JWT claims.
+// Presenter controls (⌥P): talk track, "under the hood" JWT claims and demo clean-up. No on-screen button:
+// users are switched from the sign-in page (or ⌥1–⌥9).
 import { useEffect, useState } from 'react';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
-import CompanyLogo from './CompanyLogo.jsx';
 import Icon from './Icon.jsx';
-import PersonaList, { byCompany } from './PersonaList.jsx';
+import { byCompany } from './PersonaList.jsx';
 import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 
 const TABS = [
-  ['switch', 'Switch account'],
   ['talk', 'Talk track'],
   ['hood', 'Under the hood']
 ];
@@ -18,7 +17,7 @@ export default function PresenterDock() {
   const { me, signInAs } = useSession();
   const toast = useToast();
   const [open, setOpen] = useState(false);
-  const [tab, setTab] = useState('switch');
+  const [tab, setTab] = useState('talk');
   const [personas, setPersonas] = useState([]);
   const [token, setToken] = useState(() => {
     try {
@@ -31,7 +30,7 @@ export default function PresenterDock() {
 
   useEffect(() => {
     api('/api/users')
-      .then((d) => setPersonas(byCompany(d.personas).flatMap((c) => c.users))) // ⌥1–⌥9 follow the on-screen order
+      .then((d) => setPersonas(byCompany(d.personas).flatMap((c) => c.users))) // ⌥1–⌥9 follow the sign-in page order
       .catch(() => setPersonas([]));
   }, []);
 
@@ -66,10 +65,6 @@ export default function PresenterDock() {
 
   return (
     <>
-      <button className="dock-btn" onClick={() => setOpen((o) => !o)} aria-expanded={open}>
-        <CompanyLogo tenantId={t.id} color={t.color} size={30} />
-        Switch user · {t.shortName}
-      </button>
       <section className={`dock${open ? ' open' : ''}`} aria-label="Presenter controls">
         <div className="dock-head">
           <div className="kicker">
@@ -87,24 +82,15 @@ export default function PresenterDock() {
           ))}
         </div>
         <div className="dock-body">
-          {tab === 'switch' && <SwitchTab personas={personas} currentId={me.user.id} onPick={go} />}
           {tab === 'talk' && <TalkTab tenant={t} />}
-          {tab === 'hood' && <HoodTab me={me} token={token} />}
+          {tab === 'hood' && (
+            <>
+              <ResetGoals />
+              <HoodTab me={me} token={token} />
+            </>
+          )}
         </div>
       </section>
-    </>
-  );
-}
-
-function SwitchTab({ personas, currentId, onPick }) {
-  return (
-    <>
-      <p className="muted" style={{ fontSize: 12.5, margin: '0 0 8px' }}>
-        Each switch ends the current session and signs in as a separately authorized customer. Tableau JWTs are re-minted
-        with the new user's email as <span className="code-inline">sub</span>.
-      </p>
-      <ResetGoals />
-      <PersonaList personas={personas} currentId={currentId} onPick={onPick} compact />
     </>
   );
 }

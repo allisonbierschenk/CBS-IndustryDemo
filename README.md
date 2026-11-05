@@ -52,10 +52,11 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 
 | Route | Who |
 |---|---|
-| `/guide` | **Presenter demo guide** (public): the scenes, what to say, and color-coded Tableau tech + “If they ask” answers. Linked from the login header and the presenter dock |
+| `/guide` | **Presenter demo guide** (public): the scenes, what to say, and color-coded Tableau tech + “If they ask” answers. Linked from the login header and the presenter controls (⌥P) |
 | `/login` | Click a user to sign in (JWT is logged to the browser console with a jwt.io link) |
 | `/` | Landing page after sign-in: **Ask the agent** or **Open dashboards** |
-| `/agent` | Chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics. Users who follow metrics on more than one data source (Elena: Value Intelligence + Transportation) pick **All / one source**; each source is its own conversation (`?source=` deep-links it) — see `docs/AGENT.md` |
+| `/agent` | **Pulse Agent** (top bar): chat agent powered by the **Tableau Pulse Insight Brief API**, scoped to the user's followed Pulse metrics. Users who follow metrics on more than one data source (Elena: Value Intelligence + Transportation) pick **All / one source**; each source is its own conversation (`?source=` deep-links it) — see `docs/AGENT.md` |
+| Chat bubble (every page) | **Data Agent**: an OpenAI model querying Tableau through the **Tableau MCP server** with passthrough auth (the user's own session), so RLS applies. Shows its MCP tool calls. See `docs/MCP_AGENT.md` |
 | `/dashboards` | Value Intelligence dashboard (Pulse KPIs, engagement charts, Premium benchmarks) — every customer |
 | `/dashboards#benchmarks` | Premium panel: Crestline/Vantage → "view in dashboard"; Standard → locked + upgrade request |
 | `/transportation` | Transportation Optimization & Savings — **Vantage only** (drill-down happens inside the workbook; invoice search above it) |

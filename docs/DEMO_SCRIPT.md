@@ -3,7 +3,7 @@
 **Setup**
 
 1. Run `npm run dev` (the browser opens automatically) and click **Northstar Enterprises**. The sign-in screen shows the JWT being minted: `sub` = the user's email, plus `client name`.
-2. Press **⌥P** (or click *Switch user*) to open demo controls. You'll find the talk track per customer, the user switcher (**⌥1–⌥5**), and **Under the hood**, which shows the live JWT claims.
+2. Switch users from the sign-in page, or with **⌥1–⌥5** on any page. Press **⌥P** to open demo controls: the talk track per customer and **Under the hood**, which shows the live JWT claims.
 
 | # | Persona | Do | Say |
 |---|---|---|---|

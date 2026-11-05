@@ -148,12 +148,12 @@ export default function Agent() {
 
   return (
     <div className="container">
-      <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Agent' }]} />
+      <Crumbs items={[{ label: 'Home', to: '/' }, { label: 'Pulse Agent' }]} />
       <div className="page-head">
         <div>
           <div className="title-row">
-            <h1>Agent</h1>
-            <InfoTip kind="agent" extra={{ source }} label="About the Agent" />
+            <h1>Pulse Agent</h1>
+            <InfoTip kind="agent" extra={{ source }} label="About the Pulse Agent" />
           </div>
           <p className="lead">Ask about {me.tenant.shortName}&apos;s engagements and results. Answers come from your own metrics.</p>
           <PulseAiNote />
@@ -282,7 +282,7 @@ export default function Agent() {
               value={input}
               onChange={(e) => setInput(e.target.value)}
               placeholder={`Ask about ${sourceLabel}…`}
-              aria-label="Ask the agent"
+              aria-label="Ask the Pulse Agent"
               disabled={!prep.metrics}
             />
             <button className="btn btn-dark" type="submit" disabled={!input.trim() || loading || !prep.metrics} aria-label="Send">

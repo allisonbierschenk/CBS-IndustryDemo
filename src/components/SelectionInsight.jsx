@@ -70,7 +70,7 @@ export default function SelectionInsight({ question, source, what, worksheet, on
       <div className="insight-foot">
         <Link className="btn btn-dark btn-sm" to={agentLink(question)}>
           <Icon name="agent" />
-          Continue in the Agent
+          Continue in the Pulse Agent
         </Link>
       </div>
     </aside>

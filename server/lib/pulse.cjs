@@ -40,7 +40,7 @@ const SCOPES = [
 const SESSION_TTL_MS = 110 * 60 * 1000; // REST sessions last longer; renew well before, and on any 401
 const CONTEXT_TTL_MS = 2 * 60 * 1000; // pick up follow/unfollow changes quickly
 
-function createPulseClient({ server, site, apiVersion = '3.27', clientId, secretId, secretValue, attributeFor }) {
+function createPulseClient({ server, site, apiVersion = '3.27', clientId, secretId, secretValue, attributeFor, scopes = SCOPES, label = 'Pulse' }) {
   const sessions = new Map(); // email -> { token, siteId, cookies, xsrf, expires }
   const datasourceIds = new Map(); // name -> luid (per process; names are site-wide)
   const contexts = new Map(); // userId -> { at, value }
@@ -56,7 +56,7 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
   }
 
   async function signIn(user) {
-    const { token } = mintEmbedToken({ clientId, secretId, secretValue, username: user.email, attributes: attributeFor(user), scopes: SCOPES });
+    const { token } = mintEmbedToken({ clientId, secretId, secretValue, username: user.email, attributes: attributeFor(user), scopes });
     const res = await fetch(`${server}/api/${apiVersion}/auth/signin`, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Accept: 'application/json' },
@@ -68,7 +68,7 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
     const session = { token: credentials.token, siteId: credentials.site.id, userId: credentials.user?.id, cookies: {}, xsrf: null, expires: Date.now() + SESSION_TTL_MS };
     captureCookies(session, res);
     sessions.set(user.email, session);
-    console.log(`⚡ Pulse session for ${user.email}`);
+    console.log(`⚡ ${label} session for ${user.email}`);
     return session;
   }
 
@@ -223,7 +223,10 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
   /** Drop the cached Tableau session so the next call signs in with the user's current attributes. */
   const forgetSession = (user) => sessions.delete(user.email);
 
-  return { metricContext, brief, request, getBinary, me, resolveDatasource, resetContext, vds, vdsMetadata, forgetSession };
+  /** The user's Tableau REST session (cached; re-signs in when expired). */
+  const restSession = (user) => session(user);
+
+  return { metricContext, brief, request, restSession, getBinary, me, resolveDatasource, resetContext, vds, vdsMetadata, forgetSession };
 }
 
 /** Vega-Lite spec → [{date, value}] for the trend chart (drops forecast/projection points). */

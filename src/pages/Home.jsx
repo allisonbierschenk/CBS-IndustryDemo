@@ -26,8 +26,8 @@ export default function Home() {
               <Icon name="agent" />
             </span>
             <span className="choice-copy">
-              <b>Ask the agent</b>
-              <span>Ask questions about your engagements in plain language.</span>
+              <b>Ask the Pulse Agent</b>
+              <span>Ask about the Pulse metrics you follow, in plain language.</span>
             </span>
             <span className="arrow-chip">
               <Icon name="arrowRight" />
