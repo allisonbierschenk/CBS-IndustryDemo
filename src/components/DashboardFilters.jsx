@@ -1,35 +1,54 @@
 // Apex-styled filter bar that drives the embedded dashboard's own categorical filters.
 //  • Options come from Tableau: each filter's *relevant* domain (respects row-level security and the
 //    other filters, so Engagement Type narrows to the selected Service Line).
-//  • Selecting applies the filter to every worksheet in the dashboard that carries that field.
+//  • Selecting applies the filter with dashboard.applyFilterAsync — one call for every worksheet that has it.
 //  • A Tableau 'filterchanged' listener keeps the dropdowns in sync if filters change inside the viz.
 import { useCallback, useEffect, useRef, useState } from 'react';
 import Icon from './Icon.jsx';
 
 const ALL = '';
 
-/** Worksheets in the dashboard that have a filter on `field`. */
-async function sheetsWithFilter(viz, field) {
+// Dashboard-level Embedding API (one call each, instead of one per worksheet):
+//   dashboard.getFiltersAsync()                       → every filter on the dashboard
+//   dashboard.applyFilterAsync(field, values, type)   → applies to every worksheet that has that filter
+// Falls back to per-worksheet calls only if the viz isn't a dashboard (or Tableau rejects the dashboard call).
+const isDashboard = (viz) => viz.workbook.activeSheet?.sheetType === 'dashboard';
+const worksheetsOf = (viz) => {
   const sheet = viz.workbook.activeSheet;
-  const worksheets = sheet.sheetType === 'worksheet' ? [sheet] : sheet.worksheets;
-  const found = [];
-  for (const ws of worksheets) {
-    try {
-      const filters = await ws.getFiltersAsync();
-      const f = filters.find((x) => x.fieldName === field && x.filterType === 'categorical');
-      if (f) found.push({ ws, filter: f });
-    } catch {
-      /* sheet without filter access — skip */
-    }
+  return sheet.sheetType === 'worksheet' ? [sheet] : sheet.worksheets;
+};
+
+/** All categorical filters on the dashboard, by field (first one wins). One Tableau call on a dashboard. */
+async function filtersByField(viz) {
+  let list;
+  if (isDashboard(viz) && viz.workbook.activeSheet.getFiltersAsync) {
+    list = await viz.workbook.activeSheet.getFiltersAsync();
+  } else {
+    list = (await Promise.all(worksheetsOf(viz).map((ws) => ws.getFiltersAsync().catch(() => [])))).flat();
   }
-  return found;
+  const byField = new Map();
+  for (const f of list) if (f.filterType === 'categorical' && !byField.has(f.fieldName)) byField.set(f.fieldName, f);
+  return byField;
 }
 
-async function relevantValues(viz, field) {
-  const [first] = await sheetsWithFilter(viz, field);
-  if (!first) return null; // field isn't filterable on any worksheet
-  const domain = await first.filter.getDomainAsync('relevant');
-  return domain.values.map((v) => String(v.value ?? v.formattedValue)).sort((a, b) => a.localeCompare(b));
+const currentValue = (fl) => (!fl || fl.isAllSelected || !fl.appliedValues?.length ? ALL : String(fl.appliedValues[0].value ?? fl.appliedValues[0].formattedValue));
+
+/** Set (or clear, value = ALL) one field across the whole dashboard. */
+async function applyToDashboard(viz, field, value) {
+  const dash = viz.workbook.activeSheet;
+  if (isDashboard(viz) && dash.applyFilterAsync) {
+    try {
+      // 'all' selects every value = cleared; 'replace' sets exactly this value.
+      return await (value === ALL ? dash.applyFilterAsync(field, [], 'all') : dash.applyFilterAsync(field, [value], 'replace'));
+    } catch (e) {
+      console.warn(`[filters] dashboard.applyFilterAsync(${field}) failed, applying per worksheet:`, e?.message || e);
+    }
+  }
+  const byField = await filtersByField(viz);
+  if (!byField.has(field)) return;
+  await Promise.allSettled(
+    worksheetsOf(viz).map((ws) => (value === ALL ? ws.clearFilterAsync(field) : ws.applyFilterAsync(field, [value], 'replace')))
+  );
 }
 
 export default function DashboardFilters({ viz, filters, onChange, request }) {
@@ -42,8 +61,16 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
   // Refresh options for every filter except the one the user just set (so it keeps its full list).
   const refreshOptions = useCallback(
     async (except) => {
+      const byField = await filtersByField(viz).catch(() => new Map());
       const updates = await Promise.all(
-        filters.filter((f) => f.field !== except).map(async (f) => [f.field, await relevantValues(viz, f.field).catch(() => null)])
+        filters
+          .filter((f) => f.field !== except)
+          .map(async (f) => {
+            const fl = byField.get(f.field);
+            if (!fl) return [f.field, null]; // field isn't a filter on this dashboard
+            const domain = await fl.getDomainAsync('relevant').catch(() => null);
+            return [f.field, domain ? domain.values.map((v) => String(v.value ?? v.formattedValue)).sort((a, b) => a.localeCompare(b)) : []];
+          })
       );
       for (const [field, values] of updates) console.info(`[filters] ${field} options from Tableau:`, values ?? 'not a filter on any worksheet');
       setState((s) => {
@@ -57,45 +84,21 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
     [viz, filters]
   );
 
-  // Read the dashboard's current filter values from Tableau (on load, and after a saved view opens).
-  const syncFromViz = useCallback(
-    async (isAlive = () => true) => {
-      setBusy(true);
-      try {
-        const current = await Promise.all(
-          filters.map(async (f) => {
-            const [first] = await sheetsWithFilter(viz, f.field);
-            const fl = first?.filter;
-            const value = !fl || fl.isAllSelected || !fl.appliedValues?.length ? ALL : String(fl.appliedValues[0].value ?? fl.appliedValues[0].formattedValue);
-            return [f.field, value];
-          })
-        );
-        console.info('[filters] synced from dashboard:', Object.fromEntries(current));
-        if (isAlive()) setState((s) => ({ ...s, ...Object.fromEntries(current.map(([k, v]) => [k, { ...s[k], value: v }])) }));
-        await refreshOptions(null);
-      } finally {
-        if (isAlive()) setBusy(false);
-      }
-    },
-    [viz, filters, refreshOptions]
-  );
-
   useEffect(() => {
     let alive = true;
-    // The dashboard may be preloaded and already filtered (e.g. returning to the page): read current values.
-    syncFromViz(() => alive);
+    (async () => {
+      setBusy(true);
+      // The dashboard may be preloaded and already filtered (e.g. returning to the page): read current values.
+      const byField = await filtersByField(viz).catch(() => new Map());
+      const current = filters.map((f) => [f.field, currentValue(byField.get(f.field))]);
+      if (alive) setState((s) => ({ ...s, ...Object.fromEntries(current.map(([k, v]) => [k, { ...s[k], value: v }])) }));
+      await refreshOptions(null);
+      if (alive) setBusy(false);
+    })();
     return () => {
       alive = false;
     };
-  }, [syncFromViz]);
-
-  // A saved view (Tableau custom view) replaces the dashboard's filters in one step; re-read them so the
-  // bar shows what the view applied instead of the old selection.
-  useEffect(() => {
-    const onViewLoaded = () => syncFromViz();
-    viz.addEventListener('customviewloaded', onViewLoaded);
-    return () => viz.removeEventListener('customviewloaded', onViewLoaded);
-  }, [viz, syncFromViz]);
+  }, [refreshOptions]);
 
   // Keep the bar in sync with filter changes made inside the dashboard itself.
   // FilterChangedEvent: detail.fieldName + detail.getFilterAsync() (Embedding API v3 reference).
@@ -117,14 +120,9 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
     setBusy(true);
     applying.current = true;
     try {
-      const targets = await sheetsWithFilter(viz, field);
-      const results = await Promise.allSettled(
-        targets.map(({ ws }) => (value === ALL ? ws.clearFilterAsync(field) : ws.applyFilterAsync(field, [value], 'replace')))
-      );
-      console.info(
-        `[filters] ${field} = ${value || '(All)'} →`,
-        Object.fromEntries(targets.map(({ ws }, i) => [ws.name, results[i].status === 'fulfilled' ? 'applied' : results[i].reason?.message]))
-      );
+      const t0 = performance.now();
+      await applyToDashboard(viz, field, value);
+      console.info(`[filters] ${field} = ${value || '(All)'} applied in ${Math.round(performance.now() - t0)} ms`);
       await refreshOptions(field);
       onChangeRef.current?.(field, value);
     } finally {
@@ -142,6 +140,7 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
     const wanted = filters.filter((f) => f.field in values);
     if (!wanted.length) return;
     (async () => {
+      console.info('[filters] applying from link/request:', values);
       for (const f of filters) if (!(f.field in values) && state[f.field].value !== ALL) await apply(f.field, ALL);
       for (const f of wanted) await apply(f.field, values[f.field] ?? ALL);
     })();

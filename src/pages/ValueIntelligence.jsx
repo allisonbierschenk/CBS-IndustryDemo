@@ -155,7 +155,7 @@ export default function ValueIntelligence() {
               <RefreshButton viz={viz} viewKey="valueIntelligence" />
               <ViewsMenu viz={viz} />
               <SubscribeButton viewKey="valueIntelligence" title={vi.title} />
-              <ShareButton title={vi.title} />
+              <ShareButton title={vi.title} viz={viz} filters={vi.filters} />
               <ExportMenu viz={viz} title={vi.title} />
               <DataDetailsButton viz={viz} />
               <CustomizeButton templateKey="valueIntelligence" title={vi.title} back="/dashboards" />

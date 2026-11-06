@@ -2,11 +2,46 @@
 // Tableau MCP server. The server forwards the signed-in user's own Tableau session to MCP (passthrough
 // auth), so every query runs as them and row-level security applies. Each answer shows its MCP tool calls.
 import { useEffect, useRef, useState } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Icon from './Icon.jsx';
 import InfoTip from './InfoTip.jsx';
+import { SubscribeDialog } from './SubscribeButton.jsx';
+import { useContact } from '../context/ContactContext.jsx';
 import PulseMarkup from './PulseMarkup.jsx';
+
+const GROUP_LABEL = { data: 'Data', agents: 'Agent', workflows: 'Workflow' };
+const VIEW_PATH = { valueIntelligence: '/dashboards', transportation: '/transportation' };
+const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+/** The workflow step the agent proposed — nothing runs until the user clicks. */
+function ActionCard({ action, views }) {
+  const contact = useContact();
+  const navigate = useNavigate();
+  const [subscribe, setSubscribe] = useState(false);
+  const title = views?.find((v) => v.key === action.view)?.label || 'this dashboard';
+  const run = () => {
+    if (action.kind === 'contact_apex') return contact('Schedule a review', action.message || action.reason);
+    if (action.kind === 'subscribe') return setSubscribe(true);
+    if (action.kind === 'open_dashboard') {
+      const q = new URLSearchParams(Object.entries(action.filters || {}).map(([k, v]) => [slug(k), v])).toString();
+      navigate(`${VIEW_PATH[action.view] || '/dashboards'}${q ? `?${q}` : ''}`);
+    }
+  };
+  return (
+    <div className="mcp-action">
+      <div className="mcp-action-why">
+        <span className="mcp-group is-workflows">Workflow</span> {action.reason}
+      </div>
+      <button className="btn btn-dark btn-sm" onClick={run}>
+        <Icon name={action.kind === 'contact_apex' ? 'calendar' : action.kind === 'subscribe' ? 'mail' : 'dashboard'} />
+        {action.label}
+      </button>
+      {subscribe && <SubscribeDialog viewKey={action.view} title={title} onClose={() => setSubscribe(false)} />}
+    </div>
+  );
+}
 
 function Steps({ steps }) {
   const [open, setOpen] = useState(false);
@@ -20,7 +55,9 @@ function Steps({ steps }) {
         <ol className="mcp-step-list">
           {steps.map((s, i) => (
             <li key={i} className={s.ok ? '' : 'is-error'}>
-              <code>{s.tool}</code> <span className="muted">{s.ms} ms</span>
+              {s.group && <span className={`mcp-group is-${s.group}`}>{GROUP_LABEL[s.group] || s.group}</span>} <code>{s.tool}</code>
+              {s.portal ? <span className="muted"> portal action, runs only if you confirm</span> : <span className="muted"> {s.ms} ms</span>}
+              {s.args?.question && <div className="muted">“{s.args.question}”{s.args.metrics?.length ? ` · over ${s.args.metrics.length} followed metrics` : ''}</div>}
               {s.args?.query && <pre>{JSON.stringify(s.args.query, null, 1)}</pre>}
               {s.error && <div className="muted">{s.error}</div>}
             </li>
@@ -67,7 +104,7 @@ export default function DataAgentChat() {
     try {
       const d = await api('/api/mcp/chat', { method: 'POST', body: { question, conversationId } });
       setConversationId(d.conversationId);
-      setMessages((m) => [...m, { role: 'assistant', content: d.content, steps: d.steps, ms: d.ms }]);
+      setMessages((m) => [...m, { role: 'assistant', content: d.content, steps: d.steps, images: d.images || [], action: d.action || null, ms: d.ms }]);
     } catch (e) {
       // A rejected question at the limit isn't shown as a question asked.
       if (e.status === 429) setMessages((m) => m.slice(0, -1));
@@ -152,6 +189,13 @@ export default function DataAgentChat() {
               ) : (
                 <div key={i} className="mcp-answer">
                   <PulseMarkup text={m.content} />
+                  {m.images?.map((img, j) => (
+                    <figure key={j} className="mcp-image">
+                      <img src={img.src} alt={`${img.view} (from Tableau, via MCP get-view-image)`} />
+                      <figcaption className="muted">{img.view} · get-view-image</figcaption>
+                    </figure>
+                  ))}
+                  {m.action && <ActionCard action={m.action} views={prep?.datasources} />}
                   <Steps steps={m.steps} />
                 </div>
               )

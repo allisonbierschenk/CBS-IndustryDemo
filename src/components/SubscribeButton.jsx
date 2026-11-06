@@ -18,7 +18,7 @@ export default function SubscribeButton({ viewKey, title }) {
   );
 }
 
-function SubscribeDialog({ viewKey, title, onClose }) {
+export function SubscribeDialog({ viewKey, title, onClose }) {
   const [form, setForm] = useState({ frequency: 'Weekly', weekDay: 'Monday', monthDay: '1', time: '08:00', attachment: 'pdf' });
   const [state, setState] = useState({ kind: 'editing' });
   const set = (k) => (e) => setForm((f) => ({ ...f, [k]: e.target.value }));

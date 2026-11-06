@@ -70,16 +70,21 @@ export function provenance(key, me, extra = {}) {
           ['Open', 'workbook.showCustomViewAsync(name)'],
           ['Original view', 'workbook.showCustomViewAsync()'],
           ['Make default', 'workbook.setActiveCustomViewAsDefaultAsync()'],
-          ['Delete', 'workbook.removeCustomViewAsync(name)']
+          ['Delete', 'workbook.removeCustomViewAsync(name)'],
+          ['Share', 'Share button → signed portal link that opens this view’s filters']
         ]
       };
     case 'mcpAgent':
+      // Compact (i): what runs over MCP, grouped.
       return {
         tag: 'Tableau MCP',
-        freshness: 'Live: every answer queries Tableau when you ask; nothing is cached or copied.',
-        source: `The Tableau MCP server (Model Context Protocol) over the governed ${[...new Set((extra.datasources || []).map((d) => d.name))].join(' and ') || VI_SOURCE} data source. An AI agent (${extra.model || 'OpenAI'}) picks MCP tools, reads the field list, then writes VizQL Data Service queries; each answer shows its tool calls and queries. Year to date by default, like the dashboard.`,
-        security: `Runs as you: the portal passes your own Tableau session to the MCP server (passthrough auth), so every query has the same row-level security as the dashboards (${attributeSummary(me) || 'your attributes'}). No service account, read-only tools, only your data sources, ${extra.maxQuestions || 3} questions per chat.`,
-        why: 'Tableau MCP is the open standard way to put any AI agent on governed Tableau data: the agent asks Tableau, and Tableau answers with your permissions, security and definitions — so it can explore questions no dashboard was built for without a copy of the data or a second security model. Unlike the Pulse Agent, this agent’s LLM is yours to choose and runs on your own model key, so its tokens are metered by that provider. The Pulse Agent answers from your followed metrics and is unmetered with Tableau+.'
+        api: [
+          ['Data', 'get-datasource-metadata · query-datasource (VizQL Data Service) · get-view-image · search-content · Pulse metric + follow lookups'],
+          ['Agents', 'generate-pulse-insight-brief (Tableau Pulse’s AI agent) · generate-pulse-metric-value-insight-bundle'],
+          ['Workflows', 'propose_action → Schedule a review with Apex · Subscribe (REST) · Open dashboard filtered. Portal actions, run only when you click.'],
+          ['Auth', 'Passthrough: your own Tableau session (X-Tableau-Auth). Row-level security on every call.'],
+          ['Limits', `Read-only Tableau tools · your data sources and dashboards only · ${extra.maxQuestions || 3} questions per chat · model: ${extra.model || 'OpenAI'}`]
+        ]
       };
     case 'scorecard':
       return {

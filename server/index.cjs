@@ -12,7 +12,7 @@ const express = require('express');
 const { createCookieJar } = require('./lib/session.cjs');
 const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
-const { createMcpAgent } = require('./lib/mcpAgent.cjs');
+const { createMcpAgent, TOOL_GROUPS } = require('./lib/mcpAgent.cjs');
 const { createDataDetails, parseViewUrl } = require('./lib/dataDetails.cjs');
 const { createRefresher } = require('./lib/refresh.cjs');
 const activity = require('./lib/activity.cjs');
@@ -456,6 +456,7 @@ const MCP_SCOPES = [
   'tableau:content:read',
   'tableau:mcp_site_settings:read',
   'tableau:viz_data_service:read',
+  'tableau:views:download', // get-view-data / get-view-image
   'tableau:insight_definitions_metrics:read',
   'tableau:insight_metrics:read',
   'tableau:metric_subscriptions:read',
@@ -480,7 +481,9 @@ const mcpAgent = createMcpAgent({
   openaiKey: process.env.OPENAI_API_KEY,
   model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
   restSession: mcpTableau.restSession,
-  forgetSession: mcpTableau.forgetSession
+  forgetSession: mcpTableau.forgetSession,
+  // Pulse metric context for ask_pulse_agent: the user's followed metrics on their entitled data sources.
+  pulseContext: async (user) => (await pulse.metricContext(user, agentScope(store.tenantFor(user)))).map((c) => c.item)
 });
 
 // Hoisted so sign-in / sign-out / upgrade (defined above) can drop the MCP session too.
@@ -488,10 +491,32 @@ function forgetMcpSession(user) {
   mcpTableau.forgetSession(user);
 }
 
+/** The customer's entitled dashboards with their view LUIDs (resolved as the user, by URL), for get-view-data/-image. */
+const mcpViewIds = new Map(); // viewKey -> luid (view LUIDs are site-wide)
+async function mcpViews(user, tenant) {
+  const out = [];
+  for (const [key, v] of Object.entries(store.content.views)) {
+    if (!v?.url || !store.canAccessView(tenant, key)) continue;
+    try {
+      if (!mcpViewIds.has(key)) {
+        const m = /\/views\/([^/]+)\/([^/?#]+)/.exec(v.url);
+        if (!m) continue;
+        const j = await mcpTableau.request(user, 'GET', `/views?filter=${encodeURIComponent(`viewUrlName:eq:${m[2]}`)}&pageSize=50`, null, { base: 'rest' });
+        const hit = (j.views?.view || []).find((x) => x.contentUrl === `${m[1]}/sheets/${m[2]}`);
+        if (hit) mcpViewIds.set(key, hit.id);
+      }
+      if (mcpViewIds.has(key)) out.push({ key, title: v.title, luid: mcpViewIds.get(key), filters: (v.filters || []).map((f) => f.field) });
+    } catch (e) {
+      console.warn(`⚠ mcp: couldn't resolve view ${key}: ${e.message}`);
+    }
+  }
+  return out;
+}
+
 /** The customer's entitled agent data sources with their LUIDs (resolved as the user). */
 async function mcpDatasources(user, tenant) {
   const list = agentScope(tenant).datasources;
-  return Promise.all(list.map(async (d) => ({ name: d.name, label: d.label, dateField: d.dateField, luid: await mcpTableau.resolveDatasource(user, d.name) })));
+  return Promise.all(list.map(async (d) => ({ name: d.name, label: d.label, view: d.view, dateField: d.dateField, luid: await mcpTableau.resolveDatasource(user, d.name) })));
 }
 
 const MCP_MAX_QUESTIONS = 3;
@@ -509,12 +534,14 @@ app.get('/api/mcp/context', requireUser, async (req, res) => {
       mcpHost: new URL(process.env.TABLEAU_MCP_URL).host,
       model: process.env.OPENAI_MODEL || 'gpt-4o-mini',
       maxQuestions: MCP_MAX_QUESTIONS,
-      datasources: datasources.map(({ name, label }) => ({ name, label })),
+      toolGroups: TOOL_GROUPS,
+      datasources: datasources.map(({ name, label, view }) => ({ name, label, key: view })),
+      // One per MCP group: data, a dashboard image, Pulse's agent, and signal → action.
       suggested: [
         'Which service line delivered the most business value?',
-        'How has our value realization rate trended by quarter?',
-        'Which engagements are behind on milestones?',
-        ...(datasources.some((d) => d.label === 'Transportation') ? ['What does our transportation savings data show by month?'] : [])
+        'Show me my Value Intelligence dashboard',
+        'Why is my Engagement Health metric down?',
+        'Which engagement is most off track?'
       ]
     });
   } catch (e) {
@@ -536,14 +563,14 @@ app.post('/api/mcp/chat', requireUser, async (req, res) => {
   const conversationId = prior ? req.body.conversationId : crypto.randomUUID();
   const started = Date.now();
   try {
-    const datasources = await mcpDatasources(req.user, req.tenant);
-    const r = await mcpAgent.ask(req.user, { question, history: prior ? prior.messages.slice(-12) : [], tenantName: req.tenant.clientName, datasources });
+    const [datasources, views] = await Promise.all([mcpDatasources(req.user, req.tenant), mcpViews(req.user, req.tenant)]);
+    const r = await mcpAgent.ask(req.user, { question, history: prior ? prior.messages.slice(-12) : [], tenantName: req.tenant.clientName, datasources, views });
     const turns = [...(prior?.messages || []), { role: 'user', content: question }, { role: 'assistant', content: r.content }];
     mcpConversations.set(conversationId, { userId: req.user.id, messages: turns, at: Date.now() });
     const ms = Date.now() - started;
     console.log(`⚡ MCP agent for ${req.user.email} in ${ms} ms (${r.steps.length} tool calls: ${r.steps.map((s) => `${s.tool}${s.ok ? '' : '✖'}`).join(', ')})`);
     activity.record(req.user, req.tenant, 'mcp-question', { question, ms, tools: r.steps.length });
-    res.json({ content: r.content, steps: r.steps, conversationId, ms, asked: asked + 1, limit: MCP_MAX_QUESTIONS });
+    res.json({ content: r.content, steps: r.steps, images: r.images, action: r.action, conversationId, ms, asked: asked + 1, limit: MCP_MAX_QUESTIONS });
   } catch (e) {
     console.error('mcp chat error:', e.message);
     res.status(e.status || 502).json({ error: e.message });

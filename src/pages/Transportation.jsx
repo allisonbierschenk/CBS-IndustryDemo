@@ -1,6 +1,6 @@
 // Page 2 — Transportation Optimization & Savings (Vantage only; entitlement-gated on the server and in Tableau).
 import { useCallback, useState } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
+import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import { selectedValue } from '../lib/tableau.js';
 import { useSession } from '../context/SessionContext.jsx';
 import Crumbs from '../components/Crumbs.jsx';
@@ -25,6 +25,14 @@ export default function Transportation() {
   const view = me.views.transportation;
   const dd = me.drilldown;
   const [viz, setViz] = useState(null);
+  // A shared link (?carrier=…&optimization-initiative=…) is applied once the dashboard is ready.
+  const [params] = useSearchParams();
+  const [filterRequest] = useState(() => {
+    const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+    const values = {};
+    for (const f of view.filters || []) if (params.get(slug(f.field))) values[f.field] = params.get(slug(f.field));
+    return Object.keys(values).length ? { values, nonce: Date.now() } : null;
+  });
   const engagement = me.tenant.engagements.find((e) => e.analytics === 'transportation');
 
   // Selecting an invoice status opens Invoice & Shipment Details filtered to that status.
@@ -76,14 +84,14 @@ export default function Transportation() {
             <RefreshButton viz={viz} viewKey="transportation" />
             <ViewsMenu viz={viz} />
             <SubscribeButton viewKey="transportation" title={view.title} />
-            <ShareButton title={view.title} />
+            <ShareButton title={view.title} viz={viz} filters={view.filters} />
             <ExportMenu viz={viz} title={view.title} />
             <DataDetailsButton viz={viz} />
             <CustomizeButton templateKey="transportation" title={view.title} back="/transportation" />
             <InfoTip kind="transportation" label="About this dashboard" />
           </div>
         </div>
-        {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} />}
+        {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} request={filterRequest} />}
         {viz && view.search && <InvoiceSearch viz={viz} {...view.search} />}
         <TableauViz
           viewKey="transportation"

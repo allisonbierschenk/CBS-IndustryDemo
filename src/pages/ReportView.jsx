@@ -38,7 +38,7 @@ export default function ReportView() {
           <div className="viz-meta">
             <AnalyticsAssistantButton viz={viz} />
             <ViewsMenu viz={viz} />
-            <ShareButton title={title} />
+            <ShareButton title={title} viz={viz} />
             <ExportMenu viz={viz} title={title} />
             <DataDetailsButton viz={viz} />
             <CustomizeButton templateKey={`library:${viewId}`} title={title} back={`/reports/${encodeURIComponent(viewId)}`} />

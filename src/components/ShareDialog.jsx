@@ -25,18 +25,44 @@ async function copyText(text) {
   }
 }
 
-export default function ShareDialog({ title, onClose }) {
+const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+/** What's on screen right now: the dashboard's current single-value filters for the configured fields → { slug: value }.
+ *  One dashboard.getFiltersAsync() call (Embedding API v3); per-worksheet only if the viz isn't a dashboard. */
+async function readFilters(viz, defs) {
+  const sheet = viz.workbook.activeSheet;
+  const list =
+    sheet.sheetType === 'dashboard' && sheet.getFiltersAsync
+      ? await sheet.getFiltersAsync()
+      : (await Promise.all((sheet.sheetType === 'worksheet' ? [sheet] : sheet.worksheets).map((ws) => ws.getFiltersAsync().catch(() => [])))).flat();
+  const want = new Set(defs.map((f) => f.field));
+  const out = Object.fromEntries(defs.map((f) => [slug(f.field), '']));
+  const seen = new Set();
+  for (const f of list) {
+    if (!want.has(f.fieldName) || f.filterType !== 'categorical' || seen.has(f.fieldName)) continue;
+    seen.add(f.fieldName);
+    out[slug(f.fieldName)] = !f.isAllSelected && f.appliedValues?.length === 1 ? String(f.appliedValues[0].value ?? f.appliedValues[0].formattedValue) : '';
+  }
+  console.info('[share] filters on screen:', out);
+  return out;
+}
+
+export default function ShareDialog({ title, savedView, viz, filters: filterDefs, onClose }) {
   const [state, setState] = useState({ loading: true });
   const [copied, setCopied] = useState(false);
-
   useEffect(() => {
     let alive = true;
     (async () => {
       try {
-        const path = window.location.pathname + window.location.search;
+        // Read the filters actually on screen (a saved view sets them inside Tableau and never touches the page URL).
+        const params = new URLSearchParams(window.location.search);
+        if (viz && filterDefs?.length) {
+          for (const [k, v] of Object.entries(await readFilters(viz, filterDefs))) v ? params.set(k, v) : params.delete(k);
+        }
+        const path = window.location.pathname + (params.toString() ? `?${params}` : '');
         const { url, expiresAt } = await api('/api/links', { method: 'POST', body: { path } });
         const qr = await QRCode.toDataURL(url, { margin: 1, width: 220, color: { dark: '#111614', light: '#ffffff' } });
-        const filters = [...new URLSearchParams(window.location.search).entries()];
+        const filters = [...params.entries()];
         if (alive) setState({ url, qr, expiresAt, filters });
       } catch (e) {
         if (alive) setState({ error: e.message });
@@ -62,7 +88,7 @@ export default function ShareDialog({ title, onClose }) {
         <div className="modal-head">
           <div>
             <div className="kicker">{title}</div>
-            <h3 id="share-title">Share this view</h3>
+            <h3 id="share-title">{savedView ? `Share “${savedView}”` : 'Share this view'}</h3>
           </div>
           <button className="icon-btn" aria-label="Close" onClick={onClose}>
             ✕
@@ -86,6 +112,11 @@ export default function ShareDialog({ title, onClose }) {
                       </span>
                     ))}
                   </div>
+                )}
+                {savedView && (
+                  <p className="muted" style={{ fontSize: 12.5, margin: '0 0 8px' }}>
+                    The link opens this dashboard with the saved view&apos;s filters{state.filters.length ? '' : ' (it has none set)'}.
+                  </p>
                 )}
                 <input className="input" readOnly value={state.url} onFocus={(e) => e.target.select()} />
                 <p className="muted" style={{ fontSize: 12, margin: '8px 0 0' }}>

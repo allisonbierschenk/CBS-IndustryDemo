@@ -7,6 +7,14 @@ let libPromise = null;
 export function loadEmbeddingLibrary(url) {
   if (!url) return Promise.reject(new Error('TABLEAU_SERVER is not configured on the Apex server.'));
   if (libPromise) return libPromise;
+  // Already on the page (e.g. this module was re-evaluated by a dev hot reload): don't add a second copy —
+  // a second copy re-registers Tableau's custom elements ("Custom element … already defined").
+  if (customElements.get('tableau-viz') || document.querySelector(`script[src="${url}"]`)) {
+    console.info('[tableau] Embedding API already loaded; reusing it');
+    libPromise = customElements.whenDefined('tableau-viz');
+    return libPromise;
+  }
+  console.info('[tableau] loading Embedding API', url);
   libPromise = new Promise((resolve, reject) => {
     const script = document.createElement('script');
     script.type = 'module';

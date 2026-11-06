@@ -136,18 +136,19 @@ const FEATURES = [
     ]
   })),
   F('mcpAgent', 'ai', 'Data Agent (Tableau MCP)', (p) => ({
-    title: 'Ask anything with the Data Agent',
+    title: 'Data, agents and workflows over MCP',
     where: 'Chat bubble, bottom-right of every page',
-    do: `Open the chat bubble and ask “Which service line delivered the most business value?”, then expand “Tableau MCP tool calls” to show the query the AI wrote. Switch to another client and ask the same question: different numbers.`,
-    say: 'Any AI agent, on governed Tableau data — with each client’s security intact.',
+    do: 'Open the chat bubble and use the suggested questions in order: (1) “Which service line delivered the most business value?” — data over MCP. (2) “Show me my Value Intelligence dashboard” — the dashboard image arrives over MCP. (3) “Why is my Engagement Health metric down?” — the Data Agent calls Tableau Pulse’s own AI agent over MCP. (4) “Which engagement is most off track?” — it proposes a next step; click it to schedule a review with Apex. Expand the tool calls: each is tagged Data, Agent or Workflow. Then switch client and ask again: different numbers.',
+    say: 'Any AI agent gets governed Tableau data, Tableau’s own agents, and a path to action — all with each client’s security intact.',
     money: 'Ask-anything AI as a premium portal feature, without copying client data into an AI platform.',
-    tech: ['mcp', 'vds', 'rls'],
+    tech: ['mcp', 'vds', 'pulse', 'rls'],
     ask: [
-      ['What is MCP?', 'Model Context Protocol: the open standard for giving AI agents tools. Tableau’s MCP server exposes tools like get-datasource-metadata and query-datasource (VizQL Data Service).'],
-      ['Whose data can it see?', `Only ${p.first}’s. The portal passes ${p.first}’s own Tableau session to the MCP server (passthrough auth), so every query runs as ${p.first} with the same row-level security as the dashboards. No service account.`],
-      ['Which LLM?', 'Any — this demo uses OpenAI. The LLM only sees query results Tableau already secured. Unlike Pulse AI, it’s metered by the model provider.'],
-      ['Why do the numbers match the dashboard?', 'It queries the same published data source and defaults to year to date on the date field the dashboard’s Pulse metrics use.'],
-      ['Can it change anything?', 'No — read-only tools only, limited to this client’s data sources, and 3 questions per chat before a new chat.']
+      ['What is MCP?', 'Model Context Protocol: the open standard for giving AI agents tools. Tableau’s MCP server exposes data tools (metadata, VizQL queries, view images, search) and Pulse’s AI agent.'],
+      ['Agent to agent?', 'Yes — for “why” questions the Data Agent calls generate-pulse-insight-brief, Tableau Pulse’s agent, over MCP, and cites the drivers Pulse found.'],
+      ['Are the workflows over MCP?', 'The agent proposes the action; the portal runs it when the user clicks (contact Apex, a Tableau subscription via REST, or the dashboard filtered). Tableau MCP also has write tools (run flows, extract refresh tasks, publish) — not enabled on this read-only server.'],
+      ['Whose data can it see?', `Only ${p.first}’s. The portal passes ${p.first}’s own Tableau session to the MCP server (passthrough auth), so every call runs as ${p.first}. Search results are also limited to ${p.first}’s dashboards and data sources.`],
+      ['Which LLM?', 'Any — this demo uses OpenAI. Unlike Pulse AI, it’s metered by the model provider.'],
+      ['Can it change anything?', 'Not in Tableau — read-only tools only, and 3 questions per chat.']
     ]
   })),
   F('agentSource', 'ai', 'Pulse Agent data-source picker', () => ({
@@ -471,7 +472,7 @@ const ABOUT = {
   "attentionAct": "One click to ask why, open the dashboard or email Apex.",
   "goals": "Premium: the client sets a goal on any KPI — the portal creates a real Pulse metric for them through the Pulse REST API, sets the goal and follows it.",
   "agent": "Pulse Agent: ask in plain English, answered from the client’s Pulse metrics.",
-  "mcpAgent": "Data Agent (chat bubble): ask anything — AI queries Tableau through MCP, as the user.",
+  "mcpAgent": "Data Agent (chat bubble): data, Pulse’s agent and next-step actions, all over MCP, as the user.",
   "agentSource": "Choose which metrics the Pulse Agent uses (Elena has two sets).",
   "selectionAgent": "Select data on a chart, ask the Pulse Agent about it.",
   "explain": "Select a data point in a dashboard → Pulse explains it.",
