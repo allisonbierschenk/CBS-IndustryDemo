@@ -4,6 +4,7 @@
 // <EmbedSlot>, and the persistent embed is positioned exactly over that slot. The iframe is never moved
 // in the DOM (moving an iframe reloads it).
 import { createContext, useCallback, useContext, useEffect, useLayoutEffect, useRef, useState } from 'react';
+import { useLocation } from 'react-router-dom';
 import EmbedPlaceholder from '../components/EmbedPlaceholder.jsx';
 import BenchmarkLock from '../components/BenchmarkLock.jsx';
 import TableauViz from '../components/TableauViz.jsx';
@@ -83,9 +84,29 @@ export function PersistentEmbeds({ containerRef }) {
   ));
 }
 
+// Page each preloaded view lives on, and how its filters appear in that page's URL (?service-line=…).
+const PAGE = { valueIntelligence: '/dashboards', transportation: '/transportation' };
+const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
+
+/** Filters for `view` from the current URL, if the URL is that view's page — as Tableau <viz-filter> values. */
+function urlFilters(viewKey, view, location) {
+  if (PAGE[viewKey] !== location.pathname) return [];
+  const params = new URLSearchParams(location.search);
+  return (view.filters || []).filter((f) => params.get(slug(f.field))).map((f) => ({ field: f.field, value: params.get(slug(f.field)) }));
+}
+
 function PersistentEmbed({ viewKey, view, slot, containerRef, handlers, onReady, onHeight }) {
   const boxRef = useRef(null);
   const { me } = useSession();
+  const location = useLocation();
+  // Captured ONCE, when the embed is created: a shared link's filters go to Tableau as <viz-filter> elements,
+  // so the dashboard loads already filtered (Embedding API v3) — no applyFilterAsync after load. Later filter
+  // changes go through the filter bar; this is never recomputed (that would reload the iframe).
+  const [initialFilters] = useState(() => {
+    const f = urlFilters(viewKey, view, location);
+    if (f.length) console.info(`[embed] ${viewKey}: loading with filters from the link`, f);
+    return f;
+  });
   // Standard clients: lock the Premium benchmarks tile inside this dashboard.
   const lock = me.features?.benchmarks?.cover;
   const cover = lock && lock.view === viewKey && !me.entitlements.includes('benchmarks') ? { worksheet: lock.worksheet, render: () => <BenchmarkLock /> } : undefined;
@@ -139,6 +160,7 @@ function PersistentEmbed({ viewKey, view, slot, containerRef, handlers, onReady,
         viewKey={viewKey}
         width={view.width}
         height={view.height}
+        filters={initialFilters}
         onMarkSelection={(e) => handlers.current[viewKey]?.onMarkSelection?.(e)}
         onFirstInteractive={(e, viz) => onReady(viz)}
         cover={cover}

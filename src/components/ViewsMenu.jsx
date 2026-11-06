@@ -27,13 +27,13 @@ export default function ViewsMenu({ viz }) {
     }
   }, [viz]);
 
+  // List once when the dashboard is ready, then again only after an action in this menu (act() below).
+  // No Tableau event listeners: getCustomViewsAsync() itself makes Tableau send "custom views loaded", which the
+  // Embedding API turns into one 'customviewloaded' event PER saved view — re-listing on that event was an
+  // endless loop (list → event → list…) once a user had a saved view, flooding Tableau with requests.
   useEffect(() => {
     refresh();
-    if (!viz) return;
-    const events = ['customviewloaded', 'customviewsaved', 'customviewremoved', 'customviewsetdefault'];
-    events.forEach((ev) => viz.addEventListener(ev, refresh));
-    return () => events.forEach((ev) => viz.removeEventListener(ev, refresh));
-  }, [viz, refresh]);
+  }, [refresh]);
 
   useEffect(() => {
     if (!open) return;

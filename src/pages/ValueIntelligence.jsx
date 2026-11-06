@@ -40,12 +40,9 @@ export default function ValueIntelligence() {
   const [contextLink, setContextLink] = useState(null);
   const [viz, setViz] = useState(null);
   const [params, setParams] = useSearchParams();
-  // A link with filters (e.g. from Share / QR) is applied once the dashboard is ready.
-  const [filterRequest, setFilterRequest] = useState(() => {
-    const values = {};
-    for (const f of me.views.valueIntelligence.filters || []) if (params.get(slug(f.field))) values[f.field] = params.get(slug(f.field));
-    return Object.keys(values).length ? { values, nonce: Date.now() } : null;
-  });
+  // A link's filters (Share / QR) are passed to Tableau as <viz-filter> while the dashboard loads (EmbedContext),
+  // so nothing is applied afterwards. filterRequest is only for in-page actions (e.g. "View in dashboard").
+  const [filterRequest, setFilterRequest] = useState(null);
   const t = me.tenant;
   const vi = me.views.valueIntelligence;
   const early = me.relationship.monthsOfHistory <= 6;

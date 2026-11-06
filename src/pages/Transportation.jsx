@@ -25,13 +25,14 @@ export default function Transportation() {
   const view = me.views.transportation;
   const dd = me.drilldown;
   const [viz, setViz] = useState(null);
-  // A shared link (?carrier=…&optimization-initiative=…) is applied once the dashboard is ready.
+  // A shared link's filters (?carrier=…) go to Tableau as <viz-filter> while the dashboard loads — captured once,
+  // so later filter changes (filter bar) don't reload the dashboard.
   const [params] = useSearchParams();
-  const [filterRequest] = useState(() => {
+  const [initialFilters] = useState(() => {
     const slug = (field) => field.toLowerCase().replace(/[^a-z0-9]+/g, '-');
-    const values = {};
-    for (const f of view.filters || []) if (params.get(slug(f.field))) values[f.field] = params.get(slug(f.field));
-    return Object.keys(values).length ? { values, nonce: Date.now() } : null;
+    const f = (view.filters || []).filter((x) => params.get(slug(x.field))).map((x) => ({ field: x.field, value: params.get(slug(x.field)) }));
+    if (f.length) console.info('[embed] transportation: loading with filters from the link', f);
+    return f;
   });
   const engagement = me.tenant.engagements.find((e) => e.analytics === 'transportation');
 
@@ -91,12 +92,13 @@ export default function Transportation() {
             <InfoTip kind="transportation" label="About this dashboard" />
           </div>
         </div>
-        {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} request={filterRequest} />}
+        {viz && view.filters?.length > 0 && <DashboardFilters viz={viz} filters={view.filters} />}
         {viz && view.search && <InvoiceSearch viz={viz} {...view.search} />}
         <TableauViz
           viewKey="transportation"
           width={view.width}
           height={view.height}
+          filters={initialFilters}
           onMarkSelection={onMarkSelection}
           onFirstInteractive={(e, v) => setViz(v)}
         />
