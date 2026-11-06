@@ -57,27 +57,45 @@ export default function DashboardFilters({ viz, filters, onChange, request }) {
     [viz, filters]
   );
 
+  // Read the dashboard's current filter values from Tableau (on load, and after a saved view opens).
+  const syncFromViz = useCallback(
+    async (isAlive = () => true) => {
+      setBusy(true);
+      try {
+        const current = await Promise.all(
+          filters.map(async (f) => {
+            const [first] = await sheetsWithFilter(viz, f.field);
+            const fl = first?.filter;
+            const value = !fl || fl.isAllSelected || !fl.appliedValues?.length ? ALL : String(fl.appliedValues[0].value ?? fl.appliedValues[0].formattedValue);
+            return [f.field, value];
+          })
+        );
+        console.info('[filters] synced from dashboard:', Object.fromEntries(current));
+        if (isAlive()) setState((s) => ({ ...s, ...Object.fromEntries(current.map(([k, v]) => [k, { ...s[k], value: v }])) }));
+        await refreshOptions(null);
+      } finally {
+        if (isAlive()) setBusy(false);
+      }
+    },
+    [viz, filters, refreshOptions]
+  );
+
   useEffect(() => {
     let alive = true;
-    (async () => {
-      setBusy(true);
-      // The dashboard may be preloaded and already filtered (e.g. returning to the page): read current values.
-      const current = await Promise.all(
-        filters.map(async (f) => {
-          const [first] = await sheetsWithFilter(viz, f.field);
-          const fl = first?.filter;
-          const value = !fl || fl.isAllSelected || !fl.appliedValues?.length ? ALL : String(fl.appliedValues[0].value ?? fl.appliedValues[0].formattedValue);
-          return [f.field, value];
-        })
-      );
-      if (alive) setState((s) => ({ ...s, ...Object.fromEntries(current.map(([k, v]) => [k, { ...s[k], value: v }])) }));
-      await refreshOptions(null);
-      if (alive) setBusy(false);
-    })();
+    // The dashboard may be preloaded and already filtered (e.g. returning to the page): read current values.
+    syncFromViz(() => alive);
     return () => {
       alive = false;
     };
-  }, [refreshOptions]);
+  }, [syncFromViz]);
+
+  // A saved view (Tableau custom view) replaces the dashboard's filters in one step; re-read them so the
+  // bar shows what the view applied instead of the old selection.
+  useEffect(() => {
+    const onViewLoaded = () => syncFromViz();
+    viz.addEventListener('customviewloaded', onViewLoaded);
+    return () => viz.removeEventListener('customviewloaded', onViewLoaded);
+  }, [viz, syncFromViz]);
 
   // Keep the bar in sync with filter changes made inside the dashboard itself.
   // FilterChangedEvent: detail.fieldName + detail.getFilterAsync() (Embedding API v3 reference).

@@ -821,6 +821,41 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     }
   });
 
+  // ── Customize a template: open an existing Apex dashboard in embedded web authoring ──
+  // <tableau-authoring-viz> takes the view URL with /authoring/ instead of /views/ (same as the embedding playbook's
+  // Edit Viz). Premium only (same entitlement as Build your own). The token carries the user's attributes, so
+  // row-level security applies while editing. Saving uses "Save As" into a project the user can publish to,
+  // so the Apex template itself is never overwritten.
+  const templateUrl = async (req, key) => {
+    if (key.startsWith('library:')) {
+      const view = (await libraryFor(req.user, req.tenant)).find((v) => v.id === key.slice(8));
+      return view ? { src: view.embedUrl, title: view.name } : null;
+    }
+    const v = cfg.views[key];
+    return v?.url && store.canAccessView(req.tenant, key) ? { src: v.url, title: v.title } : null;
+  };
+  app.get('/api/embed/customize/:key', requireUser, async (req, res) => {
+    try {
+      if (!(cfg.authoring.requires || []).every((r) => ent(req.tenant).has(r))) return res.status(403).json({ error: 'Customizing reports is part of Premium.' });
+      const t = await templateUrl(req, req.params.key);
+      if (!t) return res.status(403).json({ error: 'This report isn’t available to you.' });
+      const attributes = Object.fromEntries(Object.entries(req.user.attributes || {}).map(([k, v]) => [k, Array.isArray(v) ? v : [v]]));
+      const minted = mintEmbedToken({
+        clientId: env.clientId,
+        secretId: env.secretId,
+        secretValue: env.secretValue,
+        username: req.user.email,
+        attributes,
+        ttlSeconds: env.ttl,
+        scopes: ['tableau:views:embed', 'tableau:views:embed_authoring', 'tableau:content:read']
+      });
+      activity.record(req.user, req.tenant, 'customize', { view: t.title });
+      res.json({ configured: true, src: t.src.replace('/views/', '/authoring/'), title: t.title, token: minted.token, claims: minted.claims });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
   // ── Data feeds (#9) ───────────────────────────────────────────────────────
   app.get('/api/feeds', requireUser, (req, res) => {
     const days = cfg.feeds.tokenDays || 30;

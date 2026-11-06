@@ -17,6 +17,8 @@ const PATHS = {
   unlock: '<rect x="4.5" y="10.5" width="15" height="10" rx="2.5"/><path d="M8 10.5V7.5a4 4 0 0 1 7.6-1.7"/>',
   arrowRight: '<path d="M5 12h14M13 6l6 6-6 6"/>',
   close: '<path d="M6 6l12 12M18 6 6 18"/>',
+  refresh: '<path d="M20 11a8 8 0 1 0-2.3 5.7"/><path d="M20 4v7h-7"/>',
+  edit: '<path d="M4 20h4L19 9l-4-4L4 16z"/><path d="m13.5 6.5 4 4"/>',
   arrowLeft: '<path d="M19 12H5M11 6l-6 6 6 6"/>',
   chevronDown: '<path d="m6 9 6 6 6-6"/>',
   chevronRight: '<path d="m9 6 6 6-6 6"/>',

@@ -7,6 +7,7 @@ import Crumbs from '../components/Crumbs.jsx';
 import Icon from '../components/Icon.jsx';
 import TableauViz from '../components/TableauViz.jsx';
 
+import ShareButton from '../components/ShareButton.jsx';
 export default function InvoiceDetails() {
   const { me } = useSession();
   const [params, setParams] = useSearchParams();
@@ -54,6 +55,9 @@ export default function InvoiceDetails() {
           <div>
             <h3>{status ? `${status} invoices & shipments` : 'All invoices & shipments'}</h3>
             <p>{view.subtitle}</p>
+          </div>
+          <div className="viz-meta">
+            <ShareButton title={view.title} />
           </div>
         </div>
         <TableauViz key={status || 'all'} viewKey="invoiceDetails" width={view.width} height={view.height} filters={filters} />

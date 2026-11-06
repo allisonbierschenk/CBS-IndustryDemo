@@ -10,9 +10,8 @@ export default function SubscribeButton({ viewKey, title }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-ghost btn-sm" onClick={() => setOpen(true)} title="Email this dashboard on a schedule">
+      <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setOpen(true)} aria-label="Subscribe" title="Subscribe: email this dashboard on a schedule">
         <Icon name="mail" />
-        Subscribe
       </button>
       {open && <SubscribeDialog viewKey={viewKey} title={title} onClose={() => setOpen(false)} />}
     </>

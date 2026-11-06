@@ -6,6 +6,8 @@ import Crumbs from '../components/Crumbs.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
 import DataDetailsButton from '../components/DataDetails.jsx';
+import CustomizeButton from '../components/CustomizeButton.jsx';
+import ShareButton from '../components/ShareButton.jsx';
 import InfoTip from '../components/InfoTip.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import TableauViz from '../components/TableauViz.jsx';
@@ -36,8 +38,10 @@ export default function ReportView() {
           <div className="viz-meta">
             <AnalyticsAssistantButton viz={viz} />
             <ViewsMenu viz={viz} />
+            <ShareButton title={title} />
             <ExportMenu viz={viz} title={title} />
             <DataDetailsButton viz={viz} />
+            <CustomizeButton templateKey={`library:${viewId}`} title={title} back={`/reports/${encodeURIComponent(viewId)}`} />
             <InfoTip kind="report" extra={{ workbook: info?.workbook }} label="About this report" />
           </div>
         </div>

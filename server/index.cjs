@@ -14,6 +14,7 @@ const { mintEmbedToken, DEFAULT_SCOPES } = require('./lib/jwt.cjs');
 const { createPulseClient, extractSeries } = require('./lib/pulse.cjs');
 const { createMcpAgent } = require('./lib/mcpAgent.cjs');
 const { createDataDetails, parseViewUrl } = require('./lib/dataDetails.cjs');
+const { createRefresher } = require('./lib/refresh.cjs');
 const activity = require('./lib/activity.cjs');
 const registerFeatures = require('./routes/features.cjs');
 const store = require('./lib/store.cjs');
@@ -372,6 +373,54 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
     activity.record(req.user, req.tenant, 'agent-question', { question, source, ms: Date.now() - started });
   } catch (e) {
     console.error('agent chat error:', e.message);
+    res.status(502).json({ error: e.message });
+  }
+});
+
+// ── On-demand refresh: REST "Update Data Source Now" + "Query Job" on the dashboard's published data source ──
+// The client user can't refresh (Tableau 403), so the call runs as the data source owner (or REFRESH_AS_USER),
+// only after the portal checks the user is entitled to the dashboard. See server/lib/refresh.cjs.
+const refresher = createRefresher({ server: env.server, site: env.site, clientId: env.clientId, secretId: env.secretId, secretValue: env.secretValue, asUser: process.env.REFRESH_AS_USER || null });
+const refreshJobs = new Map(); // jobId -> { userId, runAs, datasource, viewKey, at }
+const runningByDatasource = new Map(); // datasource id -> jobId (one refresh at a time per data source)
+setInterval(() => {
+  for (const [id, j] of refreshJobs) if (Date.now() - j.at > 2 * 60 * 60 * 1000) refreshJobs.delete(id);
+}, 10 * 60 * 1000).unref();
+
+app.post('/api/refresh/:viewKey', requireUser, async (req, res) => {
+  const viewKey = req.params.viewKey;
+  if (!store.canAccessView(req.tenant, viewKey)) return res.status(403).json({ error: 'Your subscription does not include this dashboard.' });
+  const cfg = (store.content.agent.datasources || []).find((d) => d.view === viewKey);
+  if (!cfg) return res.status(404).json({ error: 'No published data source is configured for this dashboard.' });
+  try {
+    const list = await pulse.request(req.user, 'GET', `/datasources?filter=${encodeURIComponent(`name:eq:${cfg.name}`)}`, null, { base: 'rest' });
+    const ds = list.datasources?.datasource?.[0];
+    if (!ds) return res.status(404).json({ error: `Data source "${cfg.name}" not found in Tableau.` });
+    const running = runningByDatasource.get(ds.id);
+    if (running && refreshJobs.has(running)) {
+      return res.json({ jobId: running, datasource: ds.name, alreadyRunning: true });
+    }
+    const r = await refresher.start(ds, req.user.email);
+    refreshJobs.set(r.jobId, { userId: req.user.id, runAs: r.runAs, datasource: { id: ds.id, name: ds.name }, viewKey, at: Date.now() });
+    runningByDatasource.set(ds.id, r.jobId);
+    console.log(`⚡ refresh requested by ${req.user.email}: ${ds.name} → job ${r.jobId} (as ${r.runAs})`);
+    activity.record(req.user, req.tenant, 'refresh-data', { view: viewKey, datasource: ds.name, job: r.jobId });
+    res.status(202).json({ jobId: r.jobId, createdAt: r.createdAt, datasource: ds.name, datasourceId: ds.id, request: `POST /api/3.27/sites/{site}/datasources/${ds.id}/refresh` });
+  } catch (e) {
+    console.error('refresh error:', e.message);
+    res.status(e.status && e.status < 500 ? e.status : 502).json({ error: e.message, code: e.code || null });
+  }
+});
+
+app.get('/api/refresh/jobs/:jobId', requireUser, async (req, res) => {
+  const meta = refreshJobs.get(req.params.jobId);
+  if (!meta || meta.userId !== req.user.id) return res.status(404).json({ error: 'Unknown refresh job.' });
+  try {
+    const j = await refresher.job(meta.runAs, req.params.jobId);
+    if (j.done) runningByDatasource.delete(meta.datasource.id);
+    res.json({ ...j, datasource: meta.datasource.name });
+  } catch (e) {
+    console.error('refresh job error:', e.message);
     res.status(502).json({ error: e.message });
   }
 });

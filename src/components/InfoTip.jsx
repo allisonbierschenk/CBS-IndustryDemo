@@ -80,6 +80,19 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
         createPortal(
         <div ref={pop} className="info-pop" role="dialog" aria-label={label} onMouseEnter={show} onMouseLeave={hideSoon} style={pos ? { top: pos.top, left: pos.left, width: pos.width } : { visibility: 'hidden' }}>
           <div className="info-tag">{info.tag}</div>
+          {info.api ? (
+            <dl className="info-api">
+              {info.api.map(([what, call]) => (
+                <div key={what}>
+                  <dt>{what}</dt>
+                  <dd>
+                    <code>{call}</code>
+                  </dd>
+                </div>
+              ))}
+            </dl>
+          ) : (
+          <>
           <h4>Freshness</h4>
           <p>{info.freshness}</p>
           <h4>Source</h4>
@@ -90,6 +103,8 @@ export default function InfoTip({ kind, extra, label = 'About this' }) {
             <h4>Why Tableau helps here</h4>
             <p>{info.why}</p>
           </div>
+          </>
+          )}
         </div>,
           document.body
         )}

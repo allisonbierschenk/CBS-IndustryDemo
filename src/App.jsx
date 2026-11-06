@@ -15,6 +15,7 @@ import Login from './pages/Login.jsx';
 import NotFound from './pages/NotFound.jsx';
 import Privacy from './pages/Privacy.jsx';
 import ReportBuilder from './pages/ReportBuilder.jsx';
+import CustomizeReport from './pages/CustomizeReport.jsx';
 import Reports from './pages/Reports.jsx';
 import ReportView from './pages/ReportView.jsx';
 import Transportation from './pages/Transportation.jsx';
@@ -78,6 +79,7 @@ export default function App() {
         <Route path="benchmarks" element={<Benchmarks />} />
         <Route path="reports" element={<Reports />} />
         <Route path="reports/new" element={me?.features?.authoring ? <ReportBuilder /> : <Navigate to="/reports" replace />} />
+        <Route path="reports/customize/:key" element={me?.features?.authoring ? <CustomizeReport /> : <Navigate to="/reports" replace />} />
         <Route path="reports/:viewId" element={<ReportView />} />
         <Route path="alerts" element={<Alerts />} />
         <Route path="feeds" element={<Feeds />} />

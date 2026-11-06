@@ -11,6 +11,9 @@ import EngagementCards from '../components/EngagementCards.jsx';
 import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
 import DataDetailsButton from '../components/DataDetails.jsx';
+import CustomizeButton from '../components/CustomizeButton.jsx';
+import ShareButton from '../components/ShareButton.jsx';
+import RefreshButton from '../components/RefreshButton.jsx';
 import EngagementScorecard from '../components/EngagementScorecard.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
@@ -149,10 +152,13 @@ export default function ValueIntelligence() {
             </div>
             <div className="viz-meta">
               <AnalyticsAssistantButton viz={viz} />
+              <RefreshButton viz={viz} viewKey="valueIntelligence" />
               <ViewsMenu viz={viz} />
               <SubscribeButton viewKey="valueIntelligence" title={vi.title} />
+              <ShareButton title={vi.title} />
               <ExportMenu viz={viz} title={vi.title} />
               <DataDetailsButton viz={viz} />
+              <CustomizeButton templateKey="valueIntelligence" title={vi.title} back="/dashboards" />
               <InfoTip kind="valueIntelligence" label="About this dashboard" />
             </div>
           </div>

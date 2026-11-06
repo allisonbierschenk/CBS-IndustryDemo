@@ -122,9 +122,8 @@ export default function DataDetailsButton({ viz, src }) {
   const [open, setOpen] = useState(false);
   return (
     <>
-      <button className="btn btn-ghost btn-sm" onClick={() => setOpen(true)} disabled={!viz} title={viz ? 'Data used by this view' : 'Available once the dashboard has loaded'}>
+      <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setOpen(true)} disabled={!viz} aria-label="Data Details" title={viz ? 'Data Details: the data behind this view' : 'Available once the dashboard has loaded'}>
         <Icon name="database" />
-        Data Details
       </button>
       {open && <DataDetails viz={viz} src={src} onClose={() => setOpen(false)} />}
     </>

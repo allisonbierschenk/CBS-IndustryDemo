@@ -10,6 +10,7 @@ const LABELS = {
   'report-view': 'Opened report',
   'agent-question': 'Asked the Pulse Agent',
   'mcp-question': 'Asked the Data Agent (MCP)',
+  'refresh-data': 'Refreshed dashboard data',
   attention: 'Needs-attention summary',
   export: 'Exported',
   share: 'Shared a link',

@@ -5,6 +5,7 @@ import { useCallback, useEffect, useRef, useState } from 'react';
 import { track } from '../lib/api.js';
 import { useToast } from '../context/ToastContext.jsx';
 import Icon from './Icon.jsx';
+import InfoTip from './InfoTip.jsx';
 
 export default function ViewsMenu({ viz }) {
   const toast = useToast();
@@ -71,13 +72,15 @@ export default function ViewsMenu({ viz }) {
 
   return (
     <div className="export" ref={ref}>
-      <button className="btn btn-ghost btn-sm" onClick={() => setOpen((o) => !o)} disabled={!viz} aria-haspopup="menu" aria-expanded={open} title="Saved views">
+      <button className={`btn btn-ghost btn-sm btn-icon${active ? ' is-on' : ''}`} onClick={() => setOpen((o) => !o)} disabled={!viz} aria-haspopup="menu" aria-expanded={open} aria-label={active ? `Saved views (showing ${active})` : 'Saved views'} title={active ? `Saved views · showing “${active}”` : 'Saved views'}>
         <Icon name="eye" />
-        {active ? active : 'Views'}
       </button>
       {open && (
         <div className="export-menu views-menu" role="menu">
-          <div className="vm-label">Your saved views</div>
+          <div className="vm-label vm-label-row">
+            Your saved views
+            <InfoTip kind="savedViews" label="About saved views" />
+          </div>
           <button className={`export-item${!active ? ' is-active' : ''}`} onClick={() => act('show original', () => viz.workbook.showCustomViewAsync())}>
             <Icon name="dashboard" />
             <span>Original view</span>

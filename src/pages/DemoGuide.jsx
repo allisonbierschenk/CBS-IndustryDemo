@@ -379,6 +379,31 @@ const FEATURES = [
     tech: ['author', 'rls'],
     ask: [['Can they see other clients’ data while authoring?', 'No — the authoring token carries the same user attributes.']]
   }), onlyPremium),
+  F('refresh', 'bi', 'Refresh data on demand', () => ({
+    title: 'Refresh the data on demand',
+    where: 'Dashboard header → Refresh data',
+    do: 'Click Refresh data. The panel shows each Tableau REST call: the refresh request is accepted with a job ID, the job runs, and the dashboard reloads the new data.',
+    say: 'Users get fresh data when they need it — not only when a schedule says so.',
+    tech: ['rest', 'embed'],
+    ask: [
+      ['What did it just call?', 'Tableau REST “Update Data Source Now” (POST /datasources/{id}/refresh, scope tableau:tasks:run) on the dashboard’s published data source, then “Query Job” (GET /jobs/{id}) until it finishes, then the Embedding API’s refreshDataAsync().'],
+      ['Can any user refresh?', 'Tableau only allows the data source owner, a project leader or an admin. The portal checks the user is entitled to the dashboard, then makes the call as the owner — the client never gets those rights.'],
+      ['What if a refresh is already running?', 'The portal shows the running job instead of starting another; Tableau also rejects duplicates (“already in queue”).']
+    ]
+  })),
+  F('customize', 'money', 'Customize a template', (p) => ({
+    title: 'Customize an Apex template',
+    where: 'Dashboard header → Customize',
+    do: 'On Value Intelligence, click Customize: the same dashboard opens in the Tableau editor. Add a field to a chart or a new sheet, then File → Save As to keep your own version. Close with Tableau’s ✕.',
+    say: 'Start from what Apex built, make it yours — without asking Apex.',
+    money: 'Templates for everyone; customization as a Premium feature.',
+    tech: ['author', 'rls'],
+    ask: [
+      ['Does it change the template for everyone?', 'No — Save As writes the client’s own copy; the Apex template stays as published.'],
+      ['Can they see other clients’ data while editing?', `No — the editor’s token carries ${p.first}’s user attributes, so the same row-level security applies.`],
+      ['Where does the copy go?', 'Into a Tableau project the user is allowed to publish to; it then appears in Reports like any other view they can see.']
+    ]
+  }), onlyPremium),
   F('contact', 'money', 'Contact your account manager', () => ({
     title: 'Talk to Apex',
     where: 'Contact Apex',
@@ -473,6 +498,8 @@ const ABOUT = {
   "upgrade": "Upgrade on the spot; the blur lifts. Sign out to reset.",
   "benchmarks": "How the client compares with similar companies.",
   "build": "Clients build their own charts in Tableau.",
+  "customize": "Premium: open an Apex dashboard in the editor and save your own version.",
+  "refresh": "Refresh the dashboard’s data now, not on a schedule.",
   "contact": "Message the client’s Apex account manager.",
   "activity": "Apex sees what clients do in the portal.",
   "info": "Blue (i) icons: where the data comes from, why Tableau.",
@@ -480,7 +507,7 @@ const ABOUT = {
 };
 const OPTIONAL = FEATURES.filter((f) => f.group !== 'core');
 // The core story, used until the presenter picks their own.
-const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'mcpAgent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'dataDetails', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build'];
+const RECOMMENDED = ['attention', 'attentionAct', 'goals', 'agent', 'mcpAgent', 'agentSource', 'selectionAgent', 'explain', 'vi', 'filters', 'scorecard', 'contextNav', 'dataDetails', 'refresh', 'transportFilters', 'drill', 'actions', 'lock', 'upgrade', 'benchmarks', 'build', 'customize'];
 
 const Chip = ({ k }) => (
   <span className="tech-chip" style={{ '--c': TECH[k].color }} title={TECH[k].note}>

@@ -9,6 +9,9 @@ import AnalyticsAssistantButton from '../components/AnalyticsAssistantButton.jsx
 import DashboardFilters from '../components/DashboardFilters.jsx';
 import ExportMenu from '../components/ExportMenu.jsx';
 import DataDetailsButton from '../components/DataDetails.jsx';
+import CustomizeButton from '../components/CustomizeButton.jsx';
+import ShareButton from '../components/ShareButton.jsx';
+import RefreshButton from '../components/RefreshButton.jsx';
 import SelectionActions from '../components/SelectionActions.jsx';
 import SubscribeButton from '../components/SubscribeButton.jsx';
 import ViewsMenu from '../components/ViewsMenu.jsx';
@@ -70,10 +73,13 @@ export default function Transportation() {
           </div>
           <div className="viz-meta">
             <AnalyticsAssistantButton viz={viz} />
+            <RefreshButton viz={viz} viewKey="transportation" />
             <ViewsMenu viz={viz} />
             <SubscribeButton viewKey="transportation" title={view.title} />
+            <ShareButton title={view.title} />
             <ExportMenu viz={viz} title={view.title} />
             <DataDetailsButton viz={viz} />
+            <CustomizeButton templateKey="transportation" title={view.title} back="/transportation" />
             <InfoTip kind="transportation" label="About this dashboard" />
           </div>
         </div>

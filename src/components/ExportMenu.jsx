@@ -19,8 +19,7 @@ const ITEMS = [
   { key: 'crosstab', label: 'Crosstab', icon: 'table' },
   { key: 'pdf', label: 'PDF', icon: 'pdf' },
   { key: 'ppt', label: 'PowerPoint', icon: 'presenter' },
-  { key: 'workbook', label: 'Workbook', icon: 'workbook' },
-  { key: 'share', label: 'Share', icon: 'share' }
+  { key: 'workbook', label: 'Workbook', icon: 'workbook' }
 ];
 
 const PAGE_SIZES = [['letter', 'Letter'], ['legal', 'Legal'], ['tabloid', 'Tabloid'], ['A3', 'A3'], ['A4', 'A4'], ['A5', 'A5'], ['executive', 'Executive']];
@@ -90,9 +89,8 @@ export default function ExportMenu({ viz, title }) {
 
   return (
     <div className="export" ref={ref}>
-      <button className="btn btn-ghost btn-sm" onClick={() => setOpen((o) => !o)} disabled={!viz} aria-haspopup="menu" aria-expanded={open} title={viz ? 'Export' : 'Available once the dashboard has loaded'}>
+      <button className="btn btn-ghost btn-sm btn-icon" onClick={() => setOpen((o) => !o)} disabled={!viz} aria-haspopup="menu" aria-expanded={open} aria-label={busy ? 'Exporting…' : 'Export'} title={viz ? (busy ? 'Exporting…' : 'Export') : 'Available once the dashboard has loaded'}>
         <Icon name={busy ? 'spark' : 'download'} />
-        {busy ? 'Exporting…' : 'Export'}
       </button>
       {open && (
         <div className="export-menu" role="menu">

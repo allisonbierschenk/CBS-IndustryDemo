@@ -62,6 +62,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 | `/transportation` | Transportation Optimization & Savings — **Vantage only** (drill-down happens inside the workbook; invoice search above it) |
 | `/reports` | Report library: every entitled view in `library.project`, with Tableau favorites (star) |
 | `/reports/:viewId` | Any library view, embedded with the same JWT + RLS |
+| `/reports/customize/:key` | **Premium** — open an existing Apex template (dashboard or library view) in embedded web authoring and Save As your own version (`/views/` → `/authoring/`, as in the embedding playbook). Reached from **Customize** on each dashboard header |
 | `/reports/new` | **Premium** — build your own report (embedded web authoring, `tableau:views:embed_authoring`) |
 | `/alerts` | Email subscriptions (Tableau REST) and Pulse metric follows; group follows are read-only. **Premium:** create your own Pulse metric with a goal (Pulse REST `metrics:getOrCreate` → `PATCH goals.target` → follow) — the goal lives on that client’s metric only, and Needs attention uses it as “Expected” |
 | `/feeds` | Personal, signed CSV feed (VizQL Data Service as the user, so RLS applies) for Excel / Google Sheets |
@@ -73,6 +74,7 @@ Switch user ⌥1–5 ─────── POST /api/auth/login ─▶ new sessi
 
 ### On the dashboard pages
 
+- **Refresh data** — refreshes the dashboard's **published data source** in Tableau: REST `POST /datasources/{id}/refresh` (Update Data Source Now) as the data source owner (or `REFRESH_AS_USER`), after an entitlement check; then polls `GET /jobs/{id}` and calls `refreshDataAsync()`. The popover shows each call and Tableau's response. Requires the data source to be an **extract with an upstream connection** — an uploaded .hyper returns Tableau 400 code 403180.
 - **Data Details** — data catalog panel for the view (ported from Tab-SE/embedding_playbook): workbook, owner, view count, data sources, certification, data quality warnings, lineage, and every field with its description, type and formula. Embedding API in the browser + Metadata API and REST on the server (`/api/data-details`), as the signed-in user.
 - **Views** — save the current filters as a Tableau custom view and make it your default (opens automatically next time).
 - **Subscribe** — schedule the dashboard by email (PDF or image); manage in `/alerts`.

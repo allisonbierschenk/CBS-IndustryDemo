@@ -60,6 +60,19 @@ export function provenance(key, me, extra = {}) {
         security: 'Runs as you in Tableau: only your followed metrics, filtered by the same row-level security as the dashboards.',
         why: 'Pulse’s metrics layer is a single source of truth: every number in an answer comes from Tableau’s insights platform, which automatically detects drivers, trends, contributors and outliers on your governed metrics — so insights are deterministic, not probabilistic. Built-in AI then describes them in natural language on the Einstein Trust Layer: trusted AI that doesn’t compromise data security or privacy. It never analyzes your raw data, so it can’t invent a figure, and everything it cites matches your dashboard. It’s included with Tableau+ and unmetered — no tokens, no usage bill, no surprise costs, however many questions you ask. Choosing a data source keeps answers to that source’s metrics, under the same security as the rest of the portal. With a Pulse goal on a metric, the Pulse Agent can answer “are we on track to hit our target?” from the same governed metrics.'
       };
+    case 'savedViews':
+      // Compact (i): just the API behind each action.
+      return {
+        tag: 'Tableau Embedding API',
+        api: [
+          ['Save', 'workbook.saveCustomViewAsync(name)'],
+          ['List', 'workbook.getCustomViewsAsync()'],
+          ['Open', 'workbook.showCustomViewAsync(name)'],
+          ['Original view', 'workbook.showCustomViewAsync()'],
+          ['Make default', 'workbook.setActiveCustomViewAsDefaultAsync()'],
+          ['Delete', 'workbook.removeCustomViewAsync(name)']
+        ]
+      };
     case 'mcpAgent':
       return {
         tag: 'Tableau MCP',
