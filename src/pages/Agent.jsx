@@ -15,6 +15,23 @@ import TrendChart from '../components/TrendChart.jsx';
 const plain = (s) => String(s || '').replace(/<[^>]+>/g, '');
 
 /** KPI chip from an insight's markup: metric name, value, and change. */
+/** KPI chip from Pulse's own period-over-period facts: the metric's value, its prior value and the relative change
+ *  — exactly as Tableau formatted them, the same figures the dashboard tile shows. */
+function chipFromFacts(card) {
+  const f = card.facts;
+  const metric = /<span data-type="metric">(.*?)<\/span>/.exec(card.markup || '')?.[1];
+  if (!f?.now || !metric) return null;
+  const rel = f.rel ? f.rel.replace(/^[-+]/, '') : null;
+  const dir = f.dir === 'up' ? 'up' : f.dir === 'down' ? 'down' : 'flat';
+  return {
+    metric: plain(metric),
+    value: f.now,
+    change: dir === 'flat' || !rel ? 'no change' : `${dir} ${rel}${f.was ? ` from ${f.was}` : ''}`,
+    dir,
+    abs: f.abs
+  };
+}
+
 function chipFrom(markup) {
   const metric = /<span data-type="metric">(.*?)<\/span>/.exec(markup)?.[1];
   const keyword = /<span data-type="insight-type-keyword">(.*?)<\/span>/.exec(markup)?.[1];
@@ -28,7 +45,8 @@ function chipFrom(markup) {
 const formatFor = (markup) => (/\d%/.test(plain(markup)) ? 'percent' : /\$\d/.test(plain(markup)) ? 'currency' : 'number');
 
 function Answer({ msg }) {
-  const chips = msg.insightCards.map((c) => chipFrom(c.markup || '')).filter(Boolean);
+  // Pulse's facts first (value + relative change, matching the dashboard); the markup fallback only if a metric has none.
+  const chips = [...msg.insightCards.map(chipFromFacts), ...msg.insightCards.map((c) => chipFrom(c.markup || ''))].filter(Boolean);
   const seen = new Set();
   const uniqueChips = chips.filter((c) => (seen.has(c.metric) ? false : seen.add(c.metric)));
   const chartCard = msg.insightCards.find((c) => c.series?.points?.length >= 2);
@@ -51,6 +69,10 @@ function Answer({ msg }) {
                 <span className="kc-change">
                   {c.dir === 'down' ? '↓' : c.dir === 'up' ? '↑' : '→'} {c.change}
                 </span>
+              )}
+              {c.abs && c.value?.trim().endsWith('%') && (
+                // For a rate, Pulse's absolute difference is in percentage points: label it so it isn't read as a %.
+                <span className="kc-points">{c.abs.replace('%', '')} pts</span>
               )}
             </div>
           ))}

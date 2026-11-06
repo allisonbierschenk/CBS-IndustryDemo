@@ -165,7 +165,10 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           ? `${c.goal.name || 'Goal'}: ${upIsGood ? 'at least' : 'at most'} ${formatGoal(c.item.metric, c.goal.value)} (your goal).`
           : upIsGood ? `Higher is better: should be at or above ${was || 'the prior period'}.` : `Lower is better: should be at or below ${was || 'the prior period'}.`,
         drivers: drv.slice(0, 2),
-        ask: `Why is ${name} ${dir} ${rel} vs ${vs}, and what is driving it?`,
+        // No year in the question: Pulse reads "vs 2025" as "report on 2025" and answers about the wrong period
+        // (verified: it returned 2025 vs 2024 and "not enough information"). "this year" keeps the metric's own
+        // period — the current year to date, compared with last year — which is what this row shows.
+        ask: `Why is ${name} ${dir === 'up' ? 'up' : 'down'} this year, and what is driving it?`,
         _mag: Math.abs(f.difference?.relative?.raw || 0)
       });
     }

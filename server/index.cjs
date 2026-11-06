@@ -363,7 +363,25 @@ app.post('/api/agent/chat', requireUser, async (req, res) => {
       content,
       notEnoughInformation: Boolean(r.not_enough_information),
       followups: (r.follow_up_questions || []).map((q) => q?.content ?? q).filter(Boolean),
-      insightCards: (r.source_insights || []).map((si) => ({ id: si.id, type: si.type, markup: si.markup, series: extractSeries(si.viz, si.type) })),
+      insightCards: (r.source_insights || []).map((si) => ({
+        id: si.id,
+        type: si.type,
+        markup: si.markup,
+        series: extractSeries(si.viz, si.type),
+        // Pulse's own period-over-period facts (values exactly as Tableau formatted them), for the KPI card.
+        facts:
+          si.type === 'popc' && si.facts?.target_period_value
+            ? {
+                now: si.facts.target_period_value.formatted,
+                was: si.facts.comparison_period_value?.formatted || null,
+                rel: si.facts.difference?.relative?.formatted || null,
+                abs: si.facts.difference?.absolute?.formatted || null,
+                dir: si.facts.difference?.direction || null,
+                period: si.facts.target_time_period?.label || null,
+                vs: si.facts.comparison_time_period?.label || null
+              }
+            : null
+      })),
       conversationId,
       source,
       metricCount: ctx.length

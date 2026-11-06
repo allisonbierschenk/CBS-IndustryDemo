@@ -73,6 +73,9 @@ You are talking to a user from ${tenantName}. Answer questions about their engag
 Tableau MCP tools. Be concise and businesslike: a short answer, then key numbers as a few bullets.
 Use **bold** for key numbers. Plain markdown only: paragraphs, "- " bullets, "### " headings. No tables.
 When ranking, list each item as its own bullet: "- **Technology**: **$5.8M**". Round money to $0.1M or $K like the dashboard.
+Rates (anything shown as a %): give the current and prior rate and the RELATIVE change, like the dashboard tile —
+"64.76%, down 20.8% from 81.81%". If you mention the absolute difference, call it percentage points ("17.05 points"),
+never "%". When citing Pulse's answer, keep its numbers exactly; just label a points change as points.
 
 # Data sources you may use (and no others)
 ${datasources.map((d) => `- "${d.name}" (${d.label}), datasourceLuid: ${d.luid}${d.dateField ? `, date field: "${d.dateField}"` : ''}`).join('\n')}
@@ -91,7 +94,9 @@ Don't propose actions for neutral or positive answers (e.g. when the metric turn
 
 # Why questions
 For "why" about a metric the user follows, call ask_pulse_agent (Tableau Pulse's AI agent, over MCP) in
-addition to querying the data, and cite the drivers it finds.
+addition to querying the data, and cite the drivers it finds. Use ONLY real_drivers (dimensions with more than one
+value in this user's data). Never present a single-value dimension — e.g. the user's own client name, tier, region or
+industry — as a driver or as where the change is "concentrated"; it is just the user's whole data.
 
 # Time period: match the dashboard
 The portal's dashboards and KPI cards show YEAR TO DATE (the current calendar year so far). Unless the user
@@ -268,7 +273,33 @@ function createMcpAgent({ mcpUrl, openaiKey, model, restSession, forgetSession, 
               let out = text;
               try {
                 const j = JSON.parse(text);
-                out = JSON.stringify({ answer: (j.markup || '').replace(/<[^>]+>/g, ''), follow_up_questions: (j.follow_up_questions || []).map((q) => q?.content ?? q), not_enough_information: j.not_enough_information });
+                // Pulse's breakdowns, as Pulse computed them. A dimension with ONE member in this user's data (e.g. their
+                // only client, tier, region) restates the total — it isn't a driver — so tell the model which those are.
+                const breakdowns = (j.source_insights || [])
+                  .filter((si) => /drivers|detractors/.test(si.type) && si.facts?.dimension)
+                  .map((si) => ({ dimension: si.facts.dimension.label, members_in_your_data: si.facts.total_members, top: (si.facts.drivers || []).slice(0, 3).map((d) => `${d.entity} ${d.change_value?.formatted ?? ''}`.trim()) }));
+                const single = [...new Set(breakdowns.filter((b) => b.members_in_your_data <= 1).map((b) => b.dimension))];
+                // Pulse's prose lists those single-value slices too ("Client Name: Northstar … −0.15"). The model kept
+                // repeating them despite the instruction (verified twice), so drop those lines from what it reads.
+                // Pulse's numbers are untouched; only lines that are about a single-value dimension are left out.
+                // Match on the slice's VALUE (Pulse writes "Client = Northstar Enterprises", not the dimension label).
+                const singleValues = (j.source_insights || [])
+                  .filter((si) => /drivers|detractors/.test(si.type) && si.facts?.total_members <= 1)
+                  .flatMap((si) => (si.facts.drivers || []).map((d) => String(d.entity || '')))
+                  .filter((v) => v.length > 2);
+                const isSingleLine = (line) => singleValues.some((v) => line.includes(v));
+                const answer = (j.markup || '')
+                  .replace(/<[^>]+>/g, '')
+                  .split('\n')
+                  .filter((line) => !isSingleLine(line))
+                  .join('\n');
+                out = JSON.stringify({
+                  answer,
+                  real_drivers: breakdowns.filter((b) => b.members_in_your_data > 1),
+                  not_drivers_single_value: single.length ? `${single.join(', ')}: only one value in this user's data, so it equals the whole change. Do not list these as drivers or "concentrated in".` : null,
+                  follow_up_questions: (j.follow_up_questions || []).map((q) => q?.content ?? q),
+                  not_enough_information: j.not_enough_information
+                });
               } catch {
                 /* keep raw text */
               }
