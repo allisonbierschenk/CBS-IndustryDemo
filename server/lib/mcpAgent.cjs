@@ -269,7 +269,9 @@ function createMcpAgent({ mcpUrl, openaiKey, model, restSession, forgetSession, 
                 messages: [{ role: 'ROLE_USER', content: String(args.question || question).slice(0, 500), action_type: 'ACTION_TYPE_ANSWER', metric_group_context: ctx, metric_group_context_resolved: false }]
               };
               const result = await client.callTool({ name: 'generate-pulse-insight-brief', arguments: { briefRequest } });
-              const text = resultText(result);
+              // Parse Pulse's FULL response: resultText() truncates at 15k chars, which cut the JSON mid-string (verified:
+              // "Bad control character … at position 15000"), so the cleanup below never ran and raw text went to the model.
+              const text = (result.content || []).map((c) => (c.type === 'text' ? c.text : '')).join('');
               let out = text;
               try {
                 const j = JSON.parse(text);
@@ -290,6 +292,7 @@ function createMcpAgent({ mcpUrl, openaiKey, model, restSession, forgetSession, 
                 const isSingleLine = (line) => singleValues.some((v) => line.includes(v));
                 const answer = (j.markup || '')
                   .replace(/<[^>]+>/g, '')
+                  .replace(/&amp;/g, '&')
                   .split('\n')
                   .filter((line) => !isSingleLine(line))
                   .join('\n');
@@ -300,8 +303,8 @@ function createMcpAgent({ mcpUrl, openaiKey, model, restSession, forgetSession, 
                   follow_up_questions: (j.follow_up_questions || []).map((q) => q?.content ?? q),
                   not_enough_information: j.not_enough_information
                 });
-              } catch {
-                /* keep raw text */
+              } catch (e) {
+                console.warn('[mcp] could not post-process Pulse brief; passing raw text:', e.message, '| starts:', text.slice(0, 120));
               }
               output = out.slice(0, MAX_TOOL_RESULT_CHARS);
               steps.push({ tool: 'generate-pulse-insight-brief', group: 'agents', args: { question: briefRequest.messages[0].content, metrics: ctx.map((c) => c.metadata?.name) }, ok: !result.isError, ms: Date.now() - started, ...(result.isError ? { error: text.slice(0, 300) } : {}) });
