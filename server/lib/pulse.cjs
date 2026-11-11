@@ -138,6 +138,7 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
           return {
             source: source.label,
             goal: m.goals?.target ?? null, // { name, value } — set by the customer (or Apex) on this metric
+            threshold: m.goals?.threshold ?? null, // { name, value, threshold_sentiment_type } — Pulse "threshold" instead of a goal
             // Definition facts kept outside `item` (which is sent to Pulse as-is): lets the portal recognise the
             // goal metrics a client created here straight from Pulse, so they survive sign-out / a server restart.
             definition: {

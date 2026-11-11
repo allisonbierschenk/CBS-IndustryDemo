@@ -571,24 +571,22 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
   app.get('/api/metrics/goals', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
     try {
-      // The metrics this client created here, plus any followed metric with a goal that's scoped to this client's
-      // own data (e.g. one built for them in Tableau) — never the shared, unscoped metrics the demo relies on.
+      // Only two rules, nothing about how the metric is configured in Pulse:
+      //   1. it has a goal or a threshold, and
+      //   2. it isn't shared — the user follows it themselves, not through a group follow (the core metrics every
+      //      client gets are group follows).
       const all = await syncOwnFromPulse(req.user, req.tenant);
-      const mine = ownIds(req.user);
-      const clients = new Set(store.scopeFor(req.user).clients);
-      const ctx = all.filter((c) => {
-        if (c.goal?.value == null) return false;
-        if (mine.has(c.item.metadata.metric_id)) return true;
-        const cf = scopeFilters(c).filter((f) => f.field === 'Client Name');
-        return cf.length > 0 && cf.every((f) => valuesOf(f).length > 0 && valuesOf(f).every((v) => clients.has(v)));
-      });
+      const me = await pulse.me(req.user);
+      const subs = await pulse.request(req.user, 'GET', `/pulse/subscriptions?user_id=${me.userId}&page_size=200`);
+      const direct = new Set((subs.subscriptions || []).filter((s) => s.follower?.user_id === me.userId).map((s) => s.metric_id));
+      const ctx = all.filter((c) => (c.goal?.value != null || c.threshold?.value != null) && direct.has(c.item.metadata.metric_id));
       const goals = await Promise.all(
         ctx.map(async (c) => {
           const body = {
             bundle_request: {
               version: 1,
               options: { output_format: 'OUTPUT_FORMAT_TEXT', time_zone: 'America/New_York', language: 'LANGUAGE_EN_US', locale: 'LOCALE_EN_US' },
-              input: { metadata: c.item.metadata, metric: { ...c.item.metric, goals: { metric_goals: { target: c.goal } } } }
+              input: { metadata: c.item.metadata, metric: { ...c.item.metric, goals: { metric_goals: c.goal ? { target: c.goal } : { threshold: c.threshold } } } }
             }
           };
           const r = await pulse.request(req.user, 'POST', '/pulse/insights/ban', body, { types: { contentType: BAN_TYPE, accept: BAN_TYPE.replace('Request', 'Response') } }).catch((e) => ({ error: e.message }));
@@ -601,6 +599,14 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           const defName = c.item.metadata.name;
           const name = own?.label || defName.split(' · ')[0];
           const percentile = own?.percentile ?? (Boolean(goalsCfg.measures.find((x) => x.field === c.definition?.measureField)?.percentile) || /Benchmark Percentile/i.test(defName));
+          // Shown exactly as stored in Pulse — the card uses Pulse's own value and the goal / threshold as entered.
+          const kind = c.goal ? 'goal' : 'threshold';
+          const raw = c.goal || c.threshold;
+          // Display only: a percentile metric runs 0–1, so a goal typed as 75 (percentile points) means 0.75.
+          const mark = percentile && raw.value > 1 && raw.value <= 100 ? { ...raw, value: raw.value / 100 } : raw;
+          // A threshold says which side is unfavorable; a goal follows the metric's sentiment.
+          const thrUp = c.threshold && !/ABOVE_THRESHOLD_IS_UNFAVORABLE/.test(c.threshold.threshold_sentiment_type || '');
+          const good = kind === 'goal' ? upIsGood : thrUp;
           return {
             metricId: c.item.metadata.metric_id,
             name,
@@ -609,13 +615,14 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
             source: c.source,
             percentile,
             unit: isPercent(c.item.metric) ? 'percent' : /CURRENCY/.test(c.item.metric.representation_options?.type || '') ? 'currency' : 'number',
-            goal: c.goal,
-            goalDisplay: formatGoal(c.item.metric, c.goal.value),
+            kind,
+            goal: { name: mark.name || (kind === 'goal' ? 'Goal' : 'Threshold'), value: mark.value },
+            goalDisplay: formatGoal(c.item.metric, mark.value),
             value,
             valueDisplay: f.target_period_value?.formatted ?? null,
             period: f.target_time_period?.label ?? null,
-            upIsGood,
-            onTrack: value == null ? null : upIsGood ? value >= c.goal.value : value <= c.goal.value,
+            upIsGood: good,
+            onTrack: value == null ? null : good ? value >= mark.value : value <= mark.value,
             sentence: ins?.result?.markup ? clientSentence(String(ins.result.markup).replace(/<[^>]+>/g, '').split(defName).join(name), req.tenant, percentile) : null
           };
         })
@@ -678,7 +685,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     for (const c of ctx) {
       const d = c.definition || {};
       const metricId = c.item.metadata.metric_id;
-      if (known.has(metricId) || d.isDefaultMetric || !c.goal) continue;
+      if (known.has(metricId) || d.isDefaultMetric || !(c.goal || c.threshold)) continue;
       if (!d.description.endsWith(PORTAL_MARK) || !d.name.endsWith(suffix) || d.lastUpdatedUserId !== me.userId) continue;
       const m = goalsCfg.measures.find((x) => x.field === d.measureField);
       rememberOwn(user, { metricId, definitionId: c.item.metadata.definition_id, label: d.name.slice(0, -suffix.length), field: m?.field || d.measureField, percentile: Boolean(m?.percentile) });
