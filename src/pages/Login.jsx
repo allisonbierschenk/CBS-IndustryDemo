@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import PersonaList from '../components/PersonaList.jsx';
 import { Brand } from '../components/TopBar.jsx';
+import DemoReset from '../components/DemoReset.jsx';
 
 export default function Login() {
   const { status, signInAs } = useSession();
@@ -58,6 +59,12 @@ export default function Login() {
               {!personas && !error && <div className="muted">Loading…</div>}
               {personas && <PersonaList personas={personas} onPick={pick} />}
             </div>
+            {/* Presenter: reset the demo's Pulse metrics before a run (runs as the demo owner). */}
+            {personas?.some((p) => p.owner) && (
+              <div style={{ marginTop: 16 }}>
+                <DemoReset owner={personas.find((p) => p.owner)} />
+              </div>
+            )}
           </section>
         </main>
       </div>

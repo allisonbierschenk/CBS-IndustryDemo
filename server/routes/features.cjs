@@ -398,6 +398,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       const scope = agentScope(req.tenant);
       const dsIds = new Map();
       for (const ds of scope.datasources) dsIds.set(await pulse.resolveDatasource(req.user, ds.name), ds.label);
+      await syncOwnFromPulse(req.user, req.tenant).catch((e) => console.warn(`⚠ goal-metric sync: ${e.message}`));
       const me = await pulse.me(req.user);
       const [followed, subs, defs] = await Promise.all([
         pulse.request(req.user, 'GET', '/pulse/metrics:followedMetricsGroups'),
@@ -563,13 +564,24 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     if (percentile) t = t.replace(/\bwas (0?\.\d+|1(?:\.0+)?)\b/, (_, v) => `was at the ${ordinalOf(Math.round(Number(v) * 100))} percentile`);
     return t;
   }
+  const valuesOf = (f) => f.values || f.categorical_values?.map((v) => v.string_value) || [];
+  // A metric's effective scope: its definition's filters, overridden per field by the metric's own filters.
+  const scopeFilters = (c) => [...new Map([...(c.definition?.filters || []), ...(c.item.metric.metric_specification?.filters || [])].map((f) => [f.field, f])).values()];
   const BAN_TYPE = 'application/vnd.tableau.pulse.insightsservice.v1.GenerateInsightBundleBANRequest+json';
   app.get('/api/metrics/goals', requireUser, async (req, res) => {
     if (!ent(req.tenant).has('goals')) return res.status(403).json({ error: 'Goals are part of Premium.' });
     try {
-      // Only the metrics this client created here — never the shared metrics the demo relies on.
+      // The metrics this client created here, plus any followed metric with a goal that's scoped to this client's
+      // own data (e.g. one built for them in Tableau) — never the shared, unscoped metrics the demo relies on.
+      const all = await syncOwnFromPulse(req.user, req.tenant);
       const mine = ownIds(req.user);
-      const ctx = (await pulse.metricContext(req.user, agentScope(req.tenant))).filter((c) => c.goal?.value != null && mine.has(c.item.metadata.metric_id));
+      const clients = new Set(store.scopeFor(req.user).clients);
+      const ctx = all.filter((c) => {
+        if (c.goal?.value == null) return false;
+        if (mine.has(c.item.metadata.metric_id)) return true;
+        const cf = scopeFilters(c).filter((f) => f.field === 'Client Name');
+        return cf.length > 0 && cf.every((f) => valuesOf(f).length > 0 && valuesOf(f).every((v) => clients.has(v)));
+      });
       const goals = await Promise.all(
         ctx.map(async (c) => {
           const body = {
@@ -584,14 +596,18 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
           const f = ins?.result?.facts || {};
           const upIsGood = c.item.metric.representation_options?.sentiment_type !== 'SENTIMENT_TYPE_DOWN_IS_GOOD';
           const value = f.target_period_value?.raw ?? null;
-          const filters = (c.item.metric.metric_specification?.filters || []).filter((x) => x.field !== 'Client Name');
-          const own = ownEntry(req.user, c.item.metadata.metric_id) || {};
+          const filters = scopeFilters(c).filter((x) => x.field !== 'Client Name');
+          const own = ownEntry(req.user, c.item.metadata.metric_id);
+          const defName = c.item.metadata.name;
+          const name = own?.label || defName.split(' · ')[0];
+          const percentile = own?.percentile ?? (Boolean(goalsCfg.measures.find((x) => x.field === c.definition?.measureField)?.percentile) || /Benchmark Percentile/i.test(defName));
           return {
             metricId: c.item.metadata.metric_id,
-            name: own.label || c.item.metadata.name,
-            scope: filters.map((x) => (x.values || x.categorical_values?.map((v) => v.string_value) || []).join(', ')).join(' · '),
+            name,
+            own: Boolean(own), // only metrics the portal created can be deleted from the card
+            scope: filters.map((x) => valuesOf(x).join(', ')).join(' · '),
             source: c.source,
-            percentile: own.percentile ?? /Benchmark Percentile/i.test(c.item.metadata.name),
+            percentile,
             unit: isPercent(c.item.metric) ? 'percent' : /CURRENCY/.test(c.item.metric.representation_options?.type || '') ? 'currency' : 'number',
             goal: c.goal,
             goalDisplay: formatGoal(c.item.metric, c.goal.value),
@@ -600,7 +616,7 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
             period: f.target_time_period?.label ?? null,
             upIsGood,
             onTrack: value == null ? null : upIsGood ? value >= c.goal.value : value <= c.goal.value,
-            sentence: ins?.result?.markup ? clientSentence(String(ins.result.markup).replace(/<[^>]+>/g, ''), req.tenant, own.percentile) : null
+            sentence: ins?.result?.markup ? clientSentence(String(ins.result.markup).replace(/<[^>]+>/g, '').split(defName).join(name), req.tenant, percentile) : null
           };
         })
       );
@@ -648,6 +664,29 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
     ownMetrics[user.id] = next;
     saveOwn();
   };
+  // Pulse is the source of truth for a client's goal metrics: portal-metrics.json is local (gitignored, and wiped
+  // whenever the server's disk is), so on its own a metric created in an earlier session can vanish from the portal
+  // even though Pulse still has it. Re-adopt from Pulse every followed metric whose definition this portal created
+  // for this user — the description we write on create, the " · <client>" name suffix, and the user as its last
+  // editor — so it's listed, and can be deleted / reset, after signing out and back in.
+  const PORTAL_MARK = 'created in the Apex client portal.';
+  async function syncOwnFromPulse(user, tenant) {
+    const ctx = await pulse.metricContext(user, agentScope(tenant));
+    const me = await pulse.me(user);
+    const known = ownIds(user);
+    const suffix = ` · ${tenant.clientName}`;
+    for (const c of ctx) {
+      const d = c.definition || {};
+      const metricId = c.item.metadata.metric_id;
+      if (known.has(metricId) || d.isDefaultMetric || !c.goal) continue;
+      if (!d.description.endsWith(PORTAL_MARK) || !d.name.endsWith(suffix) || d.lastUpdatedUserId !== me.userId) continue;
+      const m = goalsCfg.measures.find((x) => x.field === d.measureField);
+      rememberOwn(user, { metricId, definitionId: c.item.metadata.definition_id, label: d.name.slice(0, -suffix.length), field: m?.field || d.measureField, percentile: Boolean(m?.percentile) });
+      console.log(`↺ re-adopted ${user.email}'s Pulse goal metric "${d.name}" (${metricId})`);
+    }
+    return ctx;
+  }
+
   function isOwnGoalMetric(m, user) {
     return Boolean(m && !m.is_default && ownIds(user).has(m.id));
   }
@@ -675,9 +714,91 @@ module.exports = function registerFeatures(app, { store, pulse, activity, requir
       fail(res, e, e.status || 502);
     }
   });
+  // ── Owner reset: delete every demo-created Pulse metric across all portal users ──
+  // Scans what each portal user follows (as that user), and picks the definitions made for the demo:
+  //   • portal-made goal metrics (description ends "created in the Apex client portal."), or
+  //   • per-client metrics made by hand in Tableau — the definition is filtered to [Client Name].
+  // Shared / unscoped metrics (the core Value Intelligence set, Transportation, Data 360) are never touched.
+  // GET = dry run (what would be deleted); POST = delete. Owner only: users.json roles ["activity"].
+  const isOwner = (user) => (user.roles || []).includes('activity');
+  async function demoMetricInventory() {
+    const defs = new Map(); // definitionId -> { id, name, reason, followers:Set, metricIds:Set, deleteAs }
+    const errors = [];
+    for (const u of store.users) {
+      try {
+        const { metric_groups = [] } = await pulse.request(u, 'GET', '/pulse/metrics:followedMetricsGroups');
+        for (const m of metric_groups.flatMap((g) => g.metrics || [])) {
+          let e = defs.get(m.definition_id);
+          if (!e) {
+            const r = await pulse.request(u, 'GET', `/pulse/definitions/${m.definition_id}`).catch(() => null);
+            const d = r && (r.definition ?? r);
+            if (!d?.metadata) continue;
+            const scoped = (d.specification?.basic_specification?.filters || []).some((f) => f.field === 'Client Name');
+            const portal = String(d.metadata.description || '').endsWith(PORTAL_MARK);
+            e = { id: m.definition_id, name: d.metadata.name, reason: portal ? 'portal goal metric' : scoped ? 'client-scoped metric' : null, followers: new Set(), metricIds: new Set(), deleteAs: [] };
+            defs.set(m.definition_id, e);
+          }
+          e.followers.add(u.email);
+          e.metricIds.add(m.id);
+          e.deleteAs.push(u);
+        }
+      } catch (err) {
+        errors.push(`${u.email}: ${err.message.slice(0, 200)}`);
+      }
+    }
+    return { targets: [...defs.values()].filter((d) => d.reason), kept: [...defs.values()].filter((d) => !d.reason), errors };
+  }
+  const describeDef = (d) => ({ id: d.id, name: d.name, reason: d.reason, followers: [...d.followers] });
+  app.get('/api/admin/demo-metrics', requireUser, async (req, res) => {
+    if (!isOwner(req.user)) return res.status(403).json({ error: 'Only the demo owner can reset Pulse metrics.' });
+    try {
+      const { targets, kept, errors } = await demoMetricInventory();
+      res.json({ targets: targets.map(describeDef), kept: kept.map((d) => d.name).sort(), errors });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+  app.post('/api/admin/demo-metrics/delete', requireUser, async (req, res) => {
+    if (!isOwner(req.user)) return res.status(403).json({ error: 'Only the demo owner can reset Pulse metrics.' });
+    try {
+      const { targets, errors } = await demoMetricInventory();
+      const deleted = [];
+      const failed = [];
+      for (const d of targets) {
+        // Delete as a follower (portal users made their own); fall back to the next follower if Tableau refuses.
+        let done = false;
+        let last = null;
+        for (const u of d.deleteAs) {
+          try {
+            await pulse.request(u, 'DELETE', `/pulse/definitions/${encodeURIComponent(d.id)}`);
+            done = true;
+            break;
+          } catch (e) {
+            if (e.status === 404) { done = true; break; }
+            last = e;
+          }
+        }
+        (done ? deleted : failed).push({ ...describeDef(d), ...(done ? {} : { error: last?.message?.slice(0, 300) }) });
+        if (done) for (const u of d.deleteAs) for (const id of d.metricIds) forgetOwn(u, id);
+      }
+      for (const u of store.users) {
+        pulse.resetContext(u);
+        attentionCache.delete(attentionKey(u));
+      }
+      saveAttention();
+      definitionsCache = null;
+      activity.record(req.user, req.tenant, 'pulse-metric', { ownerReset: true, deleted: deleted.length, failed: failed.length });
+      console.log(`🧹 owner reset by ${req.user.email}: deleted ${deleted.length}, failed ${failed.length}`);
+      res.json({ ok: true, deleted, failed, errors });
+    } catch (e) {
+      fail(res, e);
+    }
+  });
+
   // Presenter clean-up: delete every metric the portal created for this client.
   app.post('/api/metrics/reset-goals', requireUser, async (req, res) => {
     try {
+      await syncOwnFromPulse(req.user, req.tenant).catch((e) => console.warn(`⚠ goal-metric sync: ${e.message}`));
       const ids = [...ownIds(req.user)];
       const results = await Promise.all(
         ids.map((id) =>

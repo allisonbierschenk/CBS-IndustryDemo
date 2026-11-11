@@ -158,7 +158,7 @@ function BenchmarkBoard({ data, me }) {
               <GoalCard
                 key={m.metricId}
                 m={m}
-                onDelete={async () => {
+                onDelete={m.own && (async () => {
                   if (!window.confirm(`Delete this goal and its metric? This removes it from Tableau.`)) return;
                   try {
                     await api(`/api/metrics/${m.metricId}`, { method: 'DELETE' });
@@ -167,7 +167,7 @@ function BenchmarkBoard({ data, me }) {
                   } catch (e) {
                     toast(e.message);
                   }
-                }}
+                })}
               />
             ))}
           </div>
@@ -316,7 +316,7 @@ function GoalCard({ m, onDelete }) {
       <div className="goal-nums">
         <b>{fmtValue(m, m.value)}</b>
         <span>
-          {m.period ? `${m.period} to date` : 'Current'} · {m.goal.name}: <em>{fmtValue(m, m.goal.value)}</em>
+          {m.period ? `${m.period} to date` : 'Current'} · {m.goal.name || 'Goal'}: <em>{fmtValue(m, m.goal.value)}</em>
         </span>
       </div>
       <div className="goal-bar">

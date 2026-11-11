@@ -138,6 +138,17 @@ function createPulseClient({ server, site, apiVersion = '3.27', clientId, secret
           return {
             source: source.label,
             goal: m.goals?.target ?? null, // { name, value } — set by the customer (or Apex) on this metric
+            // Definition facts kept outside `item` (which is sent to Pulse as-is): lets the portal recognise the
+            // goal metrics a client created here straight from Pulse, so they survive sign-out / a server restart.
+            definition: {
+              name: d.metadata.name,
+              description: d.metadata.description || '',
+              lastUpdatedUserId: d.metadata.last_updated_user?.id || null,
+              measureField: d.specification.basic_specification?.measure?.field || null,
+              // A metric built in Tableau keeps its client / engagement scope on the definition, not the metric.
+              filters: d.specification.basic_specification?.filters || [],
+              isDefaultMetric: Boolean(m.is_default)
+            },
             item: {
               metadata: { name: d.metadata.name, metric_id: m.id, definition_id: m.definition_id },
               metric: {

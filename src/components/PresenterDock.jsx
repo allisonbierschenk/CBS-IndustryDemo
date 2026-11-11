@@ -5,6 +5,7 @@ import { api } from '../lib/api.js';
 import { useSession } from '../context/SessionContext.jsx';
 import { useToast } from '../context/ToastContext.jsx';
 import Icon from './Icon.jsx';
+import DemoReset from './DemoReset.jsx';
 import { byCompany } from './PersonaList.jsx';
 import { decodeJwt, jwtIoUrl } from '../lib/jwtDebug.js';
 
@@ -86,6 +87,7 @@ export default function PresenterDock() {
           {tab === 'hood' && (
             <>
               <ResetGoals />
+              <OwnerReset />
               <HoodTab me={me} token={token} />
             </>
           )}
@@ -179,6 +181,13 @@ function HoodTab({ me, token }) {
       </p>
     </>
   );
+}
+
+/** Demo owner reset (owner only): same panel as on the sign-in page. */
+function OwnerReset() {
+  const { me } = useSession();
+  if (!me.features?.activityLog) return null;
+  return <DemoReset />;
 }
 
 /** Demo clean-up: delete every goal metric the signed-in client created (only their own — never shared ones). */

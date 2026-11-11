@@ -167,7 +167,8 @@ function personaSummary(u) {
     tier: t.tier,
     demoFocus: t.demoFocus,
     hasTransportation: (t.features || []).includes('transportation'),
-    story: t.presenterNotes?.story
+    story: t.presenterNotes?.story,
+    owner: (u.roles || []).includes('activity') // demo owner: can run the demo reset
   };
 }
 
